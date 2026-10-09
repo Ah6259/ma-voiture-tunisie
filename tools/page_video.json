@@ -1,0 +1,35 @@
+{
+ "site": "https://ah6259.github.io/ma-voiture-tunisie/",
+ "logo": "assets/logo.svg",
+ "defaut": "fr",
+ "modele": "a-propos/index.html",
+ "nom": {
+  "fr": "Ma voiture Tunisie",
+  "ar": "مواعيد سيارتك"
+ },
+ "partager": {
+  "fr": "Partager la vidéo",
+  "ar": "شارك الفيديو"
+ },
+ "pages": [
+  {
+   "chemin": "video/",
+   "video": "presentation",
+   "couverture": "couverture.jpg",
+   "apercu": "apercu-video.jpg",
+   "site": "",
+   "titre": {
+    "fr": "Vidéo de présentation",
+    "ar": "الفيديو التقديمي"
+   },
+   "description": {
+    "fr": "Vidéo de présentation : vignette, visite technique, assurance, vidange — vos échéances et des rappels dans l'agenda du téléphone, gratuitement.",
+    "ar": "فيديو تقديمي: معلوم الجولان، الفحص الفني، التأمين، تغيير الزيت — مواعيدك وتذكيرات في رزنامة الهاتف، مجانًا."
+   },
+   "bouton": {
+    "fr": "Ouvrir le site",
+    "ar": "افتح الموقع"
+   }
+  }
+ ]
+}
