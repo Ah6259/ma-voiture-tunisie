@@ -75,8 +75,8 @@ for (const p of PAGES) {
 check(`toutes les pages : CSP, noai, pas de traduction auto, aucun script en ligne, iPhone ${problemes.join(" | ")}`, !problemes.length);
 check(`une seule version ?v= pour tout le site (${[...versions].join(", ")})`, versions.size === 1);
 check("installation : manifeste (id unique), icônes, service worker, image d'aperçu < 250 Ko", (() => { const m = JSON.parse(lire("manifest.webmanifest"));
-  return m.id === "/ma-voiture-tunisie/" && ["assets/icons/icon-192.png", "assets/icons/icon-512.png", "assets/icons/icon-maskable-512.png", "assets/apple-touch-icon.png", "sw.js", "favicon.ico", "assets/og-image-v1.jpg"].every(f => existsSync(join(root, f)))
-    && statSync(join(root, "assets/og-image-v1.jpg")).size < 250 * 1024; })());
+  return m.id === "/ma-voiture-tunisie/" && ["assets/icons/icon-192.png", "assets/icons/icon-512.png", "assets/icons/icon-maskable-512.png", "assets/apple-touch-icon.png", "sw.js", "favicon.ico", "assets/og-image-v2.jpg"].every(f => existsSync(join(root, f)))
+    && statSync(join(root, "assets/og-image-v2.jpg")).size < 250 * 1024; })());
 check("robots.txt : robots d'IA refusés + sitemap ; sitemap avec toutes les pages publiques", /GPTBot/.test(lire("robots.txt")) && /Sitemap: https:\/\/ah6259\.github\.io\/ma-voiture-tunisie\/sitemap\.xml/.test(lire("robots.txt"))
   && ["", "vignette/", "visite-technique/", "carburant/", "achat-vente/", "entretien/", "a-propos/"].every(p => lire("sitemap.xml").includes(`<loc>${BASE}${p}</loc>`)));
 check("LICENSE « tous droits réservés », .gitattributes eol=lf", /Tous droits réservés/.test(lire("LICENSE")) && /eol=lf/.test(lire(".gitattributes")));

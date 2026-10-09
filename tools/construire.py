@@ -61,7 +61,7 @@ def page(chemin_page, meta, corps):
 <meta name="theme-color" content="#2B3990">
 <meta property="og:title" content="{meta.get('og_titre', meta['titre'])}">
 <meta property="og:description" content="{meta.get('og_description', meta['description'])}">
-<meta property="og:image" content="{BASE}assets/og-image-v1.jpg">
+<meta property="og:image" content="{BASE}assets/og-image-v2.jpg">
 <meta property="og:image:type" content="image/jpeg">
 <meta property="og:image:width" content="1200"><meta property="og:image:height" content="630">
 <meta name="twitter:card" content="summary_large_image">
