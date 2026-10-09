@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="fr" dir="ltr" translate="no" data-racine="../">
+<head>
+<meta charset="utf-8">
+<meta name="google" content="notranslate">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://gc.zgo.at; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https://prix-eaux-tunisie.goatcounter.com; connect-src 'self' https://prix-eaux-tunisie.goatcounter.com https://formspree.io; object-src 'none'; base-uri 'self'; form-action 'self' https://formspree.io">
+<meta name="referrer" content="strict-origin-when-cross-origin">
+<meta name="robots" content="noai, noimageai">
+<title>Prix de l'essence et du gasoil en Tunisie (2026) + coût d'un trajet | Ma voiture Tunisie</title>
+<meta name="description" content="Prix officiels des carburants en Tunisie : sans plomb 2,525 DT, gasoil sans soufre 2,205 DT, gasoil 1,985 DT le litre (inchangés depuis novembre 2022). Calculez le coût d'un trajet et de votre mois. سعر البنزين في تونس.">
+<link rel="canonical" href="https://ah6259.github.io/ma-voiture-tunisie/carburant/">
+<link rel="icon" href="../assets/logo.svg" type="image/svg+xml">
+<link rel="manifest" href="../manifest.webmanifest">
+<link rel="apple-touch-icon" href="../assets/apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Ma voiture">
+<meta name="theme-color" content="#2B3990">
+<meta property="og:title" content="Prix des carburants en Tunisie et coût d'un trajet">
+<meta property="og:description" content="Les prix officiels à la pompe et ce que vous coûte un trajet. Gratuit, en français et en arabe.">
+<meta property="og:image" content="https://ah6259.github.io/ma-voiture-tunisie/assets/og-image-v1.jpg">
+<meta property="og:image:type" content="image/jpeg">
+<meta property="og:image:width" content="1200"><meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<meta property="og:type" content="website">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;600;700;800&family=Noto+Kufi+Arabic:wght@400;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/style.css?v=20261009a">
+<script type="application/ld+json">
+{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "Quel est le prix de l'essence en Tunisie en 2026 ?", "acceptedAnswer": {"@type": "Answer", "text": "2,525 DT le litre de sans plomb (2,855 DT le premium). Prix fixé par l'État, le même dans toutes les stations, inchangé depuis le 24 novembre 2022."}}, {"@type": "Question", "name": "Quel est le prix du gasoil en Tunisie ?", "acceptedAnswer": {"@type": "Answer", "text": "2,205 DT le litre de gasoil sans soufre (2,550 DT le premium) et 1,985 DT le litre de gasoil ordinaire, inchangés depuis le 24 novembre 2022."}}, {"@type": "Question", "name": "Comment calculer le coût d'un trajet en voiture ?", "acceptedAnswer": {"@type": "Answer", "text": "Coût = distance en km × consommation en litres pour 100 km ÷ 100 × prix du litre. Exemple : 50 km avec une voiture qui consomme 6,5 L/100 à l'essence (2,525 DT) = 3,25 litres, soit 8,206 DT."}}]}
+</script>
+<script src="../assets/regles.js?v=20261009a"></script>
+<script src="../assets/page.js?v=20261009a"></script>
+</head>
+<body>
+<header class="entete" id="entete"></header>
+<section class="hero">
+  <div class="wrap">
+    <p class="fil"><a href="../"><span data-l="fr">Accueil</span><span data-l="ar">الرئيسية</span></a> › <span data-l="fr">Carburant</span><span data-l="ar">المحروقات</span></p>
+    <h1><span data-l="fr">Prix des carburants et coût d'un trajet</span><span data-l="ar">أسعار المحروقات وكلفة الرحلة</span></h1>
+    <p class="intro"><span data-l="fr">Les prix à la pompe sont fixés par l'État : les mêmes dans toutes les stations de Tunisie.</span><span data-l="ar">أسعار المحروقات تحدّدها الدولة: نفسها في كل محطات تونس.</span></p>
+    <span class="maj"><span data-l="fr">Prix vérifiés le</span><span data-l="ar">أسعار تم التثبت منها في</span>&nbsp;<span data-carbu-verifie></span></span>
+  </div>
+</section>
+
+<main class="wrap chevauche">
+  <section class="carte">
+    <h2><span data-l="fr">Prix au litre</span><span data-l="ar">السعر للتر</span></h2>
+    <div class="prix-carbu" id="prix-carbu"></div>
+    <p class="avert" id="carbu-depuis"></p>
+  </section>
+
+  <section class="carte">
+    <h2><span data-l="fr">Combien me coûte un trajet ?</span><span data-l="ar">كم تكلّفني رحلة؟</span></h2>
+    <div class="champs2">
+      <div class="champ"><label for="carbu"><span data-l="fr">Carburant</span><span data-l="ar">الوقود</span></label><select id="carbu"></select></div>
+      <div class="champ"><label for="conso"><span data-l="fr">Consommation</span><span data-l="ar">الاستهلاك</span></label><div class="saisie"><input id="conso" type="number" inputmode="decimal" min="1" max="40" step="0.1" value="6.5"><span class="unite">L/100</span></div></div>
+      <div class="champ"><label for="distance"><span data-l="fr">Distance (aller)</span><span data-l="ar">المسافة (ذهابًا)</span></label><div class="saisie"><input id="distance" type="number" inputmode="decimal" min="0" step="1" value="25"><span class="unite">km</span></div></div>
+      <div class="champ"><label for="jours"><span data-l="fr">Jours par mois</span><span data-l="ar">أيام في الشهر</span></label><div class="saisie"><input id="jours" type="number" inputmode="numeric" min="0" max="31" step="1" value="22"><span class="unite"><span data-l="fr">j</span><span data-l="ar">يوم</span></span></div></div>
+    </div>
+    <label class="case" style="margin-top:12px"><input id="ar" type="checkbox" checked> <span data-l="fr">Aller et retour</span><span data-l="ar">ذهابًا وإيابًا</span></label>
+  </section>
+
+  <section class="carte resultat" aria-live="polite">
+    <div class="res-titre"><span data-l="fr">Coût du trajet</span><span data-l="ar">كلفة الرحلة</span></div>
+    <div class="grand" id="grand"></div>
+    <table id="tableau"></table>
+    <div class="actions"><a class="partage" id="partage" target="_blank" rel="noopener"></a></div>
+    <p class="aide"><span data-l="fr">Pour suivre vos vrais pleins et le coût au kilomètre de votre voiture : <a href="../entretien/#carnet">le carnet des dépenses</a>.</span><span data-l="ar">لمتابعة تعبئاتك الحقيقية وكلفة الكيلومتر لسيارتك: <a href="../entretien/#carnet">دفتر المصاريف</a>.</span></p>
+  </section>
+
+  <section class="carte">
+    <h2><span data-l="fr">Sources</span><span data-l="ar">المصادر</span></h2>
+    <ul class="sources" data-l="fr">
+      <li>Prix fixés par arrêté des ministres chargés de l'Énergie et des Finances ; dernière hausse le 24 novembre 2022 (communiqué du ministère de l'Industrie, des Mines et de l'Énergie, repris par l'agence TAP).</li>
+      <li>Le 26 septembre 2026, le ministère du Commerce a démenti les « nouveaux prix » qui circulaient sur les réseaux sociaux.</li>
+      <li>Notre robot surveille chaque jour les annonces officielles : en cas de changement, les prix sont mis à jour après vérification.</li>
+    </ul>
+    <ul class="sources" data-l="ar">
+      <li>أسعار محددة بقرار من الوزيرين المكلفين بالطاقة والمالية؛ آخر زيادة في ⁦24⁩ نوفمبر 2022 (بلاغ وزارة الصناعة والمناجم والطاقة، نقلته وكالة تونس إفريقيا للأنباء).</li>
+      <li>في ⁦26⁩ سبتمبر 2026، نفت وزارة التجارة «الأسعار الجديدة» المتداولة على شبكات التواصل.</li>
+      <li>يراقب روبوتنا كل يوم البلاغات الرسمية: عند أي تغيير، تُحيَّن الأسعار بعد التثبت.</li>
+    </ul>
+  </section>
+</main>
+<footer id="pied"></footer>
+<script src="../assets/carburant.js?v=20261009a"></script>
+<script data-goatcounter="https://prix-eaux-tunisie.goatcounter.com/count" async src="https://gc.zgo.at/count.js"></script>
+</body>
+</html>

@@ -1,0 +1,103 @@
+titre: Vignette 2026 Tunisie : montant selon les CV et date limite (5 mars, 5 avril) | Ma voiture Tunisie
+description: Combien coûte la vignette 2026 de votre voiture ? Barème officiel selon la puissance fiscale et le carburant (essence, diesel, GPL, électrique −50 %), date limite selon votre numéro, payer en ligne. معلوم الجولان 2026.
+og_titre: Vignette 2026 : combien et avant quand ?
+og_description: Le montant exact selon vos CV et votre carburant, et votre date limite. Gratuit, en français et en arabe.
+scripts: vignette.js
+faq: faq-vignette.json
+---
+<section class="hero">
+  <div class="wrap">
+    <p class="fil"><a href="../"><span data-l="fr">Accueil</span><span data-l="ar">الرئيسية</span></a> › <span data-l="fr">Vignette</span><span data-l="ar">معلوم الجولان</span></p>
+    <h1><span data-l="fr">Vignette 2026 : montant et date limite</span><span data-l="ar">معلوم الجولان 2026: المبلغ وآخر أجل</span></h1>
+    <p class="intro"><span data-l="fr">La taxe de circulation de votre voiture selon le barème officiel, et le jour où il faut l'avoir payée.</span><span data-l="ar">معلوم جولان سيارتك حسب الجدول الرسمي، واليوم الذي يجب أن يكون قد دُفع فيه.</span></p>
+    <span class="maj"><span data-l="fr">Règles à jour au</span><span data-l="ar">قواعد محيَّنة في</span>&nbsp;<span data-maj></span></span>
+  </div>
+</section>
+
+<main class="wrap chevauche">
+  <section class="carte">
+    <div class="champs2">
+      <div class="champ">
+        <label for="energie"><span data-l="fr">Carburant</span><span data-l="ar">نوع الوقود</span></label>
+        <select id="energie">
+          <option value="essence" data-fr="Essence" data-ar="بنزين">Essence</option>
+          <option value="diesel" data-fr="Diesel (gasoil)" data-ar="غازوال">Diesel (gasoil)</option>
+          <option value="gpl" data-fr="GPL" data-ar="غاز البترول المسال">GPL</option>
+          <option value="hybride" data-fr="Hybride essence" data-ar="هجينة بنزين">Hybride essence</option>
+          <option value="electrique" data-fr="100 % électrique" data-ar="كهربائية بالكامل">100 % électrique</option>
+        </select>
+      </div>
+      <div class="champ">
+        <label for="cv"><span data-l="fr">Puissance fiscale (CV)</span><span data-l="ar">القوة الجبائية (حصان)</span></label>
+        <div class="saisie"><input id="cv" type="number" inputmode="numeric" min="1" max="60" step="1" value="6"><span class="unite">CV</span></div>
+        <span class="aide"><span data-l="fr">Écrite sur la carte grise</span><span data-l="ar">مكتوبة في البطاقة الرمادية</span></span>
+      </div>
+    </div>
+    <div class="champ">
+      <label><span data-l="fr">Votre numéro d'immatriculation est…</span><span data-l="ar">رقم التسجيل…</span></label>
+      <div class="choix choix-4" data-nom="groupe">
+        <button type="button" data-v="pair" class="on"><span data-l="fr">Pair</span><span data-l="ar">زوجي</span></button>
+        <button type="button" data-v="impair"><span data-l="fr">Impair</span><span data-l="ar">فردي</span></button>
+        <button type="button" data-v="societe"><span data-l="fr">Société</span><span data-l="ar">شركة</span></button>
+        <button type="button" data-v="location"><span data-l="fr">Location, leasing</span><span data-l="ar">كراء، إيجار مالي</span></button>
+      </div>
+    </div>
+  </section>
+
+  <section class="carte resultat" aria-live="polite">
+    <div class="res-titre" id="titre-res"></div>
+    <div class="grand" id="grand"></div>
+    <table id="tableau"></table>
+    <div class="actions"><a class="partage" id="partage" target="_blank" rel="noopener"></a></div>
+    <p class="liens" style="margin:12px 0 0"><a class="btn-principal" href="https://taxe-circulation.finances.gov.tn" target="_blank" rel="noopener"><span data-l="fr">Payer en ligne (site officiel du ministère des Finances)</span><span data-l="ar">الدفع عبر الإنترنت (الموقع الرسمي لوزارة المالية)</span></a></p>
+    <p class="aide"><span data-l="fr">Pour un rappel avant la date limite : <a href="../">notez votre voiture sur l'accueil</a> et ajoutez les rappels à votre agenda (gratuit).</span><span data-l="ar">لتذكير قبل آخر أجل: <a href="../">سجّل سيارتك في الصفحة الرئيسية</a> وأضف التذكيرات إلى رزنامتك (مجانًا).</span></p>
+  </section>
+
+  <section class="carte">
+    <h2><span data-l="fr">Barème 2026 (personnes physiques)</span><span data-l="ar">جدول 2026 (الأشخاص الطبيعيون)</span></h2>
+    <table class="bareme" id="bareme"></table>
+    <p class="avert"><span data-l="fr">Hybride : pas de réduction, on paie selon le moteur à essence. 100 % électrique : moitié prix. Barème inchangé depuis la loi de finances 2022.</span><span data-l="ar">الهجينة: دون تخفيض، تُدفع حسب محرّك البنزين. الكهربائية بالكامل: نصف المبلغ. الجدول لم يتغيّر منذ قانون المالية لسنة 2022.</span></p>
+  </section>
+
+  <section class="carte">
+    <h2><span data-l="fr">Ce qui change en 2026</span><span data-l="ar">ما الذي تغيّر في 2026</span></h2>
+    <ul class="sources" data-l="fr">
+      <li><b>Plus d'autocollant</b> sur le pare-brise depuis le 1er janvier 2026 : le contrôle se fait par la plaque. Gardez votre reçu (papier ou électronique avec code QR).</li>
+      <li><b>Payer la vignette 2026 à temps</b> permet de régulariser sans frais les vignettes impayées des années avant 2025 (loi de finances 2026).</li>
+      <li>Une <b>amende impayée</b> peut bloquer le paiement de la vignette : vérifiez vos amendes avant de payer.</li>
+      <li>Sans reçu de vignette, l'assureur ne peut pas vous délivrer l'attestation d'assurance.</li>
+      <li>Si la date limite tombe un dimanche ou un jour férié, elle passe au jour ouvrable suivant (le site en tient compte).</li>
+    </ul>
+    <ul class="sources" data-l="ar">
+      <li><b>لا مزيد من الملصق</b> على البلّور منذ ⁦1⁩ جانفي 2026: تتم المراقبة عبر لوحة التسجيل. احتفظ بالوصل (ورقي أو إلكتروني برمز QR).</li>
+      <li><b>دفع معلوم 2026 في الآجال</b> يسمح بتسوية المعاليم غير المدفوعة للسنوات السابقة لسنة 2025 دون خطايا (قانون المالية لسنة 2026).</li>
+      <li>قد تمنع <b>خطية غير مدفوعة</b> دفع معلوم الجولان: تثبّت من خطاياك قبل الدفع.</li>
+      <li>دون وصل معلوم الجولان، لا يمكن لشركة التأمين أن تسلّمك شهادة التأمين.</li>
+      <li>إذا صادف آخر أجل يوم أحد أو عطلة، يؤجَّل إلى يوم العمل الموالي (الموقع يأخذ ذلك بعين الاعتبار).</li>
+    </ul>
+    <p class="liens" style="margin:8px 0 0"><a href="https://amendes.finances.gov.tn" target="_blank" rel="noopener"><span data-l="fr">Vérifier mes amendes (site officiel) →</span><span data-l="ar">← التثبت من خطاياي (الموقع الرسمي)</span></a></p>
+  </section>
+
+  <section class="carte">
+    <h2><span data-l="fr">Je ne connais pas mes CV</span><span data-l="ar">لا أعرف القوة الجبائية</span></h2>
+    <p><span data-l="fr">La puissance fiscale est <b>écrite sur la carte grise</b>. Pour une voiture homologuée depuis 2024, voici une estimation à partir de la puissance du moteur en kW (indicatif : la carte grise fait foi).</span><span data-l="ar">القوة الجبائية <b>مكتوبة في البطاقة الرمادية</b>. لسيارة مصادق عليها منذ 2024، هذا تقدير انطلاقًا من قوة المحرك بالكيلوواط (تقريبي: البطاقة الرمادية هي المرجع).</span></p>
+    <div class="champs2">
+      <div class="champ"><label for="kw"><span data-l="fr">Puissance du moteur</span><span data-l="ar">قوة المحرك</span></label><div class="saisie"><input id="kw" type="number" inputmode="numeric" min="10" max="800" step="1" value="66"><span class="unite">kW</span></div></div>
+      <div class="champ"><label><span data-l="fr">Estimation</span><span data-l="ar">تقدير</span></label><div class="grand" id="cv-estime" style="font-size:28px"></div></div>
+    </div>
+  </section>
+
+  <section class="carte">
+    <h2><span data-l="fr">Sources officielles</span><span data-l="ar">المصادر الرسمية</span></h2>
+    <ul class="sources" data-l="fr">
+      <li>Code de la fiscalité locale et lois de finances 2022 à 2026 (barème de la taxe de circulation, inchangé depuis 2022).</li>
+      <li>Arrêté conjoint du 19 décembre 2025 (JORT n° 151) : suppression de l'autocollant à partir de 2026.</li>
+      <li>Ministère des Finances, Direction générale des impôts : calendrier de paiement (5 février, 5 mars, 5 avril, 5 mai) ; paiement en ligne sur taxe-circulation.finances.gov.tn.</li>
+    </ul>
+    <ul class="sources" data-l="ar">
+      <li>مجلة الجباية المحلية وقوانين المالية من 2022 إلى 2026 (جدول معلوم الجولان، دون تغيير منذ 2022).</li>
+      <li>القرار المشترك المؤرخ في ⁦19⁩ ديسمبر 2025 (الرائد الرسمي عدد ⁦151⁩): إلغاء الملصق بداية من 2026.</li>
+      <li>وزارة المالية، الإدارة العامة للأداءات: رزنامة الدفع (⁦5⁩ فيفري، ⁦5⁩ مارس، ⁦5⁩ أفريل، ⁦5⁩ ماي)؛ الدفع عبر الإنترنت على taxe-circulation.finances.gov.tn.</li>
+    </ul>
+  </section>
+</main>

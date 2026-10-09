@@ -1,0 +1,78 @@
+titre: Visite technique Tunisie 2026 : quand la passer, prix (36,500 DT), rendez-vous | Ma voiture Tunisie
+description: Calculez la date de votre prochaine visite technique (voiture particulière) : 4e année, puis tous les 2 ans, puis chaque année après 10 ans. Prix 36,500 DT depuis 2025, rendez-vous ATTT. الفحص الفني للسيارات.
+og_titre: Visite technique : quand la passer ?
+og_description: La date de votre prochaine visite, le prix et le rendez-vous. Gratuit, en français et en arabe.
+scripts: echeances.js, visite.js
+faq: faq-visite.json
+---
+<section class="hero">
+  <div class="wrap">
+    <p class="fil"><a href="../"><span data-l="fr">Accueil</span><span data-l="ar">الرئيسية</span></a> › <span data-l="fr">Visite technique</span><span data-l="ar">الفحص الفني</span></p>
+    <h1><span data-l="fr">Visite technique : quand la passer ?</span><span data-l="ar">الفحص الفني: متى تجريه؟</span></h1>
+    <p class="intro"><span data-l="fr">La date de votre prochaine visite, son prix et la prise de rendez-vous à l'ATTT.</span><span data-l="ar">تاريخ فحصك القادم، ثمنه وأخذ موعد لدى الوكالة الفنية للنقل البري.</span></p>
+    <span class="maj"><span data-l="fr">Règles à jour au</span><span data-l="ar">قواعد محيَّنة في</span>&nbsp;<span data-maj></span></span>
+  </div>
+</section>
+
+<main class="wrap chevauche">
+  <section class="carte">
+    <div class="champs2">
+      <div class="champ">
+        <label for="circulation"><span data-l="fr">1re mise en circulation</span><span data-l="ar">أول جولان</span></label>
+        <input id="circulation" type="date">
+        <span class="aide"><span data-l="fr">Sur la carte grise</span><span data-l="ar">في البطاقة الرمادية</span></span>
+      </div>
+      <div class="champ">
+        <label for="derniere"><span data-l="fr">Dernière visite (facultatif)</span><span data-l="ar">آخر فحص (اختياري)</span></label>
+        <input id="derniere" type="date">
+        <span class="aide"><span data-l="fr">Sur votre dernier certificat</span><span data-l="ar">في آخر شهادة</span></span>
+      </div>
+    </div>
+  </section>
+
+  <section class="carte resultat" aria-live="polite">
+    <div class="res-titre"><span data-l="fr">Votre prochaine visite technique</span><span data-l="ar">فحصك الفني القادم</span></div>
+    <div class="grand" id="grand">—</div>
+    <p id="explication" class="aide"></p>
+    <table id="tableau"></table>
+    <p class="liens" style="margin:12px 0 0"><a class="btn-principal" href="https://www.attt.com.tn/" target="_blank" rel="noopener"><span data-l="fr">Prendre rendez-vous (site officiel de l'ATTT)</span><span data-l="ar">أخذ موعد (الموقع الرسمي للوكالة)</span></a></p>
+    <p class="aide"><span data-l="fr">Octobre à décembre est la période la plus chargée : réservez un mois à l'avance. Pour un rappel automatique : <a href="../">notez votre voiture sur l'accueil</a> (gratuit).</span><span data-l="ar">من أكتوبر إلى ديسمبر أكثر فترة ازدحامًا: احجز قبل شهر. لتذكير آلي: <a href="../">سجّل سيارتك في الصفحة الرئيسية</a> (مجانًا).</span></p>
+  </section>
+
+  <section class="carte">
+    <h2><span data-l="fr">Combien ça coûte ?</span><span data-l="ar">كم يكلّف؟</span></h2>
+    <table class="bareme">
+      <tr><td><span data-l="fr">Visite d'une voiture particulière (ou d'une moto)</span><span data-l="ar">فحص سيارة خاصة (أو دراجة نارية)</span></td><td class="m"><bdi>36,500 DT</bdi></td></tr>
+      <tr><td><span data-l="fr">Utilitaire de 3,5 tonnes au plus</span><span data-l="ar">سيارة نفعية بوزن ⁦3,5⁩ طن على أقصى تقدير</span></td><td class="m"><bdi>42,000 DT</bdi></td></tr>
+      <tr><td><span data-l="fr">Choisir sa date (rendez-vous)</span><span data-l="ar">اختيار التاريخ (موعد)</span></td><td class="m"><bdi>+ 5,000 DT</bdi></td></tr>
+    </table>
+    <p class="avert"><span data-l="fr">Tarifs depuis le 1er janvier 2025 (dont 5 DT ajoutés par la loi de finances 2025). Contre-visite : demandez le tarif au centre (montant non confirmé par une source officielle).</span><span data-l="ar">التعريفات منذ ⁦1⁩ جانفي 2025 (منها ⁦5⁩ د أضافها قانون المالية لسنة 2025). الفحص المضاد: اسأل المركز عن ثمنه (المبلغ غير مؤكد من مصدر رسمي).</span></p>
+  </section>
+
+  <section class="carte">
+    <h2><span data-l="fr">Quand faut-il la passer ?</span><span data-l="ar">متى يجب إجراؤه؟</span></h2>
+    <ol class="etapes" data-l="fr">
+      <li><b>Première visite :</b> vers la 4e année après la première mise en circulation.</li>
+      <li><b>Ensuite :</b> tous les 2 ans.</li>
+      <li><b>À partir de 10 ans :</b> chaque année.</li>
+    </ol>
+    <ol class="etapes" data-l="ar">
+      <li><b>الفحص الأول:</b> في السنة الرابعة تقريبًا بعد أول جولان.</li>
+      <li><b>بعد ذلك:</b> كل سنتين.</li>
+      <li><b>بداية من ⁦10⁩ سنوات:</b> كل سنة.</li>
+    </ol>
+    <p class="avert"><span data-l="fr">Ce rythme vient de la presse spécialisée et n'a pas encore été confirmé par un texte de l'ATTT : la date écrite sur votre dernier certificat de visite fait toujours foi. Pour la vente d'une voiture, un certificat de visite de moins d'un mois est demandé.</span><span data-l="ar">هذا النسق مأخوذ من الصحافة المختصة ولم يُؤكَّد بعد بنص من الوكالة: التاريخ المكتوب في آخر شهادة فحص هو المرجع دائمًا. عند بيع سيارة، تُطلب شهادة فحص عمرها أقل من شهر.</span></p>
+  </section>
+
+  <section class="carte">
+    <h2><span data-l="fr">Sources</span><span data-l="ar">المصادر</span></h2>
+    <ul class="sources" data-l="fr">
+      <li>Agence technique des transports terrestres (ATTT) : tarifs et prise de rendez-vous, attt.com.tn.</li>
+      <li>Loi de finances 2025, article 15 : 5 DT ajoutés à la visite technique.</li>
+    </ul>
+    <ul class="sources" data-l="ar">
+      <li>الوكالة الفنية للنقل البري: التعريفات وأخذ المواعيد، attt.com.tn.</li>
+      <li>قانون المالية لسنة 2025، الفصل ⁦15⁩: إضافة ⁦5⁩ د إلى الفحص الفني.</li>
+    </ul>
+  </section>
+</main>

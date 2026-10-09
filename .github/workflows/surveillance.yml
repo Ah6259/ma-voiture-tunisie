@@ -1,0 +1,77 @@
+# Surveillance des règles (chaque jour) : annonces sur les prix des carburants, la vignette et la visite technique (presse),
+# tarifs de l'ATTT, liens officiels du site. Le robot NE CHANGE JAMAIS un montant : il ouvre une alerte (issue GitHub -> e-mail).
+# Rien à signaler : il met à jour les dates « vérifiés le » ; ce commit sert aussi de battement de cœur
+# (GitHub met en pause les robots après 60 jours sans activité).
+name: Surveillance des règles
+on:
+  schedule:
+    - cron: "23 5 * * *"      # chaque jour, 6h23 à Tunis
+  workflow_dispatch:
+permissions:
+  contents: write
+  issues: write
+env:
+  TZ: Africa/Tunis
+  PYTHONIOENCODING: utf-8
+concurrency:
+  group: robot
+  cancel-in-progress: false
+jobs:
+  verifier:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 20 }
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.12" }
+      - run: npm install --no-save --no-package-lock jsdom
+      - name: Surveiller
+        id: verif
+        run: |
+          set +e
+          python tools/surveillance.py
+          echo "code=$?" >> "$GITHUB_OUTPUT"
+      - name: Tests avant publication
+        if: steps.verif.outputs.code == '0'
+        run: |
+          python tools/test_robot.py
+          node tools/test_site.mjs
+      - name: Publier (dates de vérification, mémoire du robot)
+        if: steps.verif.outputs.code == '0' || steps.verif.outputs.code == '2'
+        run: |
+          git config user.name "robot-ma-voiture"
+          git config user.email "robot-ma-voiture@users.noreply.github.com"
+          git add assets/regles.js assets/page.js donnees/veille.json
+          if git diff --cached --quiet; then
+            git commit --allow-empty -m "Battement de coeur : surveillance faite, rien de change"
+          else
+            git commit -m "Surveillance du $(date +%d/%m/%Y)"
+          fi
+          git pull -q --rebase --autostash
+          git push
+      - name: Fermer les alertes de panne résolues
+        if: steps.verif.outputs.code == '0'
+        env: { GH_TOKEN: "${{ github.token }}" }
+        run: |
+          for n in $(gh issue list --label alerte-robot --state open --search "Robot de surveillance en panne in:title" --json number -q '.[].number'); do
+            gh issue close "$n" --comment "Résolu : la surveillance du $(date +%d/%m/%Y) a de nouveau fonctionné."
+          done
+      - name: Alerte
+        if: steps.verif.outputs.code != '0' || failure()
+        env: { GH_TOKEN: "${{ github.token }}" }
+        run: |
+          gh label create alerte-robot --color B60205 --force >/dev/null 2>&1 || true
+          if [ "${{ steps.verif.outputs.code }}" = "2" ]; then
+            titre="Ma voiture : une règle a peut-être changé (à vérifier)"
+            corps="$(cat alerte.txt 2>/dev/null)
+          Le site n'a PAS été modifié. Demander à Claude : « vérifie l'alerte de Ma voiture et mets à jour les règles si besoin »."
+          else
+            titre="Robot de surveillance en panne"
+            corps="Le robot de Ma voiture n'a pas pu faire sa vérification. Journal : ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+          fi
+          n=$(gh issue list --label alerte-robot --state open --search "$titre in:title" --json number -q '.[0].number')
+          if [ -n "$n" ]; then gh issue comment "$n" --body "Nouveau le $(date +%d/%m/%Y) :
+          $corps"
+          else gh issue create --title "$titre" --body "$corps" --label alerte-robot; fi
