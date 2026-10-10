@@ -9,7 +9,7 @@ En ligne : https://ah6259.github.io/ma-voiture-tunisie/
 ## Comment il vit tout seul
 - Site statique sur GitHub Pages ; tous les calculs se font dans le téléphone du visiteur (rien n'est envoyé).
 - Robot `surveillance.yml` (chaque jour) : guette les annonces officielles et les tarifs de l'ATTT ; en cas de changement,
-  il ouvre une alerte (e-mail) sans rien modifier. Son passage quotidien sert de battement de cœur.
+  il ouvre une alerte (e-mail) sans rien modifier. Presse chaque jour ; ATTT, liens, tests et dates chaque lundi (battement de cœur).
 - Robot `tests.yml` : tous les tests à chaque modification ; `gendarme-tests.yml` et `relance-pages.yml` : kit commun.
 
 ## Plan de continuité (si Ahmed ou Claude n'est pas là)

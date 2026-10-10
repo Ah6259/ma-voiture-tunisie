@@ -1,11 +1,13 @@
 # Surveillance des règles (chaque jour) : annonces sur les prix des carburants, la vignette et la visite technique (presse),
 # tarifs de l'ATTT, liens officiels du site. Le robot NE CHANGE JAMAIS un montant : il ouvre une alerte (issue GitHub -> e-mail).
-# Rien à signaler : il met à jour les dates « vérifiés le » ; ce commit sert aussi de battement de cœur
+# Audit des robots du 10/10/2026 (Ahmed : « arrête la vérification non importante ») : chaque jour, seulement la veille
+# des actualités (rapide, sans tests ni commit si rien de neuf) ; le LUNDI (ou lancé à la main) : passage complet (ATTT,
+# liens officiels, tests du site, dates « vérifiés le ») ; ce commit hebdomadaire sert aussi de battement de cœur
 # (GitHub met en pause les robots après 60 jours sans activité).
 name: Surveillance des règles
 on:
   schedule:
-    - cron: "23 5 * * *"      # chaque jour, 6h23 à Tunis
+    - cron: "23 5 * * *"      # chaque jour, 6h23 à Tunis (passage complet le lundi)
   workflow_dispatch:
 permissions:
   contents: write
@@ -26,15 +28,20 @@ jobs:
         with: { node-version: 20 }
       - uses: actions/setup-python@v5
         with: { python-version: "3.12" }
+      - name: Passage complet (lundi ou lancé à la main) ou veille des actualités seule ?
+        id: mode
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ] || [ "$(date +%u)" = "1" ]; then echo "complet=1" >> "$GITHUB_OUTPUT"; else echo "complet=0" >> "$GITHUB_OUTPUT"; fi
       - run: npm install --no-save --no-package-lock jsdom
+        if: steps.mode.outputs.complet == '1'
       - name: Surveiller
         id: verif
         run: |
           set +e
-          python tools/surveillance.py
+          if [ "${{ steps.mode.outputs.complet }}" = "1" ]; then python tools/surveillance.py; else python tools/surveillance.py --leger; fi
           echo "code=$?" >> "$GITHUB_OUTPUT"
       - name: Tests avant publication
-        if: steps.verif.outputs.code == '0'
+        if: steps.verif.outputs.code == '0' && steps.mode.outputs.complet == '1'
         run: |
           python tools/test_robot.py
           node tools/test_site.mjs
@@ -45,6 +52,7 @@ jobs:
           git config user.email "robot-ma-voiture@users.noreply.github.com"
           git add assets/regles.js assets/page.js donnees/veille.json
           if git diff --cached --quiet; then
+            [ "${{ steps.mode.outputs.complet }}" = "1" ] || { echo "Rien de neuf : pas de commit."; exit 0; }
             git commit --allow-empty -m "Battement de coeur : surveillance faite, rien de change"
           else
             git commit -m "Surveillance du $(date +%d/%m/%Y)"

@@ -49,3 +49,5 @@ Règles communes à tous les sites d'Ahmed : `../../regles communes a tous les s
 tarif… »), empreinte des montants du tableau de l'ATTT, liens officiels (7 jours de panne → alerte). Il ne change JAMAIS un
 montant : alerte = issue « Ma voiture : une règle a peut-être changé » → e-mail à Ahmed → une session Claude vérifie la source
 officielle et met à jour `assets/regles.js` + les tests. Rien à signaler → dates « vérifiés le » mises à jour (battement de cœur).
+**Depuis le 10/10/2026 (audit des robots, décision d'Ahmed)** : chaque jour, presse SEULE (`--leger` : pas d'ATTT, pas de liens, pas de
+tests du site, pas de commit si rien de neuf) ; passage complet le LUNDI ou lancé à la main (ATTT, liens, tests, dates, battement de cœur).

@@ -98,5 +98,17 @@ check("un flux illisible n'arrête pas le robot (les autres sont lus)", c == 0)
 v = json.load(open(os.path.join(d, "donnees", "veille.json"), encoding="utf-8"))
 check("donnees/veille.json : date du dernier passage et empreinte ATTT gardées", v.get("dernier") == "2026-10-09" and len(v.get("attt", "")) == 16)
 
+# 5. jour ordinaire (--leger) : actualités seulement ; ATTT, liens et dates ne sont pas touchés (pas de commit)
+d = copie(); m = robot(d)
+_regles = open(os.path.join(d, "assets", "regles.js"), encoding="utf-8").read()
+_vus = []
+def _lect(url):
+    _vus.append(url); return lecteur({"attt": ATTT_AVANT})(url)
+c = m.main(["--leger", "--aujourdhui", "2026-10-11"], lecteur=_lect)
+check("--leger : rien à signaler (code 0), ATTT et liens officiels non lus", c == 0 and m.ATTT not in _vus and not any(l in _vus for l in m.LIENS))
+check("--leger : dates « vérifiés le » inchangées (pas de commit inutile)", open(os.path.join(d, "assets", "regles.js"), encoding="utf-8").read() == _regles)
+c = m.main(["--leger", "--aujourdhui", "2026-10-09"], lecteur=lecteur({"lapresse": rss(("Vignette 2027 : nouveau barème", "https://ex.tn/vg", "Thu, 08 Oct 2026 10:00:00 +0100"))}))
+check("--leger : un article sur la vignette donne quand même l'alerte (code 2)", c == 2 and "ex.tn/vg" in open(os.path.join(d, "alerte.txt"), encoding="utf-8").read())
+
 print(f"\n{'TOUT PASSE' if not erreurs else str(erreurs) + ' PROBLÈME(S)'} ({total} vérifications)")
 sys.exit(1 if erreurs else 0)

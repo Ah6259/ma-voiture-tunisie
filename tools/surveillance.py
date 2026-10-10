@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""Robot de surveillance de Ma voiture Tunisie (lancé chaque jour par .github/workflows/surveillance.yml).
+"""Robot de surveillance de Ma voiture Tunisie (lancé chaque jour par .github/workflows/surveillance.yml, --leger sauf le lundi).
 Il NE MODIFIE JAMAIS un montant du site : il prévient (alerte = issue GitHub → e-mail à Ahmed) et c'est une session
 Claude qui vérifie la source officielle puis met à jour assets/regles.js.
 
@@ -9,8 +9,10 @@ Claude qui vérifie la source officielle puis met à jour assets/regles.js.
 2. ATTT (page d'accueil, tableau des tarifs) : empreinte des montants « 26,500 », « 16,000 »… ; si elle change → alerte.
 3. Liens officiels cités par le site (taxe-circulation, amendes, douane, ATTT) : injoignables 7 jours de suite → alerte.
 4. Tout s'est bien passé → date « vérifiés le » des carburants et date MAJ du site mises à jour (battement de cœur).
+--leger (audit des robots du 10/10/2026, décision d'Ahmed : « arrête la vérification non importante ») : les jours ordinaires,
+   seule la veille des actualités (1) tourne ; ATTT, liens officiels et dates (2 à 4) une fois par semaine (passage complet).
 Codes de sortie : 0 rien à signaler ; 2 alerte à ouvrir (texte dans alerte.txt) ; 3 panne du robot lui-même.
-Usage : python tools/surveillance.py [--sans-reseau] [--aujourdhui AAAA-MM-JJ]"""
+Usage : python tools/surveillance.py [--sans-reseau] [--leger] [--aujourdhui AAAA-MM-JJ]"""
 import argparse, datetime as dt, email.utils, hashlib, html, json, os, re, sys, time, urllib.request
 import xml.etree.ElementTree as ET
 
@@ -94,6 +96,7 @@ def maj_dates(jour):
 
 def main(argv=None, lecteur=lire):
     o = argparse.ArgumentParser(); o.add_argument("--sans-reseau", action="store_true"); o.add_argument("--aujourdhui", default="")
+    o.add_argument("--leger", action="store_true")
     a = o.parse_args(argv)
     if hasattr(sys.stdout, "reconfigure"):
         sys.stdout.reconfigure(encoding="utf-8", errors="replace")
@@ -122,6 +125,15 @@ def main(argv=None, lecteur=lire):
     v["vus"] = v["vus"][-400:]
     if flux_ok == 0:
         alertes.append("- Aucun flux d'actualités n'a pu être lu (tous en panne ou bloqués) : la veille des prix ne fonctionne plus.")
+
+    if a.leger:   # jour ordinaire : actualités seulement, rien d'autre n'est touché (pas de commit si rien de neuf)
+        ecrire(VEILLE, json.dumps(v, ensure_ascii=False, indent=1) + "\n")
+        if alertes:
+            ecrire(os.path.join(RACINE, "alerte.txt"), "\n".join(alertes))
+            print("\n".join(alertes))
+            return 2
+        print(f"Veille des actualités : rien à signaler le {jour:%d/%m/%Y} ({flux_ok} flux lus).")
+        return 0
 
     # 2. tarifs de l'ATTT
     try:
