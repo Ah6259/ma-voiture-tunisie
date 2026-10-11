@@ -106,7 +106,7 @@ function rappelsAgenda() {
     const qui = v.nom ? " — " + v.nom : "";
     evts.push({ id: v.id + "-" + e.type, date: e.date,
       titre: T(NOMS[e.type][0], NOMS[e.type][1]) + qui + (e.montant ? " (" + nombre(e.montant) + " DT)" : ""),
-      description: T(e.detail.fr, e.detail.ar) + "\n" + T("Ma voiture Tunisie : ", "مواعيد سيارتك: ") + "https://ah6259.github.io/ma-voiture-tunisie/" + (e.lien || "") });
+      description: T(e.detail.fr, e.detail.ar) + "\n" + T("Ma voiture Tunisie : ", "مواعيد سيارتك: ") + "https://voiture.clicvia.com/" + (e.lien || "") });
   }));
   telechargerIcs(fabriquerIcs(evts), "rappels-ma-voiture.ics");
   $("agenda-aide").hidden = false;

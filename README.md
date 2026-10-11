@@ -4,7 +4,7 @@ Site gratuit, en français et en arabe, pour ne plus oublier les échéances de 
 technique, assurance, vidange — avec des rappels dans l'agenda du téléphone. Aussi : barème de la vignette, prix des
 carburants et coût d'un trajet, frais de mutation de la carte grise, repères d'entretien et carnet des dépenses.
 
-En ligne : https://ah6259.github.io/ma-voiture-tunisie/
+En ligne : https://voiture.clicvia.com/
 
 ## Comment il vit tout seul
 - Site statique sur GitHub Pages ; tous les calculs se font dans le téléphone du visiteur (rien n'est envoyé).

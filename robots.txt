@@ -38,4 +38,4 @@ Disallow: /
 User-agent: *
 Allow: /
 
-Sitemap: https://ah6259.github.io/ma-voiture-tunisie/sitemap.xml
+Sitemap: https://voiture.clicvia.com/sitemap.xml

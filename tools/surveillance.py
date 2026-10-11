@@ -18,7 +18,7 @@ import xml.etree.ElementTree as ET
 
 ICI = os.path.dirname(os.path.abspath(__file__)); RACINE = os.path.dirname(ICI)
 VEILLE = os.path.join(RACINE, "donnees", "veille.json")
-UA = {"User-Agent": "ma-voiture-tunisie/1.0 (+https://ah6259.github.io/ma-voiture-tunisie/)"}
+UA = {"User-Agent": "ma-voiture-tunisie/1.0 (+https://voiture.clicvia.com/)"}
 FLUX = ["https://lapresse.tn/feed/", "https://www.webdo.tn/fr/feed/",
         "https://managers.tn/feed/", "https://kapitalis.com/tunisie/feed/", "https://www.mosaiquefm.net/fr/rss",
         "https://www.mosaiquefm.net/ar/rss"]

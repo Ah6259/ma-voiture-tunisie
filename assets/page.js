@@ -74,7 +74,7 @@ const MENU_SITE = [
       b.addEventListener("click", () => appliquer(html.lang === "ar" ? "fr" : "ar")));
     // bouton Partager (règle commune) : menu de partage du téléphone, sinon WhatsApp, avec la page vidéo + l'adresse du site
     document.querySelectorAll(".partager").forEach(b => b.addEventListener("click", () => {
-      try { if (window.goatcounter && window.goatcounter.count) window.goatcounter.count({ path: "partage" + location.pathname.replace("/ma-voiture-tunisie/", "/"), title: "Partage", event: true }); } catch (e) {}
+      try { if (window.goatcounter && window.goatcounter.count) window.goatcounter.count({ path: "partage" + location.pathname.replace(/^\/ma-voiture-tunisie\//, "/"), title: "Partage", event: true }); } catch (e) {}
       return window.partagerLien();
     }));
     document.querySelectorAll("[data-maj]").forEach(x => x.textContent = MAJ);
@@ -156,7 +156,7 @@ document.addEventListener("copy", e => {
 /* Installation sur le téléphone : service worker PRUDENT (sw.js : réseau d'abord pour les pages et les données). */
 if ("serviceWorker" in navigator && location.protocol === "https:") {
   window.addEventListener("load", () => {
-    try { navigator.serviceWorker.register("/ma-voiture-tunisie/sw.js", { scope: "/ma-voiture-tunisie/" }).catch(() => {}); } catch (e) { /* rien : le site marche sans */ }
+    try { navigator.serviceWorker.register(BASE_SITE + "sw.js", { scope: BASE_SITE }).catch(() => {}); } catch (e) { /* rien : le site marche sans */ }
   });
 }
 
@@ -168,11 +168,16 @@ document.addEventListener("click", e => {
 });
 
 /* >>> vidéo de présentation : page video/ partagée par le bouton « Partager » (outil vidéos d'Ahmed) */
-window.VIDEO_SITE = {"base": "/ma-voiture-tunisie/", "defaut": "fr", "nom": {"fr": "Ma voiture Tunisie", "ar": "مواعيد سيارتك"}};
+/* Adresse du site (11 octobre 2026) : voiture.clicvia.com (racine « / ») ; l'ancienne adresse ah6259.github.io/ma-voiture-tunisie/ redirige
+   vers elle. BASE_SITE = dossier du site selon l'adresse ; GoatCounter garde le préfixe /ma-voiture-tunisie (compteur commun). */
+var BASE_SITE = /\.github\.io$/.test(location.hostname) ? "/ma-voiture-tunisie/" : "/";
+window.goatcounter = window.goatcounter || {};
+window.goatcounter.path = function (p) { return BASE_SITE === "/" ? "/ma-voiture-tunisie" + p : p; };
+window.VIDEO_SITE = {"base": BASE_SITE, "defaut": "fr", "nom": {"fr": "Ma voiture Tunisie", "ar": "مواعيد سيارتك"}};
 /* Bouton « Partager » : partage un LIEN vers la page vidéo du site (vidéo de présentation + gros bouton « Ouvrir le site »)
    + l'adresse du site dans le texte. Menu de partage du téléphone, sinon WhatsApp. Réglages : window.VIDEO_SITE. */
 (function () {
-  var S = window.VIDEO_SITE, ORIGINE = "https://ah6259.github.io";
+  var S = window.VIDEO_SITE, ORIGINE = S.base === "/" ? "https://voiture.clicvia.com" : "https://ah6259.github.io";
   function langue() { return document.documentElement.lang || S.defaut; }
   function M(o) { return o[langue()] || o[S.defaut] || o.fr; }
   window.pageVideo = function () {

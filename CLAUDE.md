@@ -51,3 +51,5 @@ montant : alerte = issue « Ma voiture : une règle a peut-être changé » → 
 officielle et met à jour `assets/regles.js` + les tests. Rien à signaler → dates « vérifiés le » mises à jour (battement de cœur).
 **Depuis le 10/10/2026 (audit des robots, décision d'Ahmed)** : chaque jour, presse SEULE (`--leger` : pas d'ATTT, pas de liens, pas de
 tests du site, pas de commit si rien de neuf) ; passage complet le LUNDI ou lancé à la main (ATTT, liens, tests, dates, battement de cœur).
+
+- **Adresse depuis le 11/10/2026 : https://voiture.clicvia.com/** (domaine clicvia.com d'Ahmed, ligne DNS `CNAME voiture → ah6259.github.io` nuage gris, fichier `CNAME`). L'ancienne adresse ah6259.github.io/ma-voiture-tunisie/ redirige seule. Site à la racine « / » : `BASE_SITE` de assets/page.js (sw.js, vidéo) ; GoatCounter garde le préfixe `/ma-voiture-tunisie`. Si l'outil vidéo réécrit le bloc VIDEO_SITE, remettre `"base": BASE_SITE` et l'ORIGINE voiture.clicvia.com.

@@ -1,7 +1,7 @@
 # Guide — Ma voiture Tunisie (pour Ahmed)
 
 ## Ce que tu peux faire depuis ton téléphone
-- **Voir le site** : https://ah6259.github.io/ma-voiture-tunisie/
+- **Voir le site** : https://voiture.clicvia.com/
 - **Activer un client du Pass** (après sa preuve de paiement de 9 DT sur WhatsApp) : application GitHub → dépôt
   `voiture-pass` → Actions → **pass** → Run workflow → action `paye`, nom, téléphone → le résumé donne le **code** et un
   bouton « Ouvrir WhatsApp avec ce message ».
