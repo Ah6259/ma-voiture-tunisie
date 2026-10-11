@@ -42,7 +42,7 @@ const MENU_SITE = [
         <div class="entete-boutons">
           ${passIci ? `<a class="entete-pass${typeof passActif === "function" && passActif() ? " actif" : ""}" href="${racine}pass/"><span class="long">${T("Pass Rappels", "باقة التذكير")}</span><span class="court">${T("Pass", "الباقة")}</span></a>` : ""}
           <button class="partager" type="button" aria-label="${T("Partager cette page", "شارك هذه الصفحة")}" title="${T("Partager", "شارك")}"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="M8.6 13.5l6.8 4M15.4 6.5l-6.8 4"/></svg></button>
-          <button class="langue" type="button">${T("العربية", "Français")}</button>
+          <button class="langue" type="button" aria-label="${T("Lire en arabe", "Lire en français")}" title="${T("العربية", "Français")}">${T("ع", "Fr")}</button>
         </div>
       </div>
       <nav class="menu" aria-label="${T("Rubriques", "الأبواب")}"><div class="wrap">${MENU_SITE.map(([h, fr, ar, ico, nom]) => /^https:/.test(h)
