@@ -5,8 +5,8 @@ const ANNEE = 2026;          // année des règles affichée sur le site (chang�
 // « ajoute lien auto-école et lien code de la route »). Lien externe = bouton à bordure dorée avec le logo du site
 // (copie locale : la CSP n'autorise que les images du site). Clic compté : « lien-site/<nom> ».
 const MENU_SITE = [
-  ["https://ah6259.github.io/code-route-tunisie/", "Code de la route", "قانون الطرقات", "assets/logo-code-route.svg", "code-route"],
-  ["https://ah6259.github.io/auto-ecoles-tunisie/", "Auto-écoles", "مدارس تعليم السياقة", "assets/logo-auto-ecoles.svg", "auto-ecoles"],
+  ["https://code.clicvia.com/", "Code de la route", "قانون الطرقات", "assets/logo-code-route.svg", "code-route"],
+  ["https://auto-ecoles.clicvia.com/", "Auto-écoles", "مدارس تعليم السياقة", "assets/logo-auto-ecoles.svg", "auto-ecoles"],
   ["", "Mes échéances", "مواعيدي"],
   ["vignette/", "Vignette", "معلوم الجولان"],
   ["visite-technique/", "Visite technique", "الفحص الفني"],
@@ -62,6 +62,7 @@ const MENU_SITE = [
           <a href="${racine}a-propos/">${T("À propos et méthode", "من نحن والمنهجية")}</a>
           ${racine ? `<a href="${racine}pass/">${T("Pass Rappels", "باقة التذكير")}</a>` : ""}
           <a href="${racine}#avis">${T("Votre avis", "رأيك")}</a>
+        <a href="https://clicvia.com/" rel="noopener" target="_blank">${T("Tous nos services", "كل خدماتنا")}</a>
         </nav>
         <p>${T(`Règles vérifiées le ${MAJ} (loi de finances ${ANNEE}, textes de l'ATTT et du ministère de l'Industrie).`,
                `قواعد تم التثبت منها في ${MAJ} (قانون المالية لسنة ${ANNEE}، نصوص الوكالة الفنية للنقل البري ووزارة الصناعة).`)}</p>

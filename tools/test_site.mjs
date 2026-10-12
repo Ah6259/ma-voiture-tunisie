@@ -126,7 +126,7 @@ const VOITURE = JSON.stringify([{ id: "abcd1234", nom: "Clio", groupe: "pair", e
   check("accueil vide : aucune erreur JavaScript, message d'invitation, bouton agenda désactivé, pas d'onglet « ajouter » avant la 1re voiture", js.length === 0 && /Remplissez au moins une date/.test(d.getElementById("liste-echeances").textContent)
     && d.getElementById("bouton-agenda").disabled && d.getElementById("voitures-onglets").hidden);
   check("accueil : bouton Partager dans l'en-tête, menu avec Code de la route et Auto-écoles en premier", d.querySelectorAll("header .partager").length === 1
-    && /code-route-tunisie/.test(d.querySelector(".menu a").href) && /auto-ecoles-tunisie/.test(d.querySelectorAll(".menu a")[1].href));
+    && /code\.clicvia\.com/.test(d.querySelector(".menu a").href) && /auto-ecoles\.clicvia\.com/.test(d.querySelectorAll(".menu a")[1].href));
   saisir(w, d.getElementById("v-cv"), "6");
   clic(d, '.choix[data-nom="groupe"] button[data-v="impair"]');
   saisir(w, d.getElementById("v-assurance"), "2026-12-01");
@@ -198,7 +198,7 @@ const VOITURE = JSON.stringify([{ id: "abcd1234", nom: "Clio", groupe: "pair", e
 {
   const { d, js } = await page("achat-vente/index.html");
   check("achat-vente : exemple 7 CV de 8 ans → 275,000 DT (estimé), 8 papiers, lien vers le contrat de vente de Documents", js.length === 0 && /275,000 DT/.test(d.getElementById("grand").textContent)
-    && d.querySelectorAll("#papiers li").length === 8 && d.querySelector('a[href="https://ah6259.github.io/documents-tunisie/vente-voiture/"]'));
+    && d.querySelectorAll("#papiers li").length === 8 && d.querySelector('a[href="https://documents.clicvia.com/vente-voiture/"]'));
 }
 
 // ---- 7. carnet des dépenses (Pass ou essai)
@@ -242,7 +242,7 @@ const VOITURE = JSON.stringify([{ id: "abcd1234", nom: "Clio", groupe: "pair", e
     const { d } = await page(p);
     if (d.querySelectorAll("header .partager").length !== 1) manque.push(p + " partager");
     if (!d.querySelector('footer a[href$="#avis"]')) manque.push(p + " votre avis");
-    if (!d.querySelector('.menu a[href="https://ah6259.github.io/auto-ecoles-tunisie/"]') || !d.querySelector('.menu a[href="https://ah6259.github.io/code-route-tunisie/"]')) manque.push(p + " liens sites");
+    if (!d.querySelector('.menu a[href="https://auto-ecoles.clicvia.com/"]') || !d.querySelector('.menu a[href="https://code.clicvia.com/"]')) manque.push(p + " liens sites");
   }
   check(`toutes les pages : bouton Partager dans l'en-tête, « Votre avis » au pied, liens Code de la route et Auto-écoles ${manque.join(" | ")}`, !manque.length);
 }
