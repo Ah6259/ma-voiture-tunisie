@@ -28,7 +28,8 @@ SUJETS = [r"carburant", r"essence", r"gasoil", r"gazoil", r"prix à la pompe", r
 CHANGE = [r"hausse", r"augment", r"baisse", r"nouveau", r"nouvelle", r"nouveaux", r"tarif", r"prix", r"barème", r"délai", r"date limite",
           r"20\d\d", r"زيادة", r"الترفيع", r"تعديل", r"أسعار", r"تعريف", r"آجال", r"جديد"]
 ATTT = "https://www.attt.com.tn/"
-LIENS = ["https://taxe-circulation.finances.gov.tn", "https://amendes.finances.gov.tn", "https://www.douane.gov.tn/taxationveh/", ATTT]
+LIENS = ["https://taxe-circulation.finances.gov.tn", "https://amendes.finances.gov.tn", "https://www.douane.gov.tn/taxationveh/", ATTT,
+         "https://www.attt.com.tn/DEV_WEB/prendreunrendezvous.php?code_menu=73"]     # page de rendez-vous de l'ATTT (bouton de la page Visite technique)
 JOURS_RECENT = 10
 
 

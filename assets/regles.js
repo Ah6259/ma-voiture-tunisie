@@ -47,7 +47,7 @@ const REGLES = {
     tarif: 36.5,
     premiere: 4,
     periode: age => age >= 10 ? 1 : 2,
-    rendezVous: "https://www.attt.com.tn/"
+    rendezVous: "https://www.attt.com.tn/DEV_WEB/prendreunrendezvous.php?code_menu=73"
   },
 
   /* ---- Carburants, DT par litre — prix fixés par l'État, inchangés depuis le 24/11/2022 (démenti d'une hausse le 26/09/2026) ---- */
