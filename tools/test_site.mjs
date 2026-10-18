@@ -170,6 +170,44 @@ const VOITURE = JSON.stringify([{ id: "abcd1234", nom: "Clio", groupe: "pair", e
   clic(d, "#ajouter-voiture");
   check("Pass actif : la 2e voiture est acceptée même après l'essai", JSON.parse(w.localStorage.getItem("mv-voitures-v1")).length === 2 && !d.querySelector("#encart-voitures .btn-pass-grand"));
 }
+// 18/10/2026 (problème vu sur l'immobilier : code payé impossible à taper quand le téléphone gardait un autre code)
+// la case du code est TOUJOURS visible, EN HAUT de pass/, quel que soit l'état gardé ; le code tapé remplace l'ancien ;
+// l'essai gratuit annoncé est RÉEL (PASS.essaiJours = 30) ; un Pass payé terminé n'est pas annoncé « essai terminé »
+{
+  const { webcrypto, pbkdf2Sync } = await import("crypto");
+  const t0 = new Date(AUJ).getTime(), futur = new Date(t0 + 200 * 864e5).toISOString(), passe = new Date(t0 - 864e5).toISOString();
+  const visible = (w, el) => { for (let e = el; e; e = e.parentElement) if (e.hidden || w.getComputedStyle(e).display === "none") return false; return !!el; };
+  const ETATS = {
+    "aucun code": {},
+    "un autre code non payé gardé": { "mv-pass-v1": JSON.stringify({ code: "ZZZZ2222", fin: futur, verifie: 0 }) },
+    "un code payé gardé": { "mv-pass-v1": JSON.stringify({ code: "ABCDEFGH", fin: futur, verifie: t0 }) },
+    "un code expiré gardé": { "mv-pass-v1": JSON.stringify({ code: "ABCDEFGH", fin: passe, verifie: t0 }) },
+    "essai fini": { "mv-essai-v1": JSON.stringify({ debut: t0 - 40 * 864e5 }) }
+  };
+  const mal = [];
+  for (const [nom, stockage] of Object.entries(ETATS)) {
+    const { w, d } = await page("pass/index.html", { stockage });
+    const bloc = d.getElementById("code-acces"), champ = bloc && bloc.querySelector("input[name=code]"), bouton = bloc && bloc.querySelector("button[type=submit]");
+    if (!visible(w, champ) || !visible(w, bouton) || !(bloc.compareDocumentPosition(d.getElementById("offre")) & 4)) mal.push(nom);
+  }
+  check(`Pass : case du code visible EN HAUT de pass/ (avant l'offre) dans tous les états ${mal}`, mal.length === 0);
+  const { w, d } = await page("pass/index.html", { stockage: ETATS["un autre code non payé gardé"] });
+  const SEL = "sel-de-test", TOURS = 1000, LISTE = { sel: SEL, tours: TOURS, codes: [{ h: pbkdf2Sync("NEWC2345", SEL, TOURS, 32, "sha256").toString("hex"), fin: futur }] };
+  Object.defineProperty(w, "crypto", { value: webcrypto, configurable: true });
+  w.fetch = async () => ({ ok: true, status: 200, json: async () => JSON.parse(JSON.stringify(LISTE)) });
+  const cf = d.getElementById("code-form");
+  cf.querySelector("input[name=code]").value = "newc-2345";
+  cf.dispatchEvent(new w.Event("submit", { bubbles: true, cancelable: true }));
+  for (let i = 0; i < 100 && !/Code accepté/.test(d.getElementById("code-status").textContent); i++) await new Promise(r => setTimeout(r, 20));
+  const garde = JSON.parse(w.localStorage.getItem("mv-pass-v1") || "{}");
+  check("Pass : le code tapé REMPLACE l'ancien code gardé (nouveau code, nouvelle date de fin, Pass actif)", garde.code === "NEWC2345" && garde.fin === futur && w.eval("passActif()"));
+  check("Pass : l'« essai gratuit de 30 jours » annoncé est réel (PASS.essaiJours = 30)", w.eval("PASS.essaiJours") === 30 && /Essai gratuit de 30 jours/.test(d.getElementById("offre").textContent));
+  const r = await page("index.html", { stockage: { "mv-voitures-v1": VOITURE, "mv-essai-v1": ETATS["essai fini"]["mv-essai-v1"], "mv-pass-v1": ETATS["un code expiré gardé"]["mv-pass-v1"] } });
+  clic(r.d, "#ajouter-voiture");
+  const enc = r.d.getElementById("encart-voitures");
+  check("Pass payé terminé : encart « Votre Pass Ma voiture est terminé » (pas « essai terminé ») + lien « J'ai déjà un code »",
+    /Votre Pass Ma voiture est terminé/.test(enc.textContent) && !/essai gratuit/i.test(enc.querySelector("h2").textContent) && !!enc.querySelector('a[href="pass/#code-acces"]'));
+}
 {
   const { w, d, js } = await page("index.html", { stockage: { "mv-voitures-v1": "pas du json", "langue": "en" } });
   check("mémoire partagée invalide (« pas du json », langue « en ») : ignorée sans erreur, page en français, aucune voiture", js.length === 0 && w.document.documentElement.lang === "fr"

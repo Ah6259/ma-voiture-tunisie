@@ -13,6 +13,16 @@ corps: data-pass
 
 <main class="wrap chevauche">
   <section class="carte pass-etat" id="pass-etat" hidden></section>
+  <section class="carte abo code-haut" id="code-acces">
+    <h2><span data-l="fr">J'ai un code</span><span data-l="ar">لدي رمز</span></h2>
+    <form id="code-form" novalidate>
+      <label class="abo-etiquette" for="code-saisie"><span data-l="fr">Votre code d'accès (8 caractères)</span><span data-l="ar">رمز الدخول (⁦8⁩ حروف وأرقام)</span></label>
+      <input id="code-saisie" name="code" required maxlength="12" autocomplete="off" autocapitalize="characters" spellcheck="false" inputmode="text">
+      <button type="submit" class="btn-pro"><span data-l="fr">Activer mon Pass</span><span data-l="ar">تفعيل الباقة</span></button>
+      <p id="code-status" role="status" aria-live="polite"></p>
+      <p class="petit"><span data-l="fr">Le code est vérifié dans votre téléphone : il n'est envoyé à personne. Il reste gardé sur ce téléphone jusqu'à la fin du Pass.</span><span data-l="ar">يتم التثبت من الرمز داخل هاتفك: لا يُرسل إلى أحد. ويبقى محفوظًا على هذا الهاتف إلى نهاية الباقة.</span></p>
+    </form>
+  </section>
 
   <section class="offre-pro" id="offre">
     <p class="ruban"><span data-l="fr">Essai gratuit de 30 jours</span><span data-l="ar">تجربة مجانية لمدة ⁦30⁩ يومًا</span></p>
@@ -59,16 +69,6 @@ corps: data-pass
     </ol>
   </section>
 
-  <section class="carte abo" id="code-acces">
-    <h2><span data-l="fr">J'ai un code</span><span data-l="ar">لدي رمز</span></h2>
-    <form id="code-form" novalidate>
-      <label class="abo-etiquette" for="code-saisie"><span data-l="fr">Votre code d'accès (8 caractères)</span><span data-l="ar">رمز الدخول (⁦8⁩ حروف وأرقام)</span></label>
-      <input id="code-saisie" name="code" required maxlength="12" autocomplete="off" autocapitalize="characters" spellcheck="false" inputmode="text">
-      <button type="submit" class="btn-pro"><span data-l="fr">Activer mon Pass</span><span data-l="ar">تفعيل الباقة</span></button>
-      <p id="code-status" role="status" aria-live="polite"></p>
-      <p class="petit"><span data-l="fr">Le code est vérifié dans votre téléphone : il n'est envoyé à personne. Il reste gardé sur ce téléphone jusqu'à la fin du Pass.</span><span data-l="ar">يتم التثبت من الرمز داخل هاتفك: لا يُرسل إلى أحد. ويبقى محفوظًا على هذا الهاتف إلى نهاية الباقة.</span></p>
-    </form>
-  </section>
 
   <section class="carte abo" id="inscription" aria-labelledby="pass-titre">
     <h2 id="pass-titre"><span data-l="fr">Demander mon Pass Ma voiture</span><span data-l="ar">طلب باقة سيارتك</span></h2>

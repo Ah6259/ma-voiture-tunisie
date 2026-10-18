@@ -74,7 +74,11 @@ function htmlBoutonPass(id) {
 }
 // encart affiché à la place d'une fonction du Pass quand l'essai est fini (et sans Pass)
 function htmlEncartPass(quoi) {
-  return `<div class="pass-bloque"><h2>${T("Votre essai gratuit de 30 jours est terminé", "انتهت تجربتك المجانية لمدة " + isoP("30") + " يومًا")}</h2>
+  // titre juste selon l'état (octobre 2026) : un Pass payé terminé n'est pas un « essai terminé »
+  const titre = lirePass() ? T("Votre Pass Ma voiture est terminé", "انتهت باقة سيارتك")
+    : essaiFini() ? T("Votre essai gratuit de 30 jours est terminé", "انتهت تجربتك المجانية لمدة " + isoP("30") + " يومًا")
+    : T("Fonction du Pass Ma voiture", "ميزة من باقة سيارتك");
+  return `<div class="pass-bloque"><h2>${titre}</h2>
     <p>${quoi}</p>${htmlBoutonPass("encart-pass")}
     <p class="demain">${T("Votre première voiture, ses échéances et ses rappels restent gratuits pour toujours.", "سيارتك الأولى ومواعيدها وتذكيراتها تبقى مجانية دائمًا.")}</p>
     <p class="pass-liens"><a href="${racineSite()}pass/#code-acces">${T("J'ai déjà un code", "لدي رمز")}</a></p></div>`;
@@ -192,7 +196,7 @@ function brancherCodeAcces() {
            "تم قبول الرمز: باقة سيارتك مفعّلة على هذا الهاتف إلى غاية " + finLisible(r.fin, true) + "."],
       forme: ["Le code a 8 caractères (lettres et chiffres), par exemple ABCD-EF23.", "الرمز يتكون من " + isoP("8") + " حروف وأرقام، مثال " + isoP("ABCD-EF23") + "."],
       inconnu: ["Code non reconnu. Vérifiez-le ; si vous venez de le recevoir, réessayez dans 10 minutes.", "رمز غير معروف. تثبّت منه؛ إن وصلك للتو، أعد المحاولة بعد " + isoP("10") + " دقائق."],
-      expire: ["Ce code a expiré le " + finLisible(r.fin) + ". Pour continuer, demandez un nouveau Pass ci-dessus.", "انتهت صلاحية هذا الرمز في " + finLisible(r.fin, true) + ". للمواصلة، اطلب باقة جديدة أعلاه."],
+      expire: ["Ce code a expiré le " + finLisible(r.fin) + ". Pour continuer, demandez un nouveau Pass ci-dessous.", "انتهت صلاحية هذا الرمز في " + finLisible(r.fin, true) + ". للمواصلة، اطلب باقة جديدة أسفله."],
       reseau: ["Pas de connexion : vérifiez Internet et réessayez.", "لا يوجد اتصال: تحقّق من الإنترنت وأعد المحاولة."],
       impossible: ["Votre navigateur ne peut pas vérifier le code : mettez-le à jour ou essayez Chrome.", "متصفحك لا يستطيع التثبت من الرمز: حدّثه أو جرّب ⁨Chrome⁩."]
     }[r.etat];
