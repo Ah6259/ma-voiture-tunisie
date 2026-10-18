@@ -44,7 +44,7 @@ function echeancesVoiture(v, aujourdhui) {
   if (dv) res.push({ type: "vignette", date: dv.date, montant: REGLES.vignette.montant(v), detail: dv.detail, lien: "vignette/", sur: true });
   // 2. visite technique
   const vt = prochaineVisite(v, auj);
-  if (vt) res.push({ type: "visite", date: vt.date, montant: REGLES.visite.tarif, detail: vt.detail, lien: "visite-technique/", sur: vt.sur });
+  if (vt) res.push({ type: "visite", date: vt.date, montant: REGLES.visite.tarif, detail: vt.detail, lien: "visite-technique/", sur: vt.sur, inconnue: !!vt.inconnue });
   // 3. assurance
   const fa = lireDate(v.assurance);
   if (fa) {
@@ -56,7 +56,8 @@ function echeancesVoiture(v, aujourdhui) {
   // 4. vidange
   const vd = prochaineVidange(v, auj);
   if (vd) res.push({ type: "vidange", date: vd.date, detail: vd.detail, lien: "entretien/", sur: false });
-  return res.sort((a, b) => a.date - b.date);
+  // date inconnue (visite peut-être en retard) : en tête de liste, jamais une date devinée
+  return res.sort((a, b) => (a.date ? a.date.getTime() : -Infinity) - (b.date ? b.date.getTime() : -Infinity));
 }
 
 function prochaineVisite(v, auj) {
@@ -76,6 +77,13 @@ function prochaineVisite(v, auj) {
     const age = (derniere - c) / (365.25 * JOUR_MS);
     const p = plusAns(derniere, R.periode(age));
     return { date: p, sur: true, detail: { fr: "Un an après votre dernière visite", ar: "بعد سنة من آخر فحص" }, retard: joursEntre(auj, p) < 0 };
+  }
+  // VS.3 (18/10/2026) : voiture de 10 ans ou plus (une visite chaque année) sans date de dernière visite : on ne devine PAS
+  // de date (une date l'an prochain serait trompeuse : la visite est peut-être déjà en retard).
+  if ((auj - c) / (365.25 * JOUR_MS) >= 10) {
+    return { date: null, inconnue: true, sur: false, detail: {
+      fr: "Date de la dernière visite inconnue : votre visite est peut-être déjà en retard. Indiquez la date de votre dernier certificat.",
+      ar: "تاريخ آخر فحص غير معروف: قد يكون فحصك متأخرًا بالفعل. أدخل تاريخ آخر شهادة فحص." } };
   }
   const prochaine = visites.find(x => joursEntre(auj, x) >= -31) || visites[visites.length - 1];
   return { date: prochaine, sur: false, detail: { fr: "Calculée depuis la 1re mise en circulation", ar: "محسوبة من تاريخ أول جولان" } };

@@ -571,14 +571,14 @@
  },
  {
   "page": "visite-technique/",
-  "nom": "visite technique : voiture de 2015 (prochaine date affichée)",
+  "nom": "visite technique : voiture de 2015 sans dernière visite (pas de date devinée, âge affiché)",
   "etapes": [
    {
     "sel": "#circulation",
     "valeur": "2015-06-01"
    }
   ],
-  "lire": "#grand"
+  "lire": "#tableau"
  },
  {
   "page": "visite-technique/",
@@ -591,6 +591,17 @@
    {
     "sel": "#derniere",
     "valeur": "2026-03-15"
+   }
+  ],
+  "lire": "#grand"
+ },
+ {
+  "page": "visite-technique/",
+  "nom": "visite technique : voiture de 2020 (prochaine date affichée)",
+  "etapes": [
+   {
+    "sel": "#circulation",
+    "valeur": "2020-06-15"
    }
   ],
   "lire": "#grand"

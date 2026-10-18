@@ -106,7 +106,9 @@ check("LICENSE « tous droits réservés », .gitattributes eol=lf", /Tous droit
   const { w: wv } = await page("visite-technique/index.html");
   const auj = new wv.Date("2026-10-09T12:00:00"), vis = (c, der) => wv.ecrireDate(wv.prochaineVisite(wv.voitureValide({ circulation: c, visite: der || "" }), auj).date);
   check("visite : voiture de 2020-06-15 → 15/06/2028 (4e année puis tous les 2 ans) ; voiture de 2024-01-10 → 10/01/2028 (1re visite)", vis("2020-06-15") === "2028-06-15" && vis("2024-01-10") === "2028-01-10");
-  check("visite : voiture de 2014-03-01 (plus de 10 ans) → 01/03/2027 ; avec une visite le 20/02/2026 → 20/02/2027", vis("2014-03-01") === "2027-03-01" && vis("2014-03-01", "2026-02-20") === "2027-02-20");
+  const r14 = wv.prochaineVisite(wv.voitureValide({ circulation: "2014-03-01" }), auj);
+  check("visite (VS.3) : voiture de 2014-03-01 (plus de 10 ans) SANS dernière visite → aucune date devinée, « peut-être déjà en retard » ; avec une visite le 20/02/2026 → 20/02/2027",
+    r14.date === null && r14.inconnue === true && /peut-être déjà en retard/.test(r14.detail.fr) && /متأخر/.test(r14.detail.ar) && vis("2014-03-01", "2026-02-20") === "2027-02-20");
 }
 
 // ---- 3. fichier agenda (.ics)
@@ -188,7 +190,23 @@ const VOITURE = JSON.stringify([{ id: "abcd1234", nom: "Clio", groupe: "pair", e
 {
   const { w, d, js } = await page("visite-technique/index.html");
   saisir(w, d.getElementById("circulation"), "2020-06-15");
-  check("visite technique : 2020-06-15 → 15/06/2028, prix 36,500 DT, aucune erreur", js.length === 0 && /15\/06\/2028/.test(d.getElementById("grand").textContent) && /36,500 DT/.test(d.getElementById("tableau").textContent));
+  check("visite technique : 2020-06-15 → 15/06/2028, prix 36,500 DT, aucune erreur", js.length === 0 && /15\/06\/2028/.test(d.getElementById("grand").textContent) && /36,500 DT/.test(d.getElementById("tableau").textContent));  saisir(w, d.getElementById("circulation"), "2014-03-01");
+  const pageVs3 = d.getElementById("grand").textContent + " " + d.getElementById("explication").textContent + " " + d.getElementById("tableau").textContent;
+  check("visite technique (VS.3) : voiture de 2014 sans dernière visite → « En retard ? », « peut-être déjà en retard », AUCUNE date affichée", js.length === 0
+    && /En retard \?/.test(d.getElementById("grand").textContent) && /peut-être déjà en retard/.test(pageVs3) && !/\d{2}\/\d{2}\/\d{4}/.test(pageVs3) && !/Il reste/.test(pageVs3));
+  saisir(w, d.getElementById("derniere"), "2026-02-20");
+  check("visite technique (VS.3) : la même voiture avec sa dernière visite (20/02/2026) → 20/02/2027", /20\/02\/2027/.test(d.getElementById("grand").textContent));
+}
+{
+  const vieille = JSON.stringify([{ id: "vieux1234", nom: "Golf", groupe: "pair", energie: "essence", cv: 6, circulation: "2012-04-10", assurance: "2026-11-30" }]);
+  const { w, d, js } = await page("index.html", { stockage: { "mv-voitures-v1": vieille } });
+  const ech = [...d.querySelectorAll("#liste-echeances .ech")];
+  const vt = ech.find(e => /Visite technique/.test(e.querySelector("h3").textContent));
+  check("accueil (VS.3) : voiture de 2012 sans dernière visite → visite technique EN TÊTE, « Date inconnue : en retard ? », aucune date devinée", js.length === 0
+    && !!vt && ech[0] === vt && vt.classList.contains("inconnue") && /en retard \?/.test(vt.textContent) && !/\d{2}\/\d{2}\/\d{4}/.test(vt.textContent) && !/NaN|undefined/.test(vt.textContent));
+  clic(d, "#bouton-agenda");
+  const f = w.__fichiers[0];
+  check("agenda (VS.3) : la visite sans date n'est PAS mise dans le fichier .ics (seulement assurance + vignette)", !!f && (f.texte.match(/BEGIN:VEVENT/g) || []).length === 2 && !/Visite technique/.test(f.texte));
 }
 {
   const { w, d, js } = await page("carburant/index.html");

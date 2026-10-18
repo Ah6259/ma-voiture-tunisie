@@ -11,8 +11,20 @@ function calculerVisite() {
     t.innerHTML = "";
     return;
   }
-  const j = joursEntre(auj, r.date), c = lireDate(v.circulation);
+  const c = lireDate(v.circulation);
   const age = c ? Math.floor((auj - c) / (365.25 * JOUR_MS)) : null;
+  if (r.inconnue) {   // VS.3 : voiture de 10 ans ou plus sans date de dernière visite → jamais de date devinée
+    g.textContent = T("En retard ?", "متأخر؟");
+    ex.textContent = T(r.detail.fr, r.detail.ar);
+    t.innerHTML = [
+      [T("Âge de la voiture", "عمر السيارة"), iso(age) + T(" ans", " سنة")],
+      [T("Rythme des visites", "نسق الفحوصات"), T("chaque année", "كل سنة")],
+      [T("Dernière visite", "آخر فحص"), T("inconnue", "غير معروف")],
+      [T("Prix", "الثمن"), dt(REGLES.visite.tarif)]
+    ].map(([a, b]) => `<tr><td>${a}</td><td>${b}</td></tr>`).join("");
+    return;
+  }
+  const j = joursEntre(auj, r.date);
   g.innerHTML = dateLisible(r.date);
   ex.textContent = (r.sur ? T("Un an ou deux après votre dernière visite, selon l'âge de la voiture.", "سنة أو سنتان بعد آخر فحص، حسب عمر السيارة.")
     : T("Date estimée depuis la 1re mise en circulation : la date de votre dernier certificat fait foi.", "تاريخ تقديري انطلاقًا من أول جولان: تاريخ آخر شهادة هو المرجع."));

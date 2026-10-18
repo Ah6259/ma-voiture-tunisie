@@ -42,6 +42,12 @@ function afficher() {
     liste.innerHTML = `<li class="vide">${T("Remplissez au moins une date ci-dessus : vos échéances s'affichent ici aussitôt.", "املأ تاريخًا واحدًا على الأقل أعلاه: تظهر مواعيدك هنا فورًا.")}</li>`;
   } else {
     liste.innerHTML = ech.map(e => {
+      if (!e.date) {   // date inconnue (visite technique d'une voiture de 10 ans ou plus) : jamais de date devinée
+        return `<li class="ech urgent inconnue"><span class="ic">${ICONES[e.type]}</span>
+        <div><h3>${T(...NOMS[e.type])}</h3><p>${T("Date inconnue : en retard ?", "تاريخ غير معروف: متأخر؟")}</p><p>${T(e.detail.fr, e.detail.ar)}</p></div>
+        <div class="reste"><b>?</b>${T("en retard ?", "متأخر؟")}</div>
+        ${e.lien ? `<a class="lien-ech" href="${e.lien}">${T("Tout savoir →", "← كل التفاصيل")}</a>` : ""}</li>`;
+      }
       const j = joursEntre(auj, e.date);
       const montant = e.montant ? ` · ${dt(e.montant)}` : "";
       const estime = e.sur ? "" : ` · ${T("estimée", "تقديري")}`;
@@ -102,7 +108,7 @@ function rappelsAgenda() {
   const auj = new Date(), evts = [];
   // gratuit : la voiture affichée ; avec le Pass ou l'essai : toutes les voitures en une fois
   const lesquelles = accesPass() ? VOITURES : [VOITURES[COURANTE]];
-  lesquelles.filter(Boolean).forEach(v => echeancesVoiture(v, auj).forEach(e => {
+  lesquelles.filter(Boolean).forEach(v => echeancesVoiture(v, auj).filter(e => e.date).forEach(e => {
     const qui = v.nom ? " — " + v.nom : "";
     evts.push({ id: v.id + "-" + e.type, date: e.date,
       titre: T(NOMS[e.type][0], NOMS[e.type][1]) + qui + (e.montant ? " (" + nombre(e.montant) + " DT)" : ""),
