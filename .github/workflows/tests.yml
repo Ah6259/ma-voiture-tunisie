@@ -38,11 +38,5 @@ jobs:
       - run: python tools/test_sabotage.py
       - name: Visiteur simule
         # Règle générale du 18/10/2026 : le visiteur simulé signale les problèmes AVANT le visiteur réel (tools/visiteur_simule.py, outil commun).
-        # Seule exception tolérée : « /video/ : page non chargée » = faux positif connu de l'outil (la vidéo retarde l'événement
-        # « load » dans Chrome sans écran ; aucun effet pour un vrai visiteur). Toute autre anomalie rend le robot rouge.
-        run: |
-          code=0; python tools/visiteur_simule.py > visiteur.txt || code=$?
-          cat visiteur.txt
-          grep -q '^ANOMALIES' visiteur.txt || exit 1
-          autres=$(grep '^  - ' visiteur.txt | grep -cv '^  - /video/ : page non chargée$' || true)
-          if [ "$code" != 0 ] && [ "$autres" != 0 ]; then exit 1; fi
+        # (la fausse alerte « page vidéo non chargée » est corrigée dans l'outil commun : plus aucune exception)
+        run: python tools/visiteur_simule.py
