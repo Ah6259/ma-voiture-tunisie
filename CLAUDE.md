@@ -42,6 +42,7 @@ Règles communes à tous les sites d'Ahmed : `../../regles communes a tous les s
 - Tests (tout doit être vert avant d'envoyer) : `node tools/test_site.mjs` (date FIXÉE au 09/10/2026, montants et dates de
   référence vérifiés à la main), `node tools/test_sw.mjs`, `node tools/test_avis.mjs`, `python tools/test_robot.py`,
   `python tools/test_sabotage.py` (6 sabotages qui doivent tous être détectés). Tous lancés par `tests.yml` à chaque envoi.
+- **Visiteur simulé** (règle générale du 18/10/2026, outil commun copié tel quel) : `python3 tools/visiteur_simule.py` (aussi dans tests.yml) — liens/images morts, pages à 390 px dans Chromium, et `tools/scenarios-visiteur.json` : vignette (CV, énergie, kW), carburant (km, conso, prix, aller-retour), mutation (CV, âge), visite technique, fiche de l'accueil — la LOGIQUE est vérifiée (plus de CV → vignette pas plus basse…). Jamais de « % » dans un scénario (l'outil plante). 18/10 : il a trouvé le barème de la vignette plus large que l'écran (corrigé).
 - Icônes : `python tools/icone.py` (Chrome sans écran). Image d'aperçu : `assets/og-image-v1.jpg` (nouveau nom si on la change).
 
 ## Robot de surveillance (`surveillance.yml`, chaque jour 6h23)

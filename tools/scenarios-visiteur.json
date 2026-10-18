@@ -1,0 +1,636 @@
+[
+ {
+  "page": "vignette/",
+  "nom": "vignette : essence 4 CV",
+  "etapes": [
+   {
+    "sel": "#energie",
+    "valeur": "essence"
+   },
+   {
+    "sel": "#cv",
+    "valeur": "4"
+   }
+  ],
+  "lire": "#grand",
+  "groupe": "vignette-puissance",
+  "ordre": 4,
+  "croissant": true
+ },
+ {
+  "page": "vignette/",
+  "nom": "vignette : essence 6 CV",
+  "etapes": [
+   {
+    "sel": "#energie",
+    "valeur": "essence"
+   },
+   {
+    "sel": "#cv",
+    "valeur": "6"
+   }
+  ],
+  "lire": "#grand",
+  "groupe": "vignette-puissance",
+  "ordre": 6,
+  "croissant": true
+ },
+ {
+  "page": "vignette/",
+  "nom": "vignette : essence 8 CV",
+  "etapes": [
+   {
+    "sel": "#energie",
+    "valeur": "essence"
+   },
+   {
+    "sel": "#cv",
+    "valeur": "8"
+   }
+  ],
+  "lire": "#grand",
+  "groupe": "vignette-puissance",
+  "ordre": 8,
+  "croissant": true
+ },
+ {
+  "page": "vignette/",
+  "nom": "vignette : essence 9 CV",
+  "etapes": [
+   {
+    "sel": "#energie",
+    "valeur": "essence"
+   },
+   {
+    "sel": "#cv",
+    "valeur": "9"
+   }
+  ],
+  "lire": "#grand",
+  "groupe": "vignette-puissance",
+  "ordre": 9,
+  "croissant": true
+ },
+ {
+  "page": "vignette/",
+  "nom": "vignette : essence 11 CV",
+  "etapes": [
+   {
+    "sel": "#energie",
+    "valeur": "essence"
+   },
+   {
+    "sel": "#cv",
+    "valeur": "11"
+   }
+  ],
+  "lire": "#grand",
+  "groupe": "vignette-puissance",
+  "ordre": 11,
+  "croissant": true
+ },
+ {
+  "page": "vignette/",
+  "nom": "vignette : essence 13 CV",
+  "etapes": [
+   {
+    "sel": "#energie",
+    "valeur": "essence"
+   },
+   {
+    "sel": "#cv",
+    "valeur": "13"
+   }
+  ],
+  "lire": "#grand",
+  "groupe": "vignette-puissance",
+  "ordre": 13,
+  "croissant": true
+ },
+ {
+  "page": "vignette/",
+  "nom": "vignette : essence 15 CV",
+  "etapes": [
+   {
+    "sel": "#energie",
+    "valeur": "essence"
+   },
+   {
+    "sel": "#cv",
+    "valeur": "15"
+   }
+  ],
+  "lire": "#grand",
+  "groupe": "vignette-puissance",
+  "ordre": 15,
+  "croissant": true
+ },
+ {
+  "page": "vignette/",
+  "nom": "vignette : essence 20 CV",
+  "etapes": [
+   {
+    "sel": "#energie",
+    "valeur": "essence"
+   },
+   {
+    "sel": "#cv",
+    "valeur": "20"
+   }
+  ],
+  "lire": "#grand",
+  "groupe": "vignette-puissance",
+  "ordre": 20,
+  "croissant": true
+ },
+ {
+  "page": "vignette/",
+  "nom": "vignette : 6 CV electrique",
+  "etapes": [
+   {
+    "sel": "#energie",
+    "valeur": "electrique"
+   },
+   {
+    "sel": "#cv",
+    "valeur": "6"
+   }
+  ],
+  "lire": "#grand",
+  "groupe": "vignette-energie",
+  "ordre": 0,
+  "croissant": true
+ },
+ {
+  "page": "vignette/",
+  "nom": "vignette : 6 CV essence",
+  "etapes": [
+   {
+    "sel": "#energie",
+    "valeur": "essence"
+   },
+   {
+    "sel": "#cv",
+    "valeur": "6"
+   }
+  ],
+  "lire": "#grand",
+  "groupe": "vignette-energie",
+  "ordre": 1,
+  "croissant": true
+ },
+ {
+  "page": "vignette/",
+  "nom": "vignette : 6 CV diesel",
+  "etapes": [
+   {
+    "sel": "#energie",
+    "valeur": "diesel"
+   },
+   {
+    "sel": "#cv",
+    "valeur": "6"
+   }
+  ],
+  "lire": "#grand",
+  "groupe": "vignette-energie",
+  "ordre": 2,
+  "croissant": true
+ },
+ {
+  "page": "vignette/",
+  "nom": "vignette : 6 CV gpl",
+  "etapes": [
+   {
+    "sel": "#energie",
+    "valeur": "gpl"
+   },
+   {
+    "sel": "#cv",
+    "valeur": "6"
+   }
+  ],
+  "lire": "#grand",
+  "groupe": "vignette-energie",
+  "ordre": 3,
+  "croissant": true
+ },
+ {
+  "page": "vignette/",
+  "nom": "vignette : 50 kW -> CV estimés",
+  "etapes": [
+   {
+    "sel": "#kw",
+    "valeur": "50"
+   }
+  ],
+  "lire": "#cv-estime",
+  "groupe": "vignette-kw",
+  "ordre": 50,
+  "croissant": true
+ },
+ {
+  "page": "vignette/",
+  "nom": "vignette : 90 kW -> CV estimés",
+  "etapes": [
+   {
+    "sel": "#kw",
+    "valeur": "90"
+   }
+  ],
+  "lire": "#cv-estime",
+  "groupe": "vignette-kw",
+  "ordre": 90,
+  "croissant": true
+ },
+ {
+  "page": "vignette/",
+  "nom": "vignette : 150 kW -> CV estimés",
+  "etapes": [
+   {
+    "sel": "#kw",
+    "valeur": "150"
+   }
+  ],
+  "lire": "#cv-estime",
+  "groupe": "vignette-kw",
+  "ordre": 150,
+  "croissant": true
+ },
+ {
+  "page": "vignette/",
+  "nom": "vignette : 250 kW -> CV estimés",
+  "etapes": [
+   {
+    "sel": "#kw",
+    "valeur": "250"
+   }
+  ],
+  "lire": "#cv-estime",
+  "groupe": "vignette-kw",
+  "ordre": 250,
+  "croissant": true
+ },
+ {
+  "page": "carburant/",
+  "nom": "carburant : trajet 5 km",
+  "etapes": [
+   {
+    "sel": "#distance",
+    "valeur": "5"
+   }
+  ],
+  "lire": "#grand",
+  "groupe": "carburant-distance",
+  "ordre": 5,
+  "croissant": true
+ },
+ {
+  "page": "carburant/",
+  "nom": "carburant : trajet 25 km",
+  "etapes": [
+   {
+    "sel": "#distance",
+    "valeur": "25"
+   }
+  ],
+  "lire": "#grand",
+  "groupe": "carburant-distance",
+  "ordre": 25,
+  "croissant": true
+ },
+ {
+  "page": "carburant/",
+  "nom": "carburant : trajet 120 km",
+  "etapes": [
+   {
+    "sel": "#distance",
+    "valeur": "120"
+   }
+  ],
+  "lire": "#grand",
+  "groupe": "carburant-distance",
+  "ordre": 120,
+  "croissant": true
+ },
+ {
+  "page": "carburant/",
+  "nom": "carburant : consommation 4 L/100",
+  "etapes": [
+   {
+    "sel": "#conso",
+    "valeur": "4"
+   }
+  ],
+  "lire": "#grand",
+  "groupe": "carburant-conso",
+  "ordre": 4,
+  "croissant": true
+ },
+ {
+  "page": "carburant/",
+  "nom": "carburant : consommation 6.5 L/100",
+  "etapes": [
+   {
+    "sel": "#conso",
+    "valeur": "6.5"
+   }
+  ],
+  "lire": "#grand",
+  "groupe": "carburant-conso",
+  "ordre": 6.5,
+  "croissant": true
+ },
+ {
+  "page": "carburant/",
+  "nom": "carburant : consommation 11 L/100",
+  "etapes": [
+   {
+    "sel": "#conso",
+    "valeur": "11"
+   }
+  ],
+  "lire": "#grand",
+  "groupe": "carburant-conso",
+  "ordre": 11,
+  "croissant": true
+ },
+ {
+  "page": "carburant/",
+  "nom": "carburant : gasoil",
+  "etapes": [
+   {
+    "sel": "#carbu",
+    "valeur": "g50"
+   }
+  ],
+  "lire": "#grand",
+  "groupe": "carburant-prix",
+  "ordre": 0,
+  "croissant": true
+ },
+ {
+  "page": "carburant/",
+  "nom": "carburant : sans plomb",
+  "etapes": [
+   {
+    "sel": "#carbu",
+    "valeur": "sp"
+   }
+  ],
+  "lire": "#grand",
+  "groupe": "carburant-prix",
+  "ordre": 1,
+  "croissant": true
+ },
+ {
+  "page": "carburant/",
+  "nom": "carburant : sans plomb premium",
+  "etapes": [
+   {
+    "sel": "#carbu",
+    "valeur": "spp"
+   }
+  ],
+  "lire": "#grand",
+  "groupe": "carburant-prix",
+  "ordre": 2,
+  "croissant": true
+ },
+ {
+  "page": "carburant/",
+  "nom": "carburant : aller simple",
+  "etapes": [
+   {
+    "sel": "#ar",
+    "valeur": ""
+   }
+  ],
+  "lire": "#grand",
+  "groupe": "carburant-aller-retour",
+  "ordre": 1,
+  "croissant": true
+ },
+ {
+  "page": "carburant/",
+  "nom": "carburant : aller-retour",
+  "etapes": [
+   {
+    "sel": "#ar",
+    "valeur": "1"
+   }
+  ],
+  "lire": "#grand",
+  "groupe": "carburant-aller-retour",
+  "ordre": 2,
+  "croissant": true
+ },
+ {
+  "page": "achat-vente/",
+  "nom": "mutation : 4 CV, 8 ans",
+  "etapes": [
+   {
+    "sel": "#cv",
+    "valeur": "4"
+   },
+   {
+    "sel": "#age",
+    "valeur": "8"
+   }
+  ],
+  "lire": "#grand",
+  "groupe": "mutation-cv",
+  "ordre": 4,
+  "croissant": true
+ },
+ {
+  "page": "achat-vente/",
+  "nom": "mutation : 6 CV, 8 ans",
+  "etapes": [
+   {
+    "sel": "#cv",
+    "valeur": "6"
+   },
+   {
+    "sel": "#age",
+    "valeur": "8"
+   }
+  ],
+  "lire": "#grand",
+  "groupe": "mutation-cv",
+  "ordre": 6,
+  "croissant": true
+ },
+ {
+  "page": "achat-vente/",
+  "nom": "mutation : 7 CV, 8 ans",
+  "etapes": [
+   {
+    "sel": "#cv",
+    "valeur": "7"
+   },
+   {
+    "sel": "#age",
+    "valeur": "8"
+   }
+  ],
+  "lire": "#grand",
+  "groupe": "mutation-cv",
+  "ordre": 7,
+  "croissant": true
+ },
+ {
+  "page": "achat-vente/",
+  "nom": "mutation : 10 CV, 8 ans",
+  "etapes": [
+   {
+    "sel": "#cv",
+    "valeur": "10"
+   },
+   {
+    "sel": "#age",
+    "valeur": "8"
+   }
+  ],
+  "lire": "#grand",
+  "groupe": "mutation-cv",
+  "ordre": 10,
+  "croissant": true
+ },
+ {
+  "page": "achat-vente/",
+  "nom": "mutation : 15 CV, 8 ans",
+  "etapes": [
+   {
+    "sel": "#cv",
+    "valeur": "15"
+   },
+   {
+    "sel": "#age",
+    "valeur": "8"
+   }
+  ],
+  "lire": "#grand",
+  "groupe": "mutation-cv",
+  "ordre": 15,
+  "croissant": true
+ },
+ {
+  "page": "achat-vente/",
+  "nom": "mutation : 7 CV, 1 ans",
+  "etapes": [
+   {
+    "sel": "#cv",
+    "valeur": "7"
+   },
+   {
+    "sel": "#age",
+    "valeur": "1"
+   }
+  ],
+  "lire": "#grand",
+  "groupe": "mutation-age",
+  "ordre": 1,
+  "croissant": true
+ },
+ {
+  "page": "achat-vente/",
+  "nom": "mutation : 7 CV, 5 ans",
+  "etapes": [
+   {
+    "sel": "#cv",
+    "valeur": "7"
+   },
+   {
+    "sel": "#age",
+    "valeur": "5"
+   }
+  ],
+  "lire": "#grand",
+  "groupe": "mutation-age",
+  "ordre": 5,
+  "croissant": true
+ },
+ {
+  "page": "achat-vente/",
+  "nom": "mutation : 7 CV, 12 ans",
+  "etapes": [
+   {
+    "sel": "#cv",
+    "valeur": "7"
+   },
+   {
+    "sel": "#age",
+    "valeur": "12"
+   }
+  ],
+  "lire": "#grand",
+  "groupe": "mutation-age",
+  "ordre": 12,
+  "croissant": true
+ },
+ {
+  "page": "visite-technique/",
+  "nom": "visite technique : voiture de 2015 (prochaine date affichée)",
+  "etapes": [
+   {
+    "sel": "#circulation",
+    "valeur": "2015-06-01"
+   }
+  ],
+  "lire": "#grand"
+ },
+ {
+  "page": "visite-technique/",
+  "nom": "visite technique : dernière visite connue",
+  "etapes": [
+   {
+    "sel": "#circulation",
+    "valeur": "2012-03-10"
+   },
+   {
+    "sel": "#derniere",
+    "valeur": "2026-03-15"
+   }
+  ],
+  "lire": "#grand"
+ },
+ {
+  "page": "",
+  "nom": "accueil : fiche voiture -> échéances",
+  "etapes": [
+   {
+    "sel": ".choix[data-nom=\"groupe\"] button[data-v=\"pair\"]",
+    "clic": true
+   },
+   {
+    "sel": "#v-energie",
+    "valeur": "essence"
+   },
+   {
+    "sel": "#v-cv",
+    "valeur": "6"
+   },
+   {
+    "sel": "#v-assurance",
+    "valeur": "2026-12-31"
+   }
+  ],
+  "lire": "#liste-echeances"
+ },
+ {
+  "page": "?lang=ar",
+  "nom": "accueil en arabe : fiche voiture -> échéances",
+  "etapes": [
+   {
+    "sel": ".choix[data-nom=\"groupe\"] button[data-v=\"impair\"]",
+    "clic": true
+   },
+   {
+    "sel": "#v-cv",
+    "valeur": "9"
+   }
+  ],
+  "lire": "#liste-echeances"
+ }
+]

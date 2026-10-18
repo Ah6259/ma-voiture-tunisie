@@ -394,6 +394,8 @@ table.bareme tr.ici td{background:var(--vert-clair);font-weight:800}
 .choix.choix-4 button{font-size:14px}
 details.plus-km{margin:0 0 12px}
 table.bareme td:last-child:not(.m){white-space:normal;text-align:start}
+/* 18/10/2026 (visiteur simulé) : le barème de la vignette dépassait l'écran du téléphone (415 px pour 390) : serré sur petit écran */
+@media (max-width:480px){table.bareme{font-size:13px}table.bareme th,table.bareme td{padding:7px 3px}table.bareme th{font-size:10.5px;letter-spacing:0}}
 
 /* « Votre avis » : e-mail obligatoire et confirmation bien visible dans la carte après l'envoi (15/10/2026) */
 .avis-merci{background:#E7F4EC;border:2px solid #1F7A47;border-radius:14px;padding:16px 18px;max-width:620px;color:#14301F}
