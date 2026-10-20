@@ -215,11 +215,76 @@ function majEtatPass() {
   }
   document.querySelectorAll(".entete-pass").forEach(a => a.classList.toggle("actif", passActif()));
 }
+/* ---- rappel de fin du Pass (demande d'Ahmed, octobre 2026) ----
+   Pas de Telegram ni d'e-mail : la page elle-même remercie le client et lui rappelle la fin.
+   - Pass payé (code) valide qui finit dans 7 jours ou moins (Pass de 12 mois : la règle des 7 jours) -> petit bandeau,
+     au plus une fois par jour. L'essai gratuit de 30 jours (sans inscription) n'est pas concerné : son encart existe déjà.
+   - Pass terminé (au plus 30 jours après la fin) -> message « Votre Pass Ma voiture est terminé — merci ! », une seule fois.
+   Mémoire sur l'appareil : PASS.cleRappel = { fin, vu (jour du dernier bandeau), finVu (message de fin montré) }. */
+PASS.cleRappel = "mv-pass-rappel-v1";
+function lireRappel() { try { const r = JSON.parse(localStorage.getItem(PASS.cleRappel) || "null"); return r && typeof r === "object" ? r : {}; } catch (e) { return {}; } }
+function ecrireRappel(r) { try { localStorage.setItem(PASS.cleRappel, JSON.stringify(r)); } catch (e) {} }
+// note l'heure de fin AVANT la revérification (qui efface un code expiré) : le message de fin reste possible
+function noterFinPass() {
+  const p = lirePass(), r = lireRappel();
+  if (p && p.fin !== r.fin) ecrireRappel({ fin: p.fin, vu: r.vu || "", finVu: false });
+}
+// { type: "proche" | "fini", fin } ou null
+function etatRappel() {
+  const r = lireRappel(), maintenant = Date.now();
+  if (passActif()) {
+    const fin = lirePass().fin, proche = Date.parse(fin) - maintenant <= 7 * 864e5;   // Pass de 12 mois : 7 jours avant
+    return proche && r.vu !== aujourdhui() ? { type: "proche", fin } : null;
+  }
+  const t = Date.parse(r.fin);
+  if (t > 0 && t <= maintenant && !r.finVu && maintenant - t <= 30 * 864e5) return { type: "fini", fin: r.fin };
+  return null;
+}
+let rappelMontre = null;
+function dessinerRappel() {
+  const ancien = document.getElementById("rappel-zone");
+  if (ancien) ancien.remove();
+  const e = rappelMontre, main = document.querySelector("main");
+  if (!e || !main) return;
+  const racine = document.documentElement.dataset.racine || "";
+  const b = document.createElement("aside");
+  b.className = "rappel-pass" + (e.type === "fini" ? " fini" : "");
+  b.id = "rappel-pass";
+  b.setAttribute("role", "status");
+  b.innerHTML = '<button type="button" class="rappel-fermer" aria-label="' + T("Fermer", "إغلاق") + '">×</button>' +
+    (e.type === "proche"
+      ? "<p><b>" + T("Merci pour votre inscription !", "شكرًا على اشتراكك!") + "</b> " +
+        T("Votre Pass Ma voiture se termine le " + finLisible(e.fin) + ".", "تنتهي باقة سيارتك في " + finLisible(e.fin, true) + ".") + "</p>"
+      : "<p><b>" + T("Votre Pass Ma voiture est terminé — merci !", "انتهت باقة سيارتك — شكرًا لك!") + "</b> " +
+        T("Il a pris fin le " + finLisible(e.fin) + ".", "انتهت في " + finLisible(e.fin, true) + ".") + "</p>") +
+    '<p class="rappel-actions"><a class="btn-pro rappel-renouveler" href="' + racine + 'pass/#offre">' + T("Renouveler mon Pass", "جدّد باقتي") + "</a>" +
+    '<a class="rappel-avis" href="' + racine + '#avis">' + T("Donner mon avis", "أعطِ رأيك") + "</a></p>";
+  // tout en haut, sous l'en-tête (avant le grand bandeau de la page) : vu sans faire défiler
+  const zone = document.createElement("div");
+  zone.className = "wrap rappel-zone";
+  zone.id = "rappel-zone";
+  zone.appendChild(b);
+  b.querySelector(".rappel-fermer").addEventListener("click", () => { rappelMontre = null; zone.remove(); });
+  const avant = document.querySelector("body > .hero") || main;
+  avant.parentNode.insertBefore(zone, avant);
+}
+function afficherRappel() {
+  const e = etatRappel();
+  if (!e) return;
+  const r = lireRappel();
+  if (e.type === "proche") r.vu = aujourdhui(); else r.finVu = true;
+  ecrireRappel(r);
+  rappelMontre = e;
+  dessinerRappel();
+}
+document.addEventListener("langue", () => { if (rappelMontre) dessinerRappel(); });
+
 document.addEventListener("pass", () => { majEtatPass(); document.dispatchEvent(new Event("recalcul")); });
 document.addEventListener("langue", majEtatPass);
 document.addEventListener("DOMContentLoaded", () => {
   brancherFormulairePass();
   brancherCodeAcces();
   majEtatPass();
-  reverifierPass().catch(() => {});
+  noterFinPass();
+  reverifierPass().catch(() => {}).then(() => { noterFinPass(); afficherRappel(); });
 });

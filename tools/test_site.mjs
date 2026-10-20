@@ -208,6 +208,45 @@ const VOITURE = JSON.stringify([{ id: "abcd1234", nom: "Clio", groupe: "pair", e
   check("Pass payé terminé : encart « Votre Pass Ma voiture est terminé » (pas « essai terminé ») + lien « J'ai déjà un code »",
     /Votre Pass Ma voiture est terminé/.test(enc.textContent) && !/essai gratuit/i.test(enc.querySelector("h2").textContent) && !!enc.querySelector('a[href="pass/#code-acces"]'));
 }
+// 20/10/2026 (demande d'Ahmed) : rappel de fin du Pass (merci, date de fin, Renouveler, Donner mon avis), puis message après la fin
+{
+  const t0 = new Date(AUJ).getTime();
+  const code = (finMs, extra = {}) => ({ "mv-pass-v1": JSON.stringify({ code: "ABCDEFGH", fin: new Date(finMs).toISOString(), verifie: t0 }), ...extra });
+  const z = n => String(n).padStart(2, "0"), lisible = ms => { const x = new Date(ms); return z(x.getDate()) + "/" + z(x.getMonth() + 1) + "/" + x.getFullYear() + " à " + z(x.getHours()) + "h" + z(x.getMinutes()); };
+  const tx = el => el ? el.textContent.replace(/[⁦-⁩  ]/g, " ").replace(/\s+/g, " ") : "";
+  let r = await page("index.html", { stockage: code(t0 + 20 * 864e5) });
+  check("rappel du Pass : rien à J-20", !r.d.getElementById("rappel-pass") && r.js.length === 0);
+  r = await page("index.html", { stockage: code(t0 + 7 * 864e5) });
+  let b = r.d.getElementById("rappel-pass");
+  check("rappel du Pass : bandeau à J-7 (merci, « se termine le JJ/MM/AAAA à HHhMM »)", !!b && r.js.length === 0 &&
+    tx(b).includes("Merci pour votre inscription") && tx(b).includes("se termine le " + lisible(t0 + 7 * 864e5)));
+  const ren = b && b.querySelector("a.rappel-renouveler"), av = b && b.querySelector("a.rappel-avis"), x = b && b.querySelector("button.rappel-fermer");
+  check("rappel du Pass : vrai bouton « Renouveler mon Pass » (pass/#offre), lien « Donner mon avis » (#avis), croix",
+    !!ren && ren.getAttribute("href") === "pass/#offre" && !!r.d.getElementById("avis") && /id="offre"/.test(lire("pass/index.html")) && !!av && av.getAttribute("href") === "#avis" && !!x && x.type === "button");
+  x.click();
+  check("rappel du Pass : la croix ferme le bandeau", !r.d.getElementById("rappel-pass"));
+  const memo = r.w.localStorage.getItem("mv-pass-rappel-v1");
+  r = await page("index.html", { stockage: code(t0 + 7 * 864e5, { "mv-pass-rappel-v1": memo }) });
+  check("rappel du Pass : une fois par jour au plus", !r.d.getElementById("rappel-pass"));
+  r = await page("index.html", { stockage: code(t0 + 6 * 864e5, { "mv-pass-rappel-v1": JSON.stringify({ ...JSON.parse(memo), vu: "2000-01-01" }) }) });
+  check("rappel du Pass : de nouveau affiché un autre jour", !!r.d.getElementById("rappel-pass"));
+  r = await page("entretien/index.html", { stockage: code(t0 + 2 * 864e5) });
+  b = r.d.getElementById("rappel-pass");
+  check("rappel du Pass : liens justes depuis entretien/ (../pass/#offre, ../#avis)", !!b && b.querySelector("a.rappel-renouveler").getAttribute("href") === "../pass/#offre" && b.querySelector("a.rappel-avis").getAttribute("href") === "../#avis");
+  r = await page("index.html", { stockage: code(t0 - 864e5) });
+  b = r.d.getElementById("rappel-pass");
+  check("rappel du Pass : après la fin, « Votre Pass Ma voiture est terminé — merci ! » avec Renouveler et Donner mon avis",
+    !!b && tx(b).includes("est terminé — merci") && !!b.querySelector("a.rappel-renouveler") && !!b.querySelector("a.rappel-avis"));
+  r = await page("index.html", { stockage: { "mv-pass-rappel-v1": r.w.localStorage.getItem("mv-pass-rappel-v1") } });
+  check("rappel du Pass : message de fin montré une seule fois", !r.d.getElementById("rappel-pass"));
+  r = await page("index.html", { stockage: { "mv-essai-v1": JSON.stringify({ debut: t0 - 27 * 864e5 }) } });
+  check("rappel du Pass : pas de bandeau pour l'essai gratuit sans inscription (son encart existe déjà)", !r.d.getElementById("rappel-pass"));
+  r = await page("index.html", { stockage: code(t0 + 3 * 864e5), lang: "ar" });
+  b = r.d.getElementById("rappel-pass");
+  check("rappel du Pass : en arabe (شكرًا على اشتراكك، جدّد باقتي)", !!b && tx(b).includes("شكرًا على اشتراكك") && tx(b).includes("جدّد باقتي"));
+  r = await page("index.html", { stockage: { "mv-pass-v1": "{abîmé", "mv-pass-rappel-v1": "{abîmé" } });
+  check("rappel du Pass : stockage abîmé = pas de plantage, pas de bandeau", r.js.length === 0 && !r.d.getElementById("rappel-pass"));
+}
 {
   const { w, d, js } = await page("index.html", { stockage: { "mv-voitures-v1": "pas du json", "langue": "en" } });
   check("mémoire partagée invalide (« pas du json », langue « en ») : ignorée sans erreur, page en français, aucune voiture", js.length === 0 && w.document.documentElement.lang === "fr"

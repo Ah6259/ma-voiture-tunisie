@@ -69,3 +69,9 @@ tests du site, pas de commit si rien de neuf) ; passage complet le LUNDI ou lanc
 - **18/10/2026 (Pass : case du code, leçon de l'immobilier)** : sur `pass/`, la carte « J'ai un code » (`#code-acces`, champ `#code-saisie`, formulaire `#code-form`) est maintenant EN HAUT, juste sous `#pass-etat`, avant l'offre (gabarit `tools/gabarits/pass.html`) — visible quel que soit l'état ; un code tapé remplace l'ancien (`mv-pass-v1`). L'essai de 30 jours est réel (`mv-essai-v1`). Encart des fonctions payantes : titre « Votre Pass Ma voiture est terminé » si un Pass payé a expiré (au lieu de « essai terminé »). Message « code expiré » : « ci-dessous ». VERSION `20261018c`. Tests « Pass : … » dans test_site.mjs.
 
 - **19/10/2026 — Visiteur simulé : contrôle des ESPACES (règle commune § 29)** : nouvelle copie commune installée, 0 anomalie, aucun défaut d'espace sur ce site.
+
+- **20/10/2026 — Rappel de fin du Pass (demande d'Ahmed ; pas de Telegram ni d'e-mail, la page parle au client)** : `afficherRappel()` de `assets/pass.js`
+  (accueil, entretien/, pages Pass) met sous l'en-tête un bandeau `#rappel-pass` à J-7 d'un Pass PAYÉ (code), au plus 1 fois par jour (mémoire
+  `mv-pass-rappel-v1`) : « Merci pour votre inscription ! Votre Pass Ma voiture se termine le JJ/MM/AAAA à HHhMM », bouton doré « Renouveler mon Pass »
+  (`pass/#offre`), lien « Donner mon avis » (`#avis` de l'accueil), croix ; après la fin (≤ 30 jours) : « terminé — merci ! » une fois. Pas pour l'essai
+  de 30 jours (sans inscription, son encart existe). FR + AR, tests « rappel du Pass » dans test_site.mjs ; VERSION 20261020a (construire.py).

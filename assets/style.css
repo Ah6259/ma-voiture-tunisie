@@ -403,3 +403,12 @@ table.bareme td:last-child:not(.m){white-space:normal;text-align:start}
 .avis-merci-titre{font-size:19px;font-weight:800;color:#1F7A47}
 .btn-avis-autre{font:inherit;font-weight:700;margin-top:6px;padding:9px 14px;border-radius:10px;border:1.5px solid #1F7A47;background:#fff;color:#1F7A47;cursor:pointer}
 .avis-merci:focus{outline:none}
+/* rappel de fin du Pass (20/10/2026) : bandeau doux, bouton doré « Renouveler », lien « Donner mon avis », croix */
+.rappel-zone{margin-top:12px}
+.rappel-pass{position:relative;background:var(--carte);border:1.5px solid #F2B33D;border-radius:var(--rayon);padding:14px 16px 12px;padding-inline-end:44px;margin:0 0 14px;box-shadow:var(--ombre)}
+.rappel-pass p{margin:0 0 10px}
+.rappel-pass .rappel-actions{display:flex;flex-wrap:wrap;align-items:center;gap:10px 16px;margin:0}
+.rappel-pass .rappel-renouveler{display:inline-block;width:auto;margin:0;padding:10px 18px;border-radius:12px}
+.rappel-pass .rappel-avis{font-weight:700;color:var(--vert)}
+.rappel-fermer{position:absolute;top:6px;inset-inline-end:6px;width:36px;height:36px;border:0;background:transparent;color:var(--doux);font-size:24px;line-height:1;cursor:pointer;border-radius:50%}
+.rappel-fermer:hover,.rappel-fermer:focus-visible{background:var(--ligne);color:var(--texte)}

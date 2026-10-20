@@ -8,7 +8,7 @@ L'accueil (index.html) est écrit à la main ; sa version ?v= est remplacée ici
 import json, os, re, sys
 
 ICI = os.path.dirname(os.path.abspath(__file__)); RACINE = os.path.dirname(ICI)
-VERSION = "20261018c"           # à changer à chaque modification des fichiers assets/ (le test vérifie une seule version)
+VERSION = "20261020a"           # à changer à chaque modification des fichiers assets/ (le test vérifie une seule version)
 BASE = "https://voiture.clicvia.com/"
 CSP = ("default-src 'self'; script-src 'self' https://gc.zgo.at; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; "
        "font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https://prix-eaux-tunisie.goatcounter.com; "
