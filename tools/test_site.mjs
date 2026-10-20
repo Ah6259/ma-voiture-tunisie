@@ -149,19 +149,26 @@ const VOITURE = JSON.stringify([{ id: "abcd1234", nom: "Clio", groupe: "pair", e
   check("bouton agenda : fichier « rappels-ma-voiture.ics » avec les 4 échéances", !!f && f.nom === "rappels-ma-voiture.ics" && (f.texte.match(/BEGIN:VEVENT/g) || []).length === 4 && /Clio/.test(f.texte) && !d.getElementById("agenda-aide").hidden);
 }
 
-// ---- 5. Pass : 2e voiture (essai de 30 jours), essai fini, Pass actif
+// ---- 5. Pass : 2e voiture (plus d'essai gratuit depuis le 20/10/2026, décision d'Ahmed), ancien essai, Pass actif
 {
   const { w, d } = await page("index.html", { stockage: { "mv-voitures-v1": VOITURE } });
   clic(d, "#ajouter-voiture");
-  check("2e voiture : l'essai gratuit de 30 jours démarre, la voiture est ajoutée, note d'essai affichée", JSON.parse(w.localStorage.getItem("mv-voitures-v1")).length === 2
-    && !!w.localStorage.getItem("mv-essai-v1") && !d.getElementById("note-essai").hidden && /Essai gratuit/.test(d.getElementById("note-essai").textContent));
+  check("2e voiture sans Pass : AUCUN essai ne démarre, pas de 2e voiture, encart du Pass « Fonction du Pass Ma voiture »", JSON.parse(w.localStorage.getItem("mv-voitures-v1")).length === 1
+    && !w.localStorage.getItem("mv-essai-v1") && /Fonction du Pass Ma voiture/.test(d.getElementById("encart-voitures").textContent) && !/essai/i.test(d.getElementById("encart-voitures").textContent));
+}
+{
+  const { w, d } = await page("index.html", { stockage: { "mv-voitures-v1": VOITURE, "mv-essai-v1": JSON.stringify({ debut: new Date(AUJ).getTime() - 5 * 864e5 }) } });
+  clic(d, "#ajouter-voiture");
+  check("ancien essai déjà commencé : il va jusqu'à sa fin (2e voiture acceptée, note « Pass ouvert sur ce téléphone jusqu'au … », sans le mot essai)",
+    JSON.parse(w.localStorage.getItem("mv-voitures-v1")).length === 2 && !d.getElementById("note-essai").hidden && /Pass ouvert sur ce téléphone jusqu'au/.test(d.getElementById("note-essai").textContent)
+    && !/essai/i.test(d.getElementById("note-essai").textContent));
 }
 {
   const vieux = new Date("2026-08-01T10:00:00").getTime();
   const { w, d } = await page("index.html", { stockage: { "mv-voitures-v1": VOITURE, "mv-essai-v1": JSON.stringify({ debut: vieux }) } });
   clic(d, "#ajouter-voiture");
-  check("essai fini : pas de 2e voiture, encart « Pass Ma voiture : 9 DT par an » avec bouton de paiement doré", JSON.parse(w.localStorage.getItem("mv-voitures-v1")).length === 1
-    && /essai gratuit de 30 jours est terminé/.test(d.getElementById("encart-voitures").textContent) && d.querySelector("#encart-voitures .btn-pass-grand"));
+  check("ancien essai fini : pas de 2e voiture, encart « Pass Ma voiture : 9 DT par an » avec bouton de paiement doré", JSON.parse(w.localStorage.getItem("mv-voitures-v1")).length === 1
+    && /Fonction du Pass Ma voiture/.test(d.getElementById("encart-voitures").textContent) && d.querySelector("#encart-voitures .btn-pass-grand"));
   check("essai fini : la 1re voiture et ses rappels restent gratuits", !d.getElementById("bouton-agenda").disabled && d.querySelectorAll("#liste-echeances .ech").length === 4);
 }
 {
@@ -172,7 +179,7 @@ const VOITURE = JSON.stringify([{ id: "abcd1234", nom: "Clio", groupe: "pair", e
 }
 // 18/10/2026 (problème vu sur l'immobilier : code payé impossible à taper quand le téléphone gardait un autre code)
 // la case du code est TOUJOURS visible, EN HAUT de pass/, quel que soit l'état gardé ; le code tapé remplace l'ancien ;
-// l'essai gratuit annoncé est RÉEL (PASS.essaiJours = 30) ; un Pass payé terminé n'est pas annoncé « essai terminé »
+// plus d'essai gratuit annoncé (20/10/2026) ; un Pass payé terminé est annoncé « terminé »
 {
   const { webcrypto, pbkdf2Sync } = await import("crypto");
   const t0 = new Date(AUJ).getTime(), futur = new Date(t0 + 200 * 864e5).toISOString(), passe = new Date(t0 - 864e5).toISOString();
@@ -201,12 +208,20 @@ const VOITURE = JSON.stringify([{ id: "abcd1234", nom: "Clio", groupe: "pair", e
   for (let i = 0; i < 100 && !/Code accepté/.test(d.getElementById("code-status").textContent); i++) await new Promise(r => setTimeout(r, 20));
   const garde = JSON.parse(w.localStorage.getItem("mv-pass-v1") || "{}");
   check("Pass : le code tapé REMPLACE l'ancien code gardé (nouveau code, nouvelle date de fin, Pass actif)", garde.code === "NEWC2345" && garde.fin === futur && w.eval("passActif()"));
-  check("Pass : l'« essai gratuit de 30 jours » annoncé est réel (PASS.essaiJours = 30)", w.eval("PASS.essaiJours") === 30 && /Essai gratuit de 30 jours/.test(d.getElementById("offre").textContent));
+  check("Pass : plus d'« essai gratuit » annoncé (décision d'Ahmed du 20/10/2026)", !/essai gratuit|تجربة مجانية/i.test(d.getElementById("offre").textContent));
   const r = await page("index.html", { stockage: { "mv-voitures-v1": VOITURE, "mv-essai-v1": ETATS["essai fini"]["mv-essai-v1"], "mv-pass-v1": ETATS["un code expiré gardé"]["mv-pass-v1"] } });
   clic(r.d, "#ajouter-voiture");
   const enc = r.d.getElementById("encart-voitures");
   check("Pass payé terminé : encart « Votre Pass Ma voiture est terminé » (pas « essai terminé ») + lien « J'ai déjà un code »",
     /Votre Pass Ma voiture est terminé/.test(enc.textContent) && !/essai gratuit/i.test(enc.querySelector("h2").textContent) && !!enc.querySelector('a[href="pass/#code-acces"]'));
+}
+// 20/10/2026 (décision d'Ahmed : « Enlève tous les essais gratuits ») : aucune page ni aucun script ne parle d'essai gratuit
+{
+  const mots = /essai gratuit|essais gratuits|essai de 30|jours gratuits|تجربة مجانية|التجربة المجانية|تجربتك المجانية/i, mal = [];
+  for (const p of PAGES) if (mots.test(lire(p))) mal.push(p);
+  for (const f of ["manifest.webmanifest", "assets/page.js", "assets/accueil.js", "assets/carnet.js", "assets/pass.js", ...readdirSync(join(root, "tools/gabarits")).map(n => "tools/gabarits/" + n)])
+    if (existsSync(join(root, f)) && mots.test(lire(f).replace(/\/\*[\s\S]*?\*\/|\/\/[^\n]*/g, ""))) mal.push(f);
+  check(`plus aucune page ne parle d'essai gratuit (titres, descriptions, og, JSON-LD, textes, boutons ; FR + AR) ${mal}`, mal.length === 0);
 }
 // 20/10/2026 (demande d'Ahmed) : rappel de fin du Pass (merci, date de fin, Renouveler, Donner mon avis), puis message après la fin
 {
@@ -240,7 +255,7 @@ const VOITURE = JSON.stringify([{ id: "abcd1234", nom: "Clio", groupe: "pair", e
   r = await page("index.html", { stockage: { "mv-pass-rappel-v1": r.w.localStorage.getItem("mv-pass-rappel-v1") } });
   check("rappel du Pass : message de fin montré une seule fois", !r.d.getElementById("rappel-pass"));
   r = await page("index.html", { stockage: { "mv-essai-v1": JSON.stringify({ debut: t0 - 27 * 864e5 }) } });
-  check("rappel du Pass : pas de bandeau pour l'essai gratuit sans inscription (son encart existe déjà)", !r.d.getElementById("rappel-pass"));
+  check("rappel du Pass : pas de bandeau pour un ancien essai (seuls les codes payés comptent)", !r.d.getElementById("rappel-pass"));
   r = await page("index.html", { stockage: code(t0 + 3 * 864e5), lang: "ar" });
   b = r.d.getElementById("rappel-pass");
   check("rappel du Pass : en arabe (شكرًا على اشتراكك، جدّد باقتي)", !!b && tx(b).includes("شكرًا على اشتراكك") && tx(b).includes("جدّد باقتي"));
@@ -296,9 +311,13 @@ const VOITURE = JSON.stringify([{ id: "abcd1234", nom: "Clio", groupe: "pair", e
     && d.querySelectorAll("#papiers li").length === 8 && d.querySelector('a[href="https://documents.clicvia.com/vente-voiture/"]'));
 }
 
-// ---- 7. carnet des dépenses (Pass ou essai)
+// ---- 7. carnet des dépenses (Pass ; plus d'essai gratuit depuis le 20/10/2026)
 {
-  const { w, d, js } = await page("entretien/index.html", { stockage: { "mv-voitures-v1": VOITURE } });
+  const { d } = await page("entretien/index.html", { stockage: { "mv-voitures-v1": VOITURE } });
+  check("carnet sans Pass : formulaire caché, encart du Pass, aucun essai démarré", d.getElementById("carnet-form").hidden && /Pass Ma voiture/.test(d.getElementById("carnet-encart").textContent));
+}
+{
+  const { w, d, js } = await page("entretien/index.html", { stockage: { "mv-voitures-v1": VOITURE, "mv-pass-v1": JSON.stringify({ code: "ABCDEFGH", fin: "2027-10-09T10:00:00Z", verifie: new Date(AUJ).getTime() }) } });
   const ajout = (type, date, montant, km, litres) => { d.getElementById("c-type").value = type; d.getElementById("c-date").value = date; d.getElementById("c-montant").value = montant;
     d.getElementById("c-km").value = km; d.getElementById("c-litres").value = litres || ""; d.getElementById("carnet-form").dispatchEvent(new w.Event("submit", { bubbles: true, cancelable: true })); };
   ajout("plein", "2026-09-01", "75", "85000", "30");
@@ -306,7 +325,7 @@ const VOITURE = JSON.stringify([{ id: "abcd1234", nom: "Clio", groupe: "pair", e
   ajout("vidange", "2026-10-01", "120", "86000");
   const c = JSON.parse(w.localStorage.getItem("mv-carnet-v1"));
   const b = w.bilanCarnet(c.abcd1234, new w.Date(AUJ));
-  check("carnet : 3 dépenses gardées pour la voiture, essai démarré, aucune erreur", js.length === 0 && c.abcd1234.length === 3 && !!w.localStorage.getItem("mv-essai-v1"));
+  check("carnet avec le Pass : 3 dépenses gardées pour la voiture, aucun essai démarré, aucune erreur", js.length === 0 && c.abcd1234.length === 3 && !w.localStorage.getItem("mv-essai-v1"));
   check("carnet : bilan 12 mois 270 DT, 1 000 km, coût 0,195 DT/km, consommation 3 L/100", b.total12 === 270 && b.km === 1000 && Math.abs(b.coutKm - 0.195) < 1e-9 && Math.abs(b.conso - 3) < 1e-9
     && /0,195/.test(d.getElementById("carnet-bilan").textContent));
   clic(d, "#carnet-export");
@@ -321,7 +340,7 @@ const VOITURE = JSON.stringify([{ id: "abcd1234", nom: "Clio", groupe: "pair", e
 {
   const { d, js } = await page("pass/index.html");
   const t = d.body.textContent;
-  check("pass : 9 DT pour 12 mois, essai de 30 jours, 3 étapes de paiement (D17, IZI, 24 321 390), WhatsApp, pas de renouvellement automatique", js.length === 0 && /9 DT/.test(t) && /12 mois/.test(t) && /Essai gratuit de 30 jours/.test(t)
+  check("pass : 9 DT pour 12 mois, plus d'essai gratuit, 3 étapes de paiement (D17, IZI, 24 321 390), WhatsApp, pas de renouvellement automatique", js.length === 0 && /9 DT/.test(t) && /12 mois/.test(t) && !/essai gratuit/i.test(t)
     && d.querySelectorAll("#paiement .paie-etapes > li").length === 3 && /24 321 390/.test(t) && d.querySelector('a.btn-wa[href^="https://wa.me/21624321390"]') && /Pas de renouvellement automatique/.test(t));
   check("pass : description cachée quand « Paiement » est ouvert (règle commune), bouton doré dans l'en-tête", d.querySelectorAll(".masque-si-paiement").length >= 2 && /:has\(> details\.paiement\[open\]\) > \.masque-si-paiement\{display:none\}/.test(lire("assets/style.css"))
     && d.querySelector("header .entete-pass"));

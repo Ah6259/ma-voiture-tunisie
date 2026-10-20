@@ -1,5 +1,5 @@
 /* Accueil « Mes échéances » : fiche de la voiture (gardée dans le téléphone), liste des échéances, rappels dans l'agenda.
-   Gratuit : 1 voiture. Avec le Pass Ma voiture (ou pendant l'essai de 30 jours) : jusqu'à 5 voitures. */
+   Gratuit : 1 voiture. Avec le Pass Ma voiture : jusqu'à 5 voitures. */
 let VOITURES = [], COURANTE = 0;
 const $ = id => document.getElementById(id);
 const CHAMPS = ["nom", "energie", "cv", "circulation", "visite", "assurance", "vidange", "kmVidange", "km", "kmMois"];
@@ -74,13 +74,13 @@ function enregistrer() {
   afficher();
 }
 
-// une voiture de plus : gratuit pour la 1re, Pass (ou essai de 30 jours) au-delà
+// une voiture de plus : gratuit pour la 1re, Pass au-delà (ou ancien essai encore en cours)
 function ajouterVoiture() {
   if (VOITURES.length >= PASS.voituresGratuites && !passActif()) {
     if (!essaiActif() && (essaiFini() || !demarrerEssai())) {
       $("encart-voitures").innerHTML = htmlEncartPass(T("Avec le <b>Pass Ma voiture à 9 DT par an</b>, suivez jusqu'à 5 voitures (toute la famille) et tenez le carnet de leurs dépenses.",
         "مع <b>باقة سيارتك بـ" + isoP("9") + " د في السنة</b>، تابع إلى غاية " + isoP("5") + " سيارات (كل العائلة) ودفتر مصاريفها."));
-      try { if (window.goatcounter && window.goatcounter.count) window.goatcounter.count({ path: "pass-bloque/voitures", title: "Essai terminé : 2e voiture", event: true }); } catch (e) {}
+      try { if (window.goatcounter && window.goatcounter.count) window.goatcounter.count({ path: "pass-bloque/voitures", title: "Pass demandé : 2e voiture", event: true }); } catch (e) {}
       return;
     }
   }
@@ -99,8 +99,8 @@ function noteEssai() {
   if (!n) return;
   if (VOITURES.length > PASS.voituresGratuites && essaiActif() && !passActif()) {
     n.hidden = false;
-    n.innerHTML = T(`Essai gratuit du Pass jusqu'au ${finLisible(finEssai())} : ensuite, seule la première voiture reste gratuite. <a href="pass/">Pass Ma voiture : 9 DT par an</a>`,
-      `تجربة مجانية للباقة إلى غاية ${finLisible(finEssai(), true)}: بعدها تبقى السيارة الأولى فقط مجانية. <a href="pass/">باقة سيارتك: ${isoP("9")} د في السنة</a>`);
+    n.innerHTML = T(`Pass ouvert sur ce téléphone jusqu'au ${finLisible(finEssai())} : ensuite, seule la première voiture reste gratuite. <a href="pass/">Pass Ma voiture : 9 DT par an</a>`,
+      `الباقة مفتوحة على هذا الهاتف إلى غاية ${finLisible(finEssai(), true)}: بعدها تبقى السيارة الأولى فقط مجانية. <a href="pass/">باقة سيارتك: ${isoP("9")} د في السنة</a>`);
   } else n.hidden = true;
 }
 

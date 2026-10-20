@@ -3,7 +3,8 @@
 
    Gratuit pour toujours : tous les calculateurs, les échéances d'UNE voiture et ses rappels dans l'agenda du téléphone.
    Avec le Pass (9 DT pour 12 mois, pas de renouvellement automatique) : jusqu'à 5 voitures (famille), le carnet des
-   pleins et des réparations (coût au kilomètre) et son export. Essai gratuit de 30 jours, sans code, au premier usage.
+   pleins et des réparations (coût au kilomètre) et son export. Plus d'essai gratuit depuis le 20 octobre 2026 (décision d'Ahmed) :
+   un essai déjà commencé sur un téléphone va jusqu'à sa fin, aucun nouveau ne démarre.
 
    Code d'accès : Ahmed active un client depuis l'application GitHub (dépôt PRIVÉ Ah6259/voiture-pass, bouton « pass »).
    Le robot publie ici, dans donnees/pass.json, SEULEMENT l'empreinte du code (PBKDF2-SHA-256 salée) et la date de fin.
@@ -11,12 +12,12 @@
 const PASS = {
   prix: 9,                                     // DT
   mois: 12,                                    // durée du Pass, à partir de l'activation du code
-  essaiJours: 30,                              // essai gratuit, sans code
+  essaiJours: 30,                              // durée des anciens essais (aucun nouveau depuis le 20 octobre 2026)
   voituresGratuites: 1,
   voituresMax: 5,
   donnees: "donnees/pass.json",
   cle: "mv-pass-v1",                           // code gardé sur l'appareil
-  cleEssai: "mv-essai-v1",                     // { debut } de l'essai gratuit
+  cleEssai: "mv-essai-v1",                     // { debut } d'un essai commencé avant le 20 octobre 2026
   alphabet: "ABCDEFGHJKLMNPQRSTUVWXYZ23456789",  // sans O/0 ni I/1 (faciles à confondre)
   longueur: 8,
   whatsapp: "21624321390"
@@ -53,30 +54,26 @@ function ecrirePass(p) {
 function passActif() { const p = lirePass(); return !!p && Date.parse(p.fin) > Date.now(); }
 function finPass() { const p = lirePass(); return p ? p.fin : ""; }
 
-/* ---- essai gratuit de 30 jours (sans code), démarré au premier usage d'une fonction du Pass ---- */
+/* ---- anciens essais de 30 jours (sans code) : plus aucun nouveau depuis le 20 octobre 2026, un essai commencé va jusqu'à sa fin ---- */
 function debutEssai() {
   try { const e = JSON.parse(localStorage.getItem(PASS.cleEssai) || "null"); return e && +e.debut > 0 ? +e.debut : 0; } catch (x) { return 0; }
 }
 function essaiActif() { const d = debutEssai(); return d > 0 && Date.now() - d < PASS.essaiJours * 86400000 && Date.now() >= d; }
 function essaiFini() { return debutEssai() > 0 && !essaiActif(); }
 function finEssai() { const d = debutEssai(); return d ? new Date(d + PASS.essaiJours * 86400000).toISOString() : ""; }
-function demarrerEssai() {
-  if (debutEssai()) return essaiActif();
-  try { localStorage.setItem(PASS.cleEssai, JSON.stringify({ debut: Date.now() })); } catch (x) { return false; }
-  return true;
-}
-// accès aux fonctions du Pass : Pass actif, ou essai en cours, ou essai jamais commencé (il démarre au premier usage)
+// plus aucun nouvel essai (décision d'Ahmed du 20 octobre 2026) : seul un essai déjà commencé compte, jusqu'à sa fin
+function demarrerEssai() { return essaiActif(); }
+// accès aux fonctions du Pass : Pass actif, ou ancien essai encore en cours
 function accesPass() { return passActif() || essaiActif(); }
 function racineSite() { return document.documentElement.dataset.racine || ""; }
 const ICONE_TICKET = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16v4a2 2 0 0 0 0 4v4H4v-4a2 2 0 0 0 0-4z"/><path d="M14 7v12"/></svg>';
 function htmlBoutonPass(id) {
   return `<a class="btn-pass-grand" id="${id}" href="${racineSite()}pass/">${ICONE_TICKET}<span>${T("Pass Ma voiture : 9 DT par an", "باقة سيارتك: " + isoP("9") + " د في السنة")}<small>${T("Jusqu'à 5 voitures et le carnet des dépenses", "إلى غاية " + isoP("5") + " سيارات ودفتر المصاريف")}</small></span></a>`;
 }
-// encart affiché à la place d'une fonction du Pass quand l'essai est fini (et sans Pass)
+// encart affiché à la place d'une fonction du Pass (sans Pass)
 function htmlEncartPass(quoi) {
   // titre juste selon l'état (octobre 2026) : un Pass payé terminé n'est pas un « essai terminé »
   const titre = lirePass() ? T("Votre Pass Ma voiture est terminé", "انتهت باقة سيارتك")
-    : essaiFini() ? T("Votre essai gratuit de 30 jours est terminé", "انتهت تجربتك المجانية لمدة " + isoP("30") + " يومًا")
     : T("Fonction du Pass Ma voiture", "ميزة من باقة سيارتك");
   return `<div class="pass-bloque"><h2>${titre}</h2>
     <p>${quoi}</p>${htmlBoutonPass("encart-pass")}
@@ -218,7 +215,7 @@ function majEtatPass() {
 /* ---- rappel de fin du Pass (demande d'Ahmed, octobre 2026) ----
    Pas de Telegram ni d'e-mail : la page elle-même remercie le client et lui rappelle la fin.
    - Pass payé (code) valide qui finit dans 7 jours ou moins (Pass de 12 mois : la règle des 7 jours) -> petit bandeau,
-     au plus une fois par jour. L'essai gratuit de 30 jours (sans inscription) n'est pas concerné : son encart existe déjà.
+     au plus une fois par jour. Un ancien essai (sans code) n'est pas concerné.
    - Pass terminé (au plus 30 jours après la fin) -> message « Votre Pass Ma voiture est terminé — merci ! », une seule fois.
    Mémoire sur l'appareil : PASS.cleRappel = { fin, vu (jour du dernier bandeau), finVu (message de fin montré) }. */
 PASS.cleRappel = "mv-pass-rappel-v1";

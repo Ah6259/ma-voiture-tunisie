@@ -1,4 +1,4 @@
-/* Carnet des dépenses (page entretien/) — fonction du Pass Ma voiture (essai gratuit de 30 jours au premier ajout).
+/* Carnet des dépenses (page entretien/) — fonction du Pass Ma voiture.
    Gardé dans le téléphone : localStorage « mv-carnet-v1 » = { <id de la voiture>: [ { id, date, type, montant, km, litres } ] }.
    Les voitures sont celles de l'accueil (« mv-voitures-v1 ») ; sans voiture notée, une voiture « Ma voiture » est utilisée.
    Bilan : dépenses des 12 derniers mois, coût au km et consommation (entre le plus petit et le plus grand compteur noté). */
@@ -60,12 +60,12 @@ function afficherCarnet() {
   const v = voit[CARNET_VOITURE], liste = (c[v.id] || []).slice().sort((a, b) => b.date < a.date ? -1 : 1);
   const o = document.getElementById("carnet-voitures");
   o.innerHTML = voit.length > 1 ? voit.map((x, i) => `<button type="button" data-i="${i}" class="${i === CARNET_VOITURE ? "on" : ""}">${x.nom ? x.nom.replace(/[<>&"]/g, "") : T("Voiture ", "سيارة ") + iso(i + 1)}</button>`).join("") : "";
-  // accès : Pass actif, essai en cours, ou essai pas encore commencé (il démarre au premier ajout)
-  const ferme = !passActif() && essaiFini();
+  // accès : Pass actif, ou ancien essai encore en cours (plus aucun nouvel essai depuis le 20 octobre 2026)
+  const ferme = !accesPass();
   document.getElementById("carnet-form").hidden = ferme;
   document.getElementById("carnet-encart").innerHTML = ferme ? htmlEncartPass(T("Avec le <b>Pass Ma voiture à 9 DT par an</b>, continuez à noter vos pleins et vos réparations, et suivez le coût au kilomètre de vos voitures.",
     "مع <b>باقة سيارتك بـ" + isoP("9") + " د في السنة</b>، واصل تسجيل تعبئاتك وإصلاحاتك وتابع كلفة الكيلومتر لسياراتك.")) :
-    (essaiActif() && !passActif() ? `<p class="pass-note">${T("Essai gratuit du Pass jusqu'au " + finLisible(finEssai()) + ".", "تجربة مجانية للباقة إلى غاية " + finLisible(finEssai(), true) + ".")} <a class="btn-pass-petit" href="../pass/">${T("Pass 9 DT par an", "الباقة " + isoP("9") + " د في السنة")}</a></p>` : "");
+    (essaiActif() && !passActif() ? `<p class="pass-note">${T("Pass ouvert sur ce téléphone jusqu'au " + finLisible(finEssai()) + ".", "الباقة مفتوحة على هذا الهاتف إلى غاية " + finLisible(finEssai(), true) + ".")} <a class="btn-pass-petit" href="../pass/">${T("Pass 9 DT par an", "الباقة " + isoP("9") + " د في السنة")}</a></p>` : "");
   const b = bilanCarnet(liste);
   document.getElementById("carnet-bilan").innerHTML = liste.length ? `<div class="prix-carbu" style="margin:12px 0">
       <div><span>${T("Dépenses sur 12 mois", "المصاريف خلال ⁦12⁩ شهرًا")}</span><b>${iso(nombre(b.total12, 0))}</b><span>DT</span></div>

@@ -21,7 +21,7 @@ Règles communes à tous les sites d'Ahmed : `../../regles communes a tous les s
   Amendes et permis : PAS de doublon, liens vers le site Code de la route (pages déjà vérifiées).
 - **Liens entre sites** : menu (Code de la route et Auto-écoles en premier, bordure dorée), encadré « Gratuit aussi sur nos
   sites » (Code de la route, Auto-écoles, Professionnels, Documents), Outils (crédit) sur achat-vente. Clics comptés « lien-site/… ».
-- **Pass Ma voiture** (partie payante) : 9 DT pour 12 mois, essai gratuit de 30 jours au premier usage (`mv-essai-v1`).
+- **Pass Ma voiture** (partie payante) : 9 DT pour 12 mois (l'essai gratuit de 30 jours `mv-essai-v1` est SUPPRIMÉ depuis le 20/10/2026, décision d'Ahmed).
   Gratuit pour toujours : tous les calculateurs + UNE voiture et ses rappels. Pass : jusqu'à 5 voitures + carnet (`mv-carnet-v1`).
   Code d'accès comme Outils pratiques (`assets/pass.js`, `donnees/pass.json` = empreintes seulement). Clients : dépôt PRIVÉ
   `Ah6259/voiture-pass` (bouton « pass » dans l'application GitHub du téléphone).
@@ -74,4 +74,9 @@ tests du site, pas de commit si rien de neuf) ; passage complet le LUNDI ou lanc
   (accueil, entretien/, pages Pass) met sous l'en-tête un bandeau `#rappel-pass` à J-7 d'un Pass PAYÉ (code), au plus 1 fois par jour (mémoire
   `mv-pass-rappel-v1`) : « Merci pour votre inscription ! Votre Pass Ma voiture se termine le JJ/MM/AAAA à HHhMM », bouton doré « Renouveler mon Pass »
   (`pass/#offre`), lien « Donner mon avis » (`#avis` de l'accueil), croix ; après la fin (≤ 30 jours) : « terminé — merci ! » une fois. Pas pour l'essai
-  de 30 jours (sans inscription, son encart existe). FR + AR, tests « rappel du Pass » dans test_site.mjs ; VERSION 20261020a (construire.py).
+  de 30 jours (sans inscription, son encart existe). FR + AR, tests « rappel du Pass » dans test_site.mjs ; VERSION 20261020b (construire.py).
+
+- **20/10/2026 — Plus AUCUN essai gratuit (décision écrite d'Ahmed : « Enlève tous les essais gratuits », comme l'immobilier le 15/10)** :
+  `demarrerEssai()` ne crée plus d'essai ; sans Pass, la 2e voiture et le carnet montrent l'encart « Fonction du Pass Ma voiture ». Un essai déjà
+  commencé sur un téléphone (`mv-essai-v1`) va jusqu'à sa fin (note « Pass ouvert sur ce téléphone jusqu'au … »). Mentions retirées des gabarits
+  (pass, conditions § 3 devenu « Durée », entretien). Le robot privé voiture-pass n'avait pas d'action « essai ». Test : aucune page ne parle d'essai gratuit.
