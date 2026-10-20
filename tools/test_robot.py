@@ -42,9 +42,11 @@ def copie():
     return d
 
 
-def lecteur(table, panne=()):
+def lecteur(table, panne=(), erreur=None):
     def lire(url, **k):
         if any(p in url for p in panne):
+            if erreur:
+                raise RuntimeError("panne simulée " + url) from erreur(url)
             raise RuntimeError("panne simulée " + url)
         for cle, val in table.items():
             if cle in url:
@@ -87,11 +89,18 @@ d = copie(); m = robot(d)
 c = m.main(["--aujourdhui", "2026-10-09"], lecteur=lecteur({"attt": ATTT_AVANT}, panne=("feed", "rss")))
 check("tous les flux d'actualités en panne → alerte « la veille ne fonctionne plus »", c == 2 and "Aucun flux" in open(os.path.join(d, "alerte.txt"), encoding="utf-8").read())
 d = copie(); m = robot(d)
-L = lecteur({"attt": ATTT_AVANT}, panne=("amendes.finances",))
+import urllib.error as _ue  # noqa: E402
+L = lecteur({"attt": ATTT_AVANT}, panne=("amendes.finances",), erreur=lambda u: _ue.HTTPError(u, 404, "Not Found", None, None))
 c3 = m.main(["--aujourdhui", "2026-10-01"], lecteur=L)
 c4 = m.main(["--aujourdhui", "2026-10-04"], lecteur=L)
 c5 = m.main(["--aujourdhui", "2026-10-08"], lecteur=L)
-check("lien officiel en panne : rien les 3 premiers jours, alerte au 7e jour", c3 == 0 and c4 == 0 and c5 == 2 and "amendes.finances" in open(os.path.join(d, "alerte.txt"), encoding="utf-8").read())
+check("lien officiel MORT (page introuvable 404) : rien les 3 premiers jours, alerte au 7e jour", c3 == 0 and c4 == 0 and c5 == 2 and "amendes.finances" in open(os.path.join(d, "alerte.txt"), encoding="utf-8").read())
+# 20/10/2026 : sites officiels tunisiens qui bloquent les robots étrangers (délai dépassé depuis GitHub, ouverts depuis la Tunisie)
+d = copie(); m = robot(d)
+L = lecteur({"attt": ATTT_AVANT}, panne=("taxe-circulation",), erreur=lambda u: _ue.URLError(TimeoutError("timed out")))
+cs = [m.main(["--aujourdhui", j], lecteur=L) for j in ("2026-10-01", "2026-10-04", "2026-10-08", "2026-10-15")]
+check("lien officiel seulement « délai dépassé » (blocage des robots étrangers) : jamais d'alerte, même après 14 jours (20/10/2026)",
+      cs == [0, 0, 0, 0] and not os.path.exists(os.path.join(d, "alerte.txt")))
 d = copie(); m = robot(d)
 c = m.main(["--aujourdhui", "2026-10-09"], lecteur=lecteur({"attt": ATTT_AVANT, "lapresse": b"pas du xml <<<"}))
 check("un flux illisible n'arrête pas le robot (les autres sont lus)", c == 0)

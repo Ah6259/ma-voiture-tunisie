@@ -13,7 +13,7 @@ Claude qui vérifie la source officielle puis met à jour assets/regles.js.
    seule la veille des actualités (1) tourne ; ATTT, liens officiels et dates (2 à 4) une fois par semaine (passage complet).
 Codes de sortie : 0 rien à signaler ; 2 alerte à ouvrir (texte dans alerte.txt) ; 3 panne du robot lui-même.
 Usage : python tools/surveillance.py [--sans-reseau] [--leger] [--aujourdhui AAAA-MM-JJ]"""
-import argparse, datetime as dt, email.utils, hashlib, html, json, os, re, sys, time, urllib.request
+import argparse, datetime as dt, email.utils, hashlib, html, json, os, re, socket, sys, time, urllib.error, urllib.request
 import xml.etree.ElementTree as ET
 
 ICI = os.path.dirname(os.path.abspath(__file__)); RACINE = os.path.dirname(ICI)
@@ -42,7 +42,18 @@ def lire(url, essais=2, pause=3):
         except Exception as e:  # réseau, certificat, 4xx/5xx
             dernier = e
             time.sleep(pause * (i + 1))
-    raise RuntimeError(f"{url} : {dernier}")
+    raise RuntimeError(f"{url} : {dernier}") from dernier
+
+
+def lien_mort(e):
+    """Vrai seulement pour un lien VRAIMENT mort : page introuvable (404, 410) ou nom de site inconnu. Un délai dépassé, une connexion
+    coupée ou refusée vient le plus souvent du blocage des robots ÉTRANGERS (GitHub) par les sites officiels tunisiens : le 20/10/2026,
+    taxe-circulation.finances.gov.tn et attt.com.tn répondaient depuis la Tunisie alors que le robot les disait « injoignables depuis le
+    09/10 » (alerte ouverte 8 jours pour rien). Ceux-là ne font jamais d'alerte, seulement une note."""
+    c = e.__cause__ if getattr(e, "__cause__", None) else e
+    if isinstance(c, urllib.error.HTTPError):
+        return c.code in (404, 410)
+    return isinstance(getattr(c, "reason", None), socket.gaierror) or isinstance(c, socket.gaierror)
 
 
 def articles(xml_brut):
@@ -153,7 +164,11 @@ def main(argv=None, lecteur=lire):
     for l in LIENS:
         try:
             lecteur(l); v["pannes_liens"].pop(l, None)
-        except Exception:
+        except Exception as e:
+            if not lien_mort(e):               # bloqué depuis l'étranger ou panne passagère : jamais une alerte
+                v["pannes_liens"].pop(l, None)
+                notes.append(f"lien officiel non joint depuis GitHub (blocage des robots étrangers ou panne passagère) : {l}")
+                continue
             debut = v["pannes_liens"].setdefault(l, jour.isoformat())
             if (jour - dt.date.fromisoformat(debut)).days >= 7:
                 alertes.append(f"- Lien officiel injoignable depuis le {debut} : {l} (à remplacer sur le site ?)")
