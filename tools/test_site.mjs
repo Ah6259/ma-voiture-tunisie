@@ -361,5 +361,33 @@ const VOITURE = JSON.stringify([{ id: "abcd1234", nom: "Clio", groupe: "pair", e
   check(`toutes les pages : bouton Partager dans l'en-tête, « Votre avis » au pied, liens Code de la route et Auto-écoles ${manque.join(" | ")}`, !manque.length);
 }
 
+// 25/10/2026 (RÈGLE d'Ahmed, règle commune § 44 : « la page Comment fonctionne le site doit être mise à jour chaque fois qu'on modifie le site ») :
+// chaque fonction visible du site (repère dans le code ou les pages) doit être expliquée dans a-propos/ (gabarit tools/gabarits/a-propos.html) ; nouvelle fonction = une ligne ici + son explication FR + AR
+{ const brut = lire("a-propos/index.html"), ap = brut.replace(/<[^>]+>/g, " ").replace(/&nbsp;/g, " ").replace(/[\u00a0\u2066-\u2069]/g, " ").replace(/\s+/g, " ");
+  const acc = lire("index.html"), js = ["page.js", "pass.js", "accueil.js", "agenda.js", "carnet.js", "echeances.js"].map(f => existsSync(join(root, "assets", f)) ? lire("assets/" + f) : "").join("\n");
+  const FONCTIONS = [
+    ["Mes échéances (accueil)", /Mes prochaines échéances/.test(acc), /Mes échéances \(accueil\) : remplissez la fiche de votre voiture/],
+    ["rappels .ics dans l'agenda", /\.ics|text\/calendar/.test(js), /Rappels dans l'agenda : un fichier « \.ics »/],
+    ["vignette", existsSync(join(root, "vignette/index.html")), /Vignette : le barème, la date limite/],
+    ["visite technique + rendez-vous ATTT", /Prendre rendez-vous/.test(lire("visite-technique/index.html")), /Visite technique : le prix, la prochaine date et le bouton « Prendre rendez-vous »/],
+    ["carburant et coût d'un trajet", existsSync(join(root, "carburant/index.html")), /Carburant : les prix officiels et le coût d'un trajet/],
+    ["acheter ou vendre (mutation, Documents, Douane, crédit)", existsSync(join(root, "achat-vente/index.html")), /Acheter ou vendre : les frais de mutation[^.]*Douane[^.]*crédit/],
+    ["entretien et carnet exportable", /exporterCarnet/.test(js), /Entretien et carnet des dépenses : repères d'entretien, et un carnet[^.]*exporter/],
+    ["nos autres sites gratuits", /Gratuit aussi sur nos sites/.test(acc), /Nos autres sites gratuits : Code de la route, Auto-écoles/],
+    ["langue FR / AR", /class="langue"/.test(js), /Français \/ arabe : le bouton de langue/],
+    ["bouton Partager", /class="partager"/.test(js), /Partager : le bouton rond/],
+    ["Votre avis", /id="avis"/.test(acc), /Votre avis : un formulaire/],
+    ["installation et hors connexion", existsSync(join(root, "sw.js")), /Installer sur le téléphone/],
+    ["vidéo de présentation", existsSync(join(root, "video/index.html")), /Vidéo de présentation : courte vidéo/],
+    ["une voiture gratuite et Pass Ma voiture (prix, 5 voitures, code)", existsSync(join(root, "pass/index.html")), /une voiture avec ses rappels[\s\S]*Pass Ma voiture \(payant, 9 DT pour 12 mois\) ajoute jusqu'à 5 voitures[\s\S]*code/],
+    ["rappel de fin du Pass", /afficherRappel/.test(js), /avant la fin du Pass, un bandeau vous prévient/],
+    ["vie privée", true, /Vos voitures, vos dates et vos dépenses sont gardées dans votre téléphone/],
+    ["mises à jour automatiques", existsSync(join(root, "tools/surveillance.py")), /Un robot surveille chaque jour les annonces officielles/],
+    ["site indépendant", true, /Ce site est indépendant/]];
+  const manque = FONCTIONS.filter(([, sur, re]) => sur && !re.test(ap)).map(([n]) => n);
+  check(`page « Comment fonctionne le site ? » à jour : titre et chaque fonction du site expliquée (${FONCTIONS.length} fonctions)` + (manque.length ? " — manque : " + manque.join(", ") : ""),
+    manque.length === 0 && /<h1>[^]*?Comment fonctionne le site \?[^]*?كيف يعمل الموقع؟[^]*?<\/h1>/.test(brut)
+    && /a-propos\/">\$\{T\("Comment fonctionne le site \?"/.test(lire("assets/page.js")) && /id="lien-fonctionnement"/.test(acc)); }
+
 console.log(`\n${erreurs ? erreurs + " PROBLÈME(S)" : "TOUT PASSE"} (${total} vérifications)`);
 process.exit(erreurs ? 1 : 0);
