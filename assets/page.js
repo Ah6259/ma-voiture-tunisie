@@ -1,5 +1,5 @@
 /* Langue (français / arabe), en-tête, menu et pied de page communs, partage, protections — repris d'Outils pratiques Tunisie */
-const MAJ = "09/10/2026";   // date de la dernière vérification des règles (mise à jour par le robot surveillance.yml)
+const MAJ = "26/10/2026";   // date de la dernière vérification des règles (mise à jour par le robot surveillance.yml)
 const ANNEE = 2026;          // année des règles affichée sur le site (changée par le robot en janvier)
 // Menu de l'en-tête (toutes les pages) : les outils du site + nos sites voisins (demande d'Ahmed, 09/10/2026 :
 // « ajoute lien auto-école et lien code de la route »). Lien externe = bouton à bordure dorée avec le logo du site

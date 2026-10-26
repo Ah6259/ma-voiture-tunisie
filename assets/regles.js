@@ -53,7 +53,7 @@ const REGLES = {
   /* ---- Carburants, DT par litre — prix fixés par l'État, inchangés depuis le 24/11/2022 (démenti d'une hausse le 26/09/2026) ---- */
   carburants: {
     depuis: "24/11/2022",
-    verifie: "09/10/2026",
+    verifie: "26/10/2026",
     prix: [
       { id: "sp", fr: "Essence sans plomb", ar: "بنزين خالٍ من الرصاص", prix: 2.525 },
       { id: "spp", fr: "Sans plomb premium", ar: "بنزين ممتاز", prix: 2.855 },

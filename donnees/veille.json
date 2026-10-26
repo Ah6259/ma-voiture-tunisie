@@ -2,12 +2,7 @@
  "vus": [
   "https://www.mosaiquefm.net/ar/%D8%AA%D9%88%D9%86%D8%B3-%D9%88%D8%B7%D9%86%D9%8A%D8%A9/1533173/%D9%82%D8%B1%D9%8A%D8%A8%D8%A7-%D9%85%D8%AC%D9%84%D8%A9-%D8%AC%D8%AF%D9%8A%D8%AF%D8%A9-%D9%84%D8%AA%D9%86%D8%B8%D9%8A%D9%85-%D9%82%D8%B7%D8%A7%D8%B9-%D8%A7%D9%84%D9%85%D8%AD%D8%B1%D9%88%D9%82%D8%A7%D8%AA"
  ],
- "pannes_liens": {
-  "https://taxe-circulation.finances.gov.tn": "2026-10-09",
-  "https://www.douane.gov.tn/taxationveh/": "2026-10-09",
-  "https://www.attt.com.tn/": "2026-10-09",
-  "https://www.attt.com.tn/DEV_WEB/prendreunrendezvous.php?code_menu=73": "2026-10-19"
- },
+ "pannes_liens": {},
  "attt": "7edce7ab94c7b196",
  "attt_montants": [
   "26,500",
@@ -16,5 +11,5 @@
   "21,000",
   "5,000"
  ],
- "dernier": "2026-10-19"
+ "dernier": "2026-10-26"
 }
