@@ -57,7 +57,7 @@ jobs:
           else
             git commit -m "Surveillance du $(date +%d/%m/%Y)"
           fi
-          git pull -q --rebase --autostash
+          git pull -q --rebase -X theirs --autostash
           git push
       - name: Fermer les alertes de panne résolues
         if: steps.verif.outputs.code == '0'
