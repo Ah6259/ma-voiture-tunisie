@@ -82,3 +82,9 @@ tests du site, pas de commit si rien de neuf) ; passage complet le LUNDI ou lanc
   (pass, conditions § 3 devenu « Durée », entretien). Le robot privé voiture-pass n'avait pas d'action « essai ». Test : aucune page ne parle d'essai gratuit.
 
 - **RÈGLE D'AHMED (25/10/2026, règle commune § 44) : la page « Comment fonctionne le site ? » (`a-propos/`, FR + AR, h1 « Comment fonctionne le site ? » / « كيف يعمل الموقع؟ ») est mise à jour à CHAQUE modification visible, dans le même envoi** (nouvelle page, fonction changée ou retirée). Gabarit `tools/gabarits/a-propos.html` (puis `python tools/construire.py`) : cartes `#fonctionnement` (chaque fonction en une ligne), `#gratuit-pass` (une voiture gratuite, Pass Ma voiture), `#mises-a-jour` (robot quotidien, site indépendant), puis méthode / vos données / limites / photos / contact. Liens : pied de page de toutes les pages (`page.js`, « Comment fonctionne le site ? ») et accueil (`#lien-fonctionnement`). **Test `FONCTIONS` dans `tools/test_site.mjs`** (repère dans le code -> phrase attendue dans la page) : fonction présente mais non expliquée = test rouge = publication bloquée. Nouvelle fonction = une ligne dans `FONCTIONS` + son explication FR + AR dans le gabarit. VERSION 20261025a.
+
+- **08/11/2026 — plan SEO d'Ahmed appliqué à ce site (phase 2 ; contrôle commun `outils visibilite/controle_seo.mjs` de projets-ahmed ;
+  plan : `consignes des taches/seo-voiture.md`)** : titres des 8 gabarits et de l'accueil ramenés à <= 70 caractères (sans le suffixe
+  « | Ma voiture Tunisie » quand il dépasse), descriptions <= 165 ; garde-fous `titre_seo()` / `desc_seo()` dans `page()` de
+  tools/construire.py ; test « SEO : titre de 10 à 70 caractères et description de 40 à 170, titres uniques » dans test_site.mjs.
+  Avant : titres de 88 à 111 caractères, descriptions de 208 à 234 (Google les coupait). Tous les tests verts.

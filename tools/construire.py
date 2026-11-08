@@ -16,6 +16,32 @@ CSP = ("default-src 'self'; script-src 'self' https://gc.zgo.at; style-src 'self
        "form-action 'self' https://formspree.io")
 
 
+def titre_seo(t, maxi=70):
+    """Titre Google <= 70 caractères : le suffixe « | Ma voiture Tunisie » saute s'il dépasse, puis coupe à un séparateur (règle commune SEO)."""
+    t = " ".join(t.split())
+    if len(t) <= maxi:
+        return t
+    base = t.split(" | ")[0].strip()
+    if len(base) <= maxi:
+        return base
+    for sep in (" : ", " — ", " (", ", "):
+        i = base.rfind(sep, 0, maxi)
+        if i > 20:
+            return base[:i].rstrip(" ,:—(")
+    return base[:maxi - 1].rsplit(" ", 1)[0] + "…"
+
+
+def desc_seo(d, maxi=165):
+    """Description <= 165 caractères, coupée en fin de phrase, sinon au mot + « … »."""
+    d = " ".join(d.split())
+    if len(d) <= maxi:
+        return d
+    i = max(d.rfind(". ", 0, maxi), d.rfind(" ? ", 0, maxi), d.rfind(" ! ", 0, maxi))
+    if i > 40:
+        return d[:i + 1].strip()
+    return d[:maxi - 1].rsplit(" ", 1)[0] + "…"
+
+
 def lire_gabarit(chemin):
     texte = open(chemin, encoding="utf-8").read()
     tete, corps = texte.split("\n---\n", 1)
@@ -49,8 +75,8 @@ def page(chemin_page, meta, corps):
 <meta http-equiv="Content-Security-Policy" content="{CSP}">
 <meta name="referrer" content="strict-origin-when-cross-origin">
 {robots}
-<title>{meta['titre']}</title>
-<meta name="description" content="{meta['description']}">
+<title>{titre_seo(meta['titre'])}</title>
+<meta name="description" content="{desc_seo(meta['description'])}">
 <link rel="canonical" href="{BASE}{chemin_page.rsplit('index.html', 1)[0]}">
 <link rel="icon" href="{r}assets/logo.svg" type="image/svg+xml">
 <link rel="manifest" href="{r}manifest.webmanifest">
