@@ -11,7 +11,8 @@ import { dirname, join } from "path";
 // ---- Réglages propres à ce site ------------------------------------------------
 const SITE = "Ma voiture Tunisie";                                         // valeur du champ caché « site »
 const BASE = "https://voiture.clicvia.com/";            // adresse de l'accueil en ligne
-const IGNORER = ["node_modules", ".git", "tools", "captures", "preuves conditions d'utilisation"];
+const IGNORER = ["node_modules", ".git", "tools", "captures", "preuves conditions d'utilisation",
+  "404.html"];   // page 404 COMMUNE (outils communs/page-404, 17/11/2026) : page autonome, sans pied ni service worker ; vérifiée par test_site.mjs
 // --------------------------------------------------------------------------------
 const FORMSPREE = "https://formspree.io/f/mwlpakqj";
 

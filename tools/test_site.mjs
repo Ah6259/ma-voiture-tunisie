@@ -369,9 +369,19 @@ const VOITURE = JSON.stringify([{ id: "abcd1234", nom: "Clio", groupe: "pair", e
     if (d.querySelectorAll("header .partager").length !== 1) manque.push(p + " partager");
     if (!d.querySelector('footer a[href$="#avis"]')) manque.push(p + " votre avis");
     if (!d.querySelector('.menu a[href="https://auto-ecoles.clicvia.com/"]') || !d.querySelector('.menu a[href="https://code.clicvia.com/"]')) manque.push(p + " liens sites");
+    // 17/11/2026 : liens vers les pages communes « Confidentialité » et « Conditions d'utilisation » de clicvia.com, dans la langue de la page
+    const lien = (dd, u, t) => [...dd.querySelectorAll("footer nav a")].some(a => a.getAttribute("href") === u && a.textContent.trim() === t);
+    if (!lien(d, "https://clicvia.com/confidentialite/", "Confidentialité") || !lien(d, "https://clicvia.com/conditions/", "Conditions d'utilisation")) manque.push(p + " confidentialité/conditions (fr)");
+    const da = (await page(p, { lang: "ar" })).d;
+    if (da.documentElement.lang !== "ar" || !lien(da, "https://clicvia.com/ar/confidentialite/", "الخصوصية") || !lien(da, "https://clicvia.com/ar/conditions/", "شروط الاستعمال")) manque.push(p + " confidentialité/conditions (ar)");
   }
-  check(`toutes les pages : bouton Partager dans l'en-tête, « Votre avis » au pied, liens Code de la route et Auto-écoles ${manque.join(" | ")}`, !manque.length);
+  check(`toutes les pages : bouton Partager dans l'en-tête, « Votre avis » au pied, liens Code de la route et Auto-écoles, liens Confidentialité / Conditions d'utilisation (fr + ar) ${manque.join(" | ")}`, !manque.length);
 }
+// Page 404 commune (17/11/2026, règle commune § 58 point 14 ; modèle : outils communs/page-404 de projets-ahmed) : sinon GitHub montre sa page anglaise
+check("page 404 commune à la racine publiée : 404.html (nom du site, couleur) + 404.js qui cherche la page (« Recherche de la page »)",
+  existsSync(join(root, "404.html")) && existsSync(join(root, "404.js")) && lire("404.html").includes("<title>Page introuvable — Ma voiture Tunisie</title>")
+  && lire("404.html").includes('<script src="/404.js"></script>') && lire("404.js").includes("Recherche de la page"));
+check("À propos : la page introuvable et les liens Confidentialité / Conditions sont expliqués (FR + AR)", lire("a-propos/index.html").includes("Page introuvable, confidentialité, conditions") && lire("a-propos/index.html").includes("صفحة غير موجودة، الخصوصية، الشروط"));
 
 // 25/10/2026 (RÈGLE d'Ahmed, règle commune § 44 : « la page Comment fonctionne le site doit être mise à jour chaque fois qu'on modifie le site ») :
 // chaque fonction visible du site (repère dans le code ou les pages) doit être expliquée dans a-propos/ (gabarit tools/gabarits/a-propos.html) ; nouvelle fonction = une ligne ici + son explication FR + AR

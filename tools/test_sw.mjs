@@ -10,7 +10,8 @@ import vm from "vm";
 const RACINE = "/ma-voiture-tunisie/";                 // portée du service worker = dossier du site
 const JS_COMMUN = "assets/page.js";           // fichier JS chargé par toutes les pages, qui enregistre sw.js
 const EXCLUS = [];            // pages qui ne doivent JAMAIS être mises en cache
-const IGNORER = ["node_modules", ".git", "tools", "captures", "preuves conditions d'utilisation"];
+const IGNORER = ["node_modules", ".git", "tools", "captures", "preuves conditions d'utilisation",
+  "404.html"];   // page 404 COMMUNE (outils communs/page-404, 17/11/2026) : page autonome, sans pied ni service worker ; vérifiée par test_site.mjs
 // --------------------------------------------------------------------------------
 
 const root = process.argv[2] || join(dirname(fileURLToPath(import.meta.url)), "..");

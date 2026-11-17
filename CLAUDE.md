@@ -88,3 +88,7 @@ tests du site, pas de commit si rien de neuf) ; passage complet le LUNDI ou lanc
   « | Ma voiture Tunisie » quand il dépasse), descriptions <= 165 ; garde-fous `titre_seo()` / `desc_seo()` dans `page()` de
   tools/construire.py ; test « SEO : titre de 10 à 70 caractères et description de 40 à 170, titres uniques » dans test_site.mjs.
   Avant : titres de 88 à 111 caractères, descriptions de 208 à 234 (Google les coupait). Tous les tests verts.
+- **17/11/2026 — page 404 commune + liens Confidentialité / Conditions (liste des « 20 points » d'Ahmed)** : `404.html` + `404.js` à la racine
+  (modèle `outils communs/page-404/` de projets-ahmed : le modifier là-bas puis `installer.py site "Ma voiture Tunisie" "#2B3990"`) ;
+  pied (assets/page.js) : liens https://clicvia.com/confidentialite/ et /conditions/ (versions ar/ quand la page est en arabe) ;
+  test_site.mjs bloque si la 404 ou un lien manque (FR + AR, toutes les pages) ; 404.html exclue de test_sw / test_avis. Version 20261117a.
