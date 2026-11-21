@@ -65,10 +65,12 @@ function finEssai() { const d = debutEssai(); return d ? new Date(d + PASS.essai
 function demarrerEssai() { return essaiActif(); }
 // accès aux fonctions du Pass : Pass actif, ou ancien essai encore en cours
 function accesPass() { return passActif() || essaiActif(); }
-function racineSite() { return document.documentElement.dataset.racine || ""; }
+function racineSite() { return document.documentElement.dataset.racine || ""; }   // fichiers (données du Pass)
+// pages : dossier de la langue (ar/… sur une page arabe, une adresse par langue depuis le 21/11/2026)
+function racinePagesPass() { return window.racinePages ? window.racinePages() : racineSite(); }
 const ICONE_TICKET = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16v4a2 2 0 0 0 0 4v4H4v-4a2 2 0 0 0 0-4z"/><path d="M14 7v12"/></svg>';
 function htmlBoutonPass(id) {
-  return `<a class="btn-pass-grand" id="${id}" href="${racineSite()}pass/">${ICONE_TICKET}<span>${T("Pass Ma voiture : 9 DT par an", "باقة سيارتك: " + isoP("9") + " د في السنة")}<small>${T("Jusqu'à 5 voitures et le carnet des dépenses", "إلى غاية " + isoP("5") + " سيارات ودفتر المصاريف")}</small></span></a>`;
+  return `<a class="btn-pass-grand" id="${id}" href="${racinePagesPass()}pass/">${ICONE_TICKET}<span>${T("Pass Ma voiture : 9 DT par an", "باقة سيارتك: " + isoP("9") + " د في السنة")}<small>${T("Jusqu'à 5 voitures et le carnet des dépenses", "إلى غاية " + isoP("5") + " سيارات ودفتر المصاريف")}</small></span></a>`;
 }
 // encart affiché à la place d'une fonction du Pass (sans Pass)
 function htmlEncartPass(quoi) {
@@ -78,7 +80,7 @@ function htmlEncartPass(quoi) {
   return `<div class="pass-bloque"><h2>${titre}</h2>
     <p>${quoi}</p>${htmlBoutonPass("encart-pass")}
     <p class="demain">${T("Votre première voiture, ses échéances et ses rappels restent gratuits pour toujours.", "سيارتك الأولى ومواعيدها وتذكيراتها تبقى مجانية دائمًا.")}</p>
-    <p class="pass-liens"><a href="${racineSite()}pass/#code-acces">${T("J'ai déjà un code", "لدي رمز")}</a></p></div>`;
+    <p class="pass-liens"><a href="${racinePagesPass()}pass/#code-acces">${T("J'ai déjà un code", "لدي رمز")}</a></p></div>`;
 }
 
 /* ---- vérification d'un code ---- */
@@ -243,7 +245,7 @@ function dessinerRappel() {
   if (ancien) ancien.remove();
   const e = rappelMontre, main = document.querySelector("main");
   if (!e || !main) return;
-  const racine = document.documentElement.dataset.racine || "";
+  const racine = racinePagesPass();
   const b = document.createElement("aside");
   b.className = "rappel-pass" + (e.type === "fini" ? " fini" : "");
   b.id = "rappel-pass";

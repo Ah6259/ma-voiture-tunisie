@@ -18,11 +18,35 @@ const MENU_SITE = [
 // La mémoire du navigateur est PARTAGÉE par tous les sites d'ah6259.github.io : n'accepter que « fr » ou « ar »
 (function () {
   const html = document.documentElement;
-  const racine = html.dataset.racine || "";
-  let langue = "fr";
-  try { langue = (/^(fr|ar)$/.test(localStorage.getItem("langue") || "") ? localStorage.getItem("langue") : "") || (navigator.language || "").startsWith("ar") && "ar" || "fr"; } catch (e) {}
+  const racine = html.dataset.racine || "";                      // dossier des FICHIERS (style, scripts, images, données)
+  // UNE ADRESSE PAR LANGUE (21/11/2026, tools/construire.py) : la page française est à son adresse, la page arabe dans ar/.
+  // Sur ces pages (data-langue-fixe), la langue est celle de l'ADRESSE : le bouton de langue ouvre l'autre adresse
+  // (data-autre-langue, mêmes paramètres, même ancre) ; un ancien lien « ?lang=ar », ou un visiteur venu d'une page du site
+  // qui avait choisi l'autre langue, est renvoyé vers la bonne adresse. Jamais pour un robot (Google, visiteur simulé) ni dans un cadre.
+  // video/ garde une seule adresse (?lang=ar) et l'ancien bouton qui change la page sur place.
+  const FIXE = html.dataset.langueFixe === "fr" || html.dataset.langueFixe === "ar" ? html.dataset.langueFixe : "";
+  // dossier des PAGES : ar/… sur une page arabe ; sur video/ (langue changée sur place), celui de la langue affichée
+  const site = () => FIXE ? (html.dataset.site !== undefined ? html.dataset.site : racine) : (html.lang === "ar" ? racine + "ar/" : racine);
+  window.racinePages = site;
+  let langue = "fr", gardee = "";
+  try { gardee = /^(fr|ar)$/.test(localStorage.getItem("langue") || "") ? localStorage.getItem("langue") : ""; } catch (e) {}
+  langue = gardee || ((navigator.language || "").startsWith("ar") ? "ar" : "fr");
   const demande = new URLSearchParams(location.search).get("lang");
   if (demande === "ar" || demande === "fr") langue = demande;
+  const aller = () => {                                           // autre adresse de la même page, mêmes paramètres, même ancre
+    const q = new URLSearchParams(location.search); q.delete("lang");
+    const u = html.dataset.autreLangue + (q.toString() ? "?" + q : "") + location.hash;
+    if (window.allerVers) return window.allerVers(u);            // pour les tests
+    try { location.replace(u); } catch (e) {}
+  };
+  if (FIXE) {
+    let robot = false;
+    try { robot = navigator.webdriver === true || window.top !== window.self; } catch (e) { robot = true; }
+    const duSite = (document.referrer || "").indexOf(location.origin + "/") === 0;
+    const voulue = (demande === "ar" || demande === "fr") ? demande : (duSite ? gardee : "");
+    langue = FIXE;
+    if (voulue && voulue !== FIXE && !robot) aller();
+  }
 
   window.T = (fr, ar) => html.lang === "ar" ? ar : fr;
 
@@ -30,38 +54,38 @@ const MENU_SITE = [
     // bouton doré « Pass Rappels » : SEULEMENT sur les pages du Pass (<body data-pass>), jamais sur l'accueil
     // (règle commune : le payant est découvert au moment du besoin). Voir assets/pass.js.
     const passIci = !!document.body && document.body.hasAttribute("data-pass");
-    const ici = location.pathname.replace(/index\.html$/, "");
+    const ici = location.pathname.replace(/index\.html$/, ""), P = site();
     const e = document.getElementById("entete");
     if (e) e.innerHTML = `
       <div class="wrap">
-        <a class="logo" href="${racine || "./"}">
+        <a class="logo" href="${P || "./"}">
           <img class="logo-mark" src="${racine}assets/logo.svg" alt="" width="34" height="34">
           <span class="logo-nom">${T("Ma voiture Tunisie", "مواعيد سيارتك")}
             <small>${T("Gratuit · vignette, visite, assurance", "مجاني · الجولان، الفحص، التأمين")}</small></span>
         </a>
         <div class="entete-boutons">
-          ${passIci ? `<a class="entete-pass${typeof passActif === "function" && passActif() ? " actif" : ""}" href="${racine}pass/"><span class="long">${T("Pass Rappels", "باقة التذكير")}</span><span class="court">${T("Pass", "الباقة")}</span></a>` : ""}
+          ${passIci ? `<a class="entete-pass${typeof passActif === "function" && passActif() ? " actif" : ""}" href="${P}pass/"><span class="long">${T("Pass Rappels", "باقة التذكير")}</span><span class="court">${T("Pass", "الباقة")}</span></a>` : ""}
           <button class="partager" type="button" aria-label="${T("Partager cette page", "شارك هذه الصفحة")}" title="${T("Partager", "شارك")}"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="M8.6 13.5l6.8 4M15.4 6.5l-6.8 4"/></svg></button>
           <button class="langue" type="button" aria-label="${T("Lire en arabe", "Lire en français")}" title="${T("العربية", "Français")}">${T("ع", "Fr")}</button>
         </div>
       </div>
       <nav class="menu" aria-label="${T("Rubriques", "الأبواب")}"><div class="wrap">${MENU_SITE.map(([h, fr, ar, ico, nom]) => /^https:/.test(h)
         ? `<a class="menu-annuaire" href="${h}" target="_blank" rel="noopener" data-compteur="lien-site/${nom}">${ico ? `<img src="${racine}${ico}" alt="" width="20" height="20">` : ""}${T(fr, ar)}</a>`
-        : `<a href="${racine}${h || "./"}"${(h ? ici.endsWith("/" + h) : !racine) ? ' aria-current="page"' : ""}>${T(fr, ar)}</a>`).join("")}</div></nav>`;
+        : `<a href="${P}${h || (P ? "" : "./")}"${(h ? ici.endsWith("/" + h) : !P) ? ' aria-current="page"' : ""}>${T(fr, ar)}</a>`).join("")}</div></nav>`;
     const p = document.getElementById("pied");
     if (p) p.innerHTML = `
       <div class="wrap">
         <div class="pied-logo"><img src="${racine}assets/logo.svg" alt="" width="24" height="24"> ${T("Ma voiture Tunisie", "مواعيد سيارتك")}</div>
         <nav>
-          <a href="${racine || "./"}">${T("Mes échéances et rappels", "مواعيدي والتذكير")}</a>
-          <a href="${racine}vignette/">${T("Vignette", "معلوم الجولان")}</a>
-          <a href="${racine}visite-technique/">${T("Visite technique", "الفحص الفني")}</a>
-          <a href="${racine}carburant/">${T("Prix des carburants", "أسعار المحروقات")}</a>
-          <a href="${racine}achat-vente/">${T("Acheter ou vendre une voiture", "شراء أو بيع سيارة")}</a>
-          <a href="${racine}entretien/">${T("Entretien", "الصيانة")}</a>
-          <a href="${racine}a-propos/">${T("Comment fonctionne le site ?", "كيف يعمل الموقع؟")}</a>
-          ${racine ? `<a href="${racine}pass/">${T("Pass Rappels", "باقة التذكير")}</a>` : ""}
-          <a href="${racine}#avis">${T("Votre avis", "رأيك")}</a>
+          <a href="${P || "./"}">${T("Mes échéances et rappels", "مواعيدي والتذكير")}</a>
+          <a href="${P}vignette/">${T("Vignette", "معلوم الجولان")}</a>
+          <a href="${P}visite-technique/">${T("Visite technique", "الفحص الفني")}</a>
+          <a href="${P}carburant/">${T("Prix des carburants", "أسعار المحروقات")}</a>
+          <a href="${P}achat-vente/">${T("Acheter ou vendre une voiture", "شراء أو بيع سيارة")}</a>
+          <a href="${P}entretien/">${T("Entretien", "الصيانة")}</a>
+          <a href="${P}a-propos/">${T("Comment fonctionne le site ?", "كيف يعمل الموقع؟")}</a>
+          ${P ? `<a href="${P}pass/">${T("Pass Rappels", "باقة التذكير")}</a>` : ""}
+          <a href="${P}#avis">${T("Votre avis", "رأيك")}</a>
         <a href="https://clicvia.com/" rel="noopener" target="_blank">${T("Tous nos services", "كل خدماتنا")}</a>
         <a href="${T("https://clicvia.com/confidentialite/", "https://clicvia.com/ar/confidentialite/")}" rel="noopener" target="_blank">${T("Confidentialité", "الخصوصية")}</a>
         <a href="${T("https://clicvia.com/conditions/", "https://clicvia.com/ar/conditions/")}" rel="noopener" target="_blank">${T("Conditions d'utilisation", "شروط الاستعمال")}</a>
@@ -70,11 +94,16 @@ const MENU_SITE = [
                `قواعد تم التثبت منها في ${MAJ} (قانون المالية لسنة ${ANNEE}، نصوص الوكالة الفنية للنقل البري ووزارة الصناعة).`)}</p>
         <p>${T("Résultats indicatifs : ce site n'est pas un service officiel. Vos dates restent dans votre téléphone, rien n'est envoyé.",
                "نتائج تقريبية: هذا الموقع ليس خدمة رسمية. تبقى تواريخك في هاتفك، لا يُرسل أي شيء.")}</p>
-        <p>${T("Photos : Wikimedia Commons, licences libres —", "الصور: ويكيميديا كومنز، رخص حرة —")} <a href="${racine}a-propos/#photos">${T("auteurs et licences", "المؤلفون والرخص")}</a>.</p>
+        <p>${T("Photos : Wikimedia Commons, licences libres —", "الصور: ويكيميديا كومنز، رخص حرة —")} <a href="${P}a-propos/#photos">${T("auteurs et licences", "المؤلفون والرخص")}</a>.</p>
         <p>© 2026 Ma voiture Tunisie — ${T("tous droits réservés.", "جميع الحقوق محفوظة.")}</p>
       </div>`;
     document.querySelectorAll(".langue").forEach(b =>
-      b.addEventListener("click", () => appliquer(html.lang === "ar" ? "fr" : "ar")));
+      b.addEventListener("click", () => {
+        const l = html.lang === "ar" ? "fr" : "ar";
+        if (!FIXE) return appliquer(l);
+        try { localStorage.setItem("langue", l); } catch (e) {}
+        aller();
+      }));
     // bouton Partager (règle commune) : menu de partage du téléphone, sinon WhatsApp, avec la page vidéo + l'adresse du site
     document.querySelectorAll(".partager").forEach(b => b.addEventListener("click", () => {
       try { if (window.goatcounter && window.goatcounter.count) window.goatcounter.count({ path: "partage" + location.pathname.replace(/^\/ma-voiture-tunisie\//, "/"), title: "Partage", event: true }); } catch (e) {}
@@ -185,7 +214,8 @@ window.VIDEO_SITE = {"base": BASE_SITE, "defaut": "fr", "nom": {"fr": "Ma voitur
   function M(o) { return o[langue()] || o[S.defaut] || o.fr; }
   window.pageVideo = function () {
     var l = langue(), q = l !== S.defaut ? "?lang=" + l : "";
-    return { page: ORIGINE + S.base + "video/" + q, site: ORIGINE + S.base + q, titre: M(S.nom) };
+    // une adresse par langue (21/11/2026) : le site en arabe est à ar/ (la page vidéo garde ?lang=ar)
+    return { page: ORIGINE + S.base + "video/" + q, site: ORIGINE + S.base + (l === "ar" ? "ar/" : ""), titre: M(S.nom) };
   };
   window.partagerLien = function (titre, site) {
     var v = window.pageVideo(), t = titre || v.titre;
@@ -213,7 +243,7 @@ window.VIDEO_SITE = {"base": BASE_SITE, "defaut": "fr", "nom": {"fr": "Ma voitur
       if (v.getAttribute("poster") !== po) v.setAttribute("poster", po);
     }
     var p = location.pathname.replace(/index\.html$/, "");
-    if (p === S.base || p === S.base + "a-propos/") {
+    if (p === S.base || p === S.base + "a-propos/" || p === S.base + "ar/" || p === S.base + "ar/a-propos/") {
       var b = document.getElementById("lien-video");
       if (!b) {
         b = document.createElement("p"); b.id = "lien-video"; b.className = "lien-video"; b.appendChild(document.createElement("a"));

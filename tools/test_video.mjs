@@ -101,7 +101,9 @@ j = await essai({ page: "video/index.html", cible: "[data-partager-video]" });
 check("page vidéo : le bouton « Partager la vidéo » partage la page vidéo", (j.partages[0] || {}).url === SITE + "video/" && !(j.partages[0] || {}).files);
 const autre = ["fr", "ar", "en"].find(l => l !== DEFAUT && (pv.includes(`data-v${l}=`)));
 if (autre) {
-j = await essai({ query: "?lang=" + autre });
+// une adresse par langue (21/11/2026) : la page de l'autre langue est à <langue>/ (sinon ?lang=)
+const pageAutre = existsSync(join(root, autre, "index.html")) ? autre + "/index.html" : "";
+j = await essai(pageAutre ? { page: pageAutre } : { query: "?lang=" + autre });
 check(`Partager (page en « ${autre} ») : page vidéo dans la même langue`, (j.partages[0] || {}).url === SITE + "video/?lang=" + autre);
 // 5. page vidéo dans l'autre langue (textes, vidéo de la langue)
 {
@@ -119,6 +121,12 @@ for (const page of ["index.html", APROPOS].filter(Boolean)) {
   for (let k = 0; k < 60 && !w.document.querySelector("#lien-video a"); k++) await new Promise(r => setTimeout(r, 50));
   const a = w.document.querySelector("#lien-video a");
   check(`lien « Vidéo de présentation » sur ${page} -> page vidéo`, !!a && a.getAttribute("href") === BASE + "video/");
+}
+if (existsSync(join(root, "ar/index.html"))) {
+  const w = await ouvrir("ar/index.html");
+  for (let k = 0; k < 60 && !w.document.querySelector("#lien-video a"); k++) await new Promise(r => setTimeout(r, 50));
+  const a = w.document.querySelector("#lien-video a");
+  check("lien « Vidéo de présentation » sur l'accueil arabe (ar/) -> page vidéo en arabe", !!a && a.getAttribute("href") === BASE + "video/?lang=ar" && /[؀-ۿ]/.test(a.textContent));
 }
 console.log(pb.length ? `${pb.length} PROBLÈME(S) sur ${ok + pb.length} vérifications (page vidéo et partage)` : `TOUT PASSE (${ok} vérifications : page vidéo et partage)`);
 process.exit(pb.length ? 1 : 0);

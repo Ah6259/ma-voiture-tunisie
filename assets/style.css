@@ -85,7 +85,7 @@ td:last-child{text-align:end;font-variant-numeric:tabular-nums;white-space:nowra
 tr.total td{font-weight:800;border-bottom:0;font-size:16px}
 .moins{color:var(--rouge)}
 .actions{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px}
-.partage{display:inline-flex;align-items:center;gap:8px;background:#1FAF5A;color:#fff;text-decoration:none;font-weight:700;border-radius:999px;padding:10px 18px;font-size:14px}
+.partage{display:inline-flex;align-items:center;gap:8px;background:#1A7F45;color:#fff;text-decoration:none;font-weight:700;border-radius:999px;padding:10px 18px;font-size:14px}
 .partage svg{width:18px;height:18px;fill:#fff}
 /* lien discret vers l'annuaire des comptables (affiché seulement après un calcul) */
 .lien-pro{margin:14px 0 0;padding:10px 12px;border:1px solid var(--ligne);border-radius:12px;background:var(--vert-tres-clair);font-size:13px;line-height:1.45}
@@ -237,7 +237,7 @@ html[dir="rtl"] .btn-pass-grand svg{transform:scaleX(-1)}
   border-radius:12px;padding:11px 14px;cursor:pointer}
 .paiement summary.btn-clair{justify-content:center}
 .paiement summary.btn-clair::after{content:none}
-.btn-wa{display:flex;align-items:center;justify-content:center;gap:8px;text-decoration:none;font-weight:800;font-size:15px;color:#fff;background:#1F9D55;
+.btn-wa{display:flex;align-items:center;justify-content:center;gap:8px;text-decoration:none;font-weight:800;font-size:15px;color:#fff;background:#1A7F45;
   border-radius:12px;padding:12px 14px;margin:10px 0;text-align:center}
 .btn-wa svg{width:20px;height:20px;flex:none;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
 .offre-pro{position:relative;background:var(--carte);border:2px solid #F2B33D;border-radius:var(--rayon);padding:22px 18px 18px;margin:0 0 14px;box-shadow:var(--ombre)}

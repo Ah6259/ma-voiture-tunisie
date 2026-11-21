@@ -2,6 +2,7 @@
 // Accepte un dossier en argument pour tester une copie sabotée. Date du test FIXÉE (jamais la date du jour : règle commune).
 // jsdom : npm install --no-save --no-package-lock jsdom (sur le PC, repris au besoin du dossier de Documents Tunisie).
 import { readFileSync, existsSync, readdirSync, statSync } from "fs";
+import { execSync } from "child_process";
 import { createRequire } from "module";
 import { fileURLToPath } from "url";
 import { dirname, join, resolve } from "path";
@@ -13,6 +14,9 @@ catch (e) { ({ JSDOM, VirtualConsole } = createRequire(resolve(dirname(fileURLTo
 
 const root = process.argv[2] ? resolve(process.argv[2]) : join(dirname(fileURLToPath(import.meta.url)), "..");
 const lire = f => readFileSync(join(root, f), "utf8");
+// pages bilingues (sources) : tools/sources/index.html (accueil) et tools/modele-video.html (À propos, fabriquée par construire.py)
+const lireSource = f => f === "index.html" && existsSync(join(root, "tools/sources/index.html")) ? lire("tools/sources/index.html")
+  : f === "a-propos/index.html" && existsSync(join(root, "tools/modele-video.html")) ? lire("tools/modele-video.html") : lire(f);
 let erreurs = 0, total = 0;
 const check = (desc, ok) => { total++; if (ok) console.log("OK   " + desc); else { erreurs++; console.log("FAIL " + desc); } };
 const BASE = "https://voiture.clicvia.com/";
@@ -29,14 +33,17 @@ const PAGES = [];
 })("");
 
 // charge une page comme un navigateur (scripts dans l'ordre), avec une horloge fixe et une mémoire de départ
-async function page(chemin = "index.html", { quand = AUJ, stockage = {}, lang } = {}) {
+// UNE ADRESSE PAR LANGUE (21/11/2026) : lang "ar" = la page arabe ar/<chemin> (fabriquée par tools/construire.py) ; video/ garde ?lang=ar
+async function page(chemin = "index.html", { quand = AUJ, stockage = {}, lang, referrer } = {}) {
+  if (lang === "ar" && !chemin.startsWith("ar/") && existsSync(join(root, "ar", chemin))) { chemin = "ar/" + chemin; lang = ""; }
+  if (lang === "fr" && chemin.startsWith("ar/")) { chemin = chemin.slice(3); lang = ""; }
   const dossier = dirname(chemin);
   let html = lire(chemin).replace(/<script[^>]*gc\.zgo\.at[^>]*><\/script>/, "")
     .replace(/<script( defer)? src="((?:\.\.\/)*assets\/[^"?]+)(\?[^"]*)?"><\/script>/g, (_, d, f) => `<script>${lire(join(dossier, f).replace(/\\/g, "/"))}</script>`);
   const vc = new VirtualConsole(), js = [];
   vc.on("jsdomError", e => { if (!/Not implemented/.test(e.message)) js.push(e.message); });
   const url = BASE + (chemin === "index.html" ? "" : chemin.replace(/index\.html$/, "")) + (lang ? "?lang=" + lang : "");
-  const dom = new JSDOM(html, { url, runScripts: "dangerously", pretendToBeVisual: true, virtualConsole: vc,
+  const dom = new JSDOM(html, { url, referrer, runScripts: "dangerously", pretendToBeVisual: true, virtualConsole: vc,
     beforeParse(w) {
       const Vrai = w.Date, fixe = new Vrai(quand).getTime();
       class D extends Vrai { constructor(...a) { if (a.length) super(...a); else super(fixe); } static now() { return fixe; } }
@@ -354,7 +361,7 @@ const VOITURE = JSON.stringify([{ id: "abcd1234", nom: "Clio", groupe: "pair", e
   const t = d.body.textContent;
   check("pass : 9 DT pour 12 mois, plus d'essai gratuit, 3 étapes de paiement (D17, IZI, 24 321 390), WhatsApp, pas de renouvellement automatique", js.length === 0 && /9 DT/.test(t) && /12 mois/.test(t) && !/essai gratuit/i.test(t)
     && d.querySelectorAll("#paiement .paie-etapes > li").length === 3 && /24 321 390/.test(t) && d.querySelector('a.btn-wa[href^="https://wa.me/21624321390"]') && /Pas de renouvellement automatique/.test(t));
-  check("pass : description cachée quand « Paiement » est ouvert (règle commune), bouton doré dans l'en-tête", d.querySelectorAll(".masque-si-paiement").length >= 2 && /:has\(> details\.paiement\[open\]\) > \.masque-si-paiement\{display:none\}/.test(lire("assets/style.css"))
+  check("pass : description cachée quand « Paiement » est ouvert (règle commune, pages FR et ar/), bouton doré dans l'en-tête", d.querySelectorAll(".masque-si-paiement").length >= 1 && /masque-si-paiement/.test(lire("ar/pass/index.html")) && /:has\(> details\.paiement\[open\]\) > \.masque-si-paiement\{display:none\}/.test(lire("assets/style.css"))
     && d.querySelector("header .entete-pass"));
   check("pass : formulaire Formspree (site « Ma voiture Tunisie », formule 9 DT 12 mois), saisie du code", d.querySelector('#pass-form[action="https://formspree.io/f/mwlpakqj"] input[name="site"][value="Ma voiture Tunisie"]')
     && d.querySelector('#pass-form input[name="formule"][value="Pass Ma voiture - 9 DT - 12 mois"]') && d.getElementById("code-form"));
@@ -364,7 +371,7 @@ const VOITURE = JSON.stringify([{ id: "abcd1234", nom: "Clio", groupe: "pair", e
 // ---- 9. bouton Partager et pied de page sur TOUTES les pages (règle commune)
 {
   const manque = [];
-  for (const p of PAGES) {
+  for (const p of PAGES.filter(x => !x.startsWith("ar/"))) {      // chaque page en français, puis sa version arabe (ar/…)
     const { d } = await page(p);
     if (d.querySelectorAll("header .partager").length !== 1) manque.push(p + " partager");
     if (!d.querySelector('footer a[href$="#avis"]')) manque.push(p + " votre avis");
@@ -381,12 +388,12 @@ const VOITURE = JSON.stringify([{ id: "abcd1234", nom: "Clio", groupe: "pair", e
 check("page 404 commune à la racine publiée : 404.html (nom du site, couleur) + 404.js qui cherche la page (« Recherche de la page »)",
   existsSync(join(root, "404.html")) && existsSync(join(root, "404.js")) && lire("404.html").includes("<title>Page introuvable — Ma voiture Tunisie</title>")
   && lire("404.html").includes('<script src="/404.js"></script>') && lire("404.js").includes("Recherche de la page"));
-check("À propos : la page introuvable et les liens Confidentialité / Conditions sont expliqués (FR + AR)", lire("a-propos/index.html").includes("Page introuvable, confidentialité, conditions") && lire("a-propos/index.html").includes("صفحة غير موجودة، الخصوصية، الشروط"));
+check("À propos : la page introuvable et les liens Confidentialité / Conditions sont expliqués (FR + AR)", lire("a-propos/index.html").includes("Page introuvable, confidentialité, conditions") && lire("ar/a-propos/index.html").includes("صفحة غير موجودة، الخصوصية، الشروط"));
 
 // 25/10/2026 (RÈGLE d'Ahmed, règle commune § 44 : « la page Comment fonctionne le site doit être mise à jour chaque fois qu'on modifie le site ») :
 // chaque fonction visible du site (repère dans le code ou les pages) doit être expliquée dans a-propos/ (gabarit tools/gabarits/a-propos.html) ; nouvelle fonction = une ligne ici + son explication FR + AR
-{ const brut = lire("a-propos/index.html"), ap = brut.replace(/<[^>]+>/g, " ").replace(/&nbsp;/g, " ").replace(/[\u00a0\u2066-\u2069]/g, " ").replace(/\s+/g, " ");
-  const acc = lire("index.html"), js = ["page.js", "pass.js", "accueil.js", "agenda.js", "carnet.js", "echeances.js"].map(f => existsSync(join(root, "assets", f)) ? lire("assets/" + f) : "").join("\n");
+{ const brut = lireSource("a-propos/index.html"), ap = brut.replace(/<[^>]+>/g, " ").replace(/&nbsp;/g, " ").replace(/[\u00a0\u2066-\u2069]/g, " ").replace(/\s+/g, " ");
+  const acc = lireSource("index.html"), js = ["page.js", "pass.js", "accueil.js", "agenda.js", "carnet.js", "echeances.js"].map(f => existsSync(join(root, "assets", f)) ? lire("assets/" + f) : "").join("\n");
   const FONCTIONS = [
     ["Mes échéances (accueil)", /Mes prochaines échéances/.test(acc), /Mes échéances \(accueil\) : remplissez la fiche de votre voiture/],
     ["rappels .ics dans l'agenda", /\.ics|text\/calendar/.test(js), /Rappels dans l'agenda : un fichier « \.ics »/],
@@ -397,6 +404,7 @@ check("À propos : la page introuvable et les liens Confidentialité / Condition
     ["entretien et carnet exportable", /exporterCarnet/.test(js), /Entretien et carnet des dépenses : repères d'entretien, et un carnet[^.]*exporter/],
     ["nos autres sites gratuits", /Gratuit aussi sur nos sites/.test(acc), /Nos autres sites gratuits : Code de la route, Auto-écoles/],
     ["langue FR / AR", /class="langue"/.test(js), /Français \/ arabe : le bouton de langue/],
+    ["une adresse par langue (ar/)", existsSync(join(root, "ar/index.html")) && /autreLangue/.test(js), /Une adresse par langue : chaque page existe en français et en arabe \(voiture\.clicvia\.com\/ar\//],
     ["bouton Partager", /class="partager"/.test(js), /Partager : le bouton rond/],
     ["Votre avis", /id="avis"/.test(acc), /Votre avis : un formulaire/],
     ["installation et hors connexion", existsSync(join(root, "sw.js")), /Installer sur le téléphone/],
@@ -410,6 +418,94 @@ check("À propos : la page introuvable et les liens Confidentialité / Condition
   check(`page « Comment fonctionne le site ? » à jour : titre et chaque fonction du site expliquée (${FONCTIONS.length} fonctions)` + (manque.length ? " — manque : " + manque.join(", ") : ""),
     manque.length === 0 && /<h1>[^]*?Comment fonctionne le site \?[^]*?كيف يعمل الموقع؟[^]*?<\/h1>/.test(brut)
     && /a-propos\/">\$\{T\("Comment fonctionne le site \?"/.test(lire("assets/page.js")) && /id="lien-fonctionnement"/.test(acc)); }
+
+
+// ---- UNE ADRESSE PAR LANGUE (21/11/2026, règle commune § 8 point 9 : « une adresse par langue, jamais seulement ?lang= ») ----
+// sources bilingues (tools/gabarits/, tools/sources/index.html) -> <chemin>/index.html (français seul) + ar/<chemin>/index.html (arabe seul)
+{
+  const chemins = ["", "vignette/", "visite-technique/", "carburant/", "achat-vente/", "entretien/", "pass/", "pass/conditions/", "a-propos/"];
+  check("une adresse par langue : chaque page publique a sa version arabe ar/…, et aucune page arabe sans page française",
+    chemins.every(c => existsSync(join(root, "ar", c, "index.html"))) && PAGES.filter(p => p.startsWith("ar/")).every(p => existsSync(join(root, p.slice(3)))));
+  // pages fabriquées à jour (sinon on a modifié une page à la main au lieu de sa source)
+  let aJour = false, sortie = "";
+  for (const py of [process.env.PYTHON, "python3", "python"].filter(Boolean)) {
+    try { sortie = execSync(`${py} tools/construire.py --verifier`, { cwd: root, encoding: "utf8", stdio: ["ignore", "pipe", "pipe"] }); aJour = true; break; }
+    catch (e) { sortie = (e.stdout || "") + (e.stderr || ""); if (/ÉCHEC/.test(sortie)) break; }
+  }
+  check(`une adresse par langue : pages fabriquées à jour (python tools/construire.py --verifier) ${aJour ? "" : sortie.trim()}`, aJour);
+  const tete = h => [...h.matchAll(/<link rel="alternate" hreflang="([^"]+)" href="([^"]+)">/g)].map(m => m[1] + "=" + m[2]).sort().join(" ");
+  const mal = [], titresAr = new Map();
+  for (const c of chemins) {
+    const fr = lire(c + "index.html"), ar = lire("ar/" + c + "index.html");
+    const attendu = [`ar=${BASE}ar/${c}`, `fr=${BASE}${c}`, `x-default=${BASE}${c}`].sort().join(" ");
+    if (!/<html lang="fr" dir="ltr"[^>]*data-langue-fixe="fr"/.test(fr) || /data-l="ar"/.test(fr)) mal.push(c + " : page française pas seule");
+    if (!/<html lang="ar" dir="rtl"[^>]*data-langue-fixe="ar"/.test(ar) || /data-l="fr"/.test(ar)) mal.push(c + " : page arabe pas seule");
+    if (/[؀-ۿ]/.test((fr.match(/<title>([^<]*)<\/title>/) || [])[1] + (fr.match(/name="description" content="([^"]*)"/) || [])[1])) mal.push(c + " : titre ou description française avec de l'arabe");
+    if (tete(fr) !== attendu || tete(ar) !== attendu) mal.push(c + " : hreflang fr / ar / x-default pas réciproques");
+    if (!fr.includes(`<link rel="canonical" href="${BASE}${c}">`) || !ar.includes(`<link rel="canonical" href="${BASE}ar/${c}">`)) mal.push(c + " : canonical");
+    if (!fr.includes(`<meta property="og:url" content="${BASE}${c}">`) || !ar.includes(`<meta property="og:url" content="${BASE}ar/${c}">`)) mal.push(c + " : og:url");
+    if (!fr.includes('<meta property="og:locale" content="fr_FR">') || !ar.includes('<meta property="og:locale" content="ar_AR">')) mal.push(c + " : og:locale");
+    if (/ld\+json/.test(ar)) mal.push(c + " : FAQ Google française sur la page arabe");
+    const t = (ar.match(/<title>([^<]*)<\/title>/) || [])[1] || "", de = (ar.match(/name="description" content="([^"]*)"/) || [])[1] || "";
+    if (!/[؀-ۿ]/.test(t) || t.length < 10 || t.length > 70) mal.push(c + ` : titre arabe (${t.length})`);
+    if (!/[؀-ۿ]/.test(de) || de.length < 40 || de.length > 170) mal.push(c + ` : description arabe (${de.length})`);
+    if (titresAr.has(t)) mal.push(c + " : même titre arabe que " + titresAr.get(t)); titresAr.set(t, c);
+    // liens relatifs de la page arabe : fichiers à la racine, pages dans ar/ ; tout doit exister
+    for (const m of ar.matchAll(/\b(?:href|src)="(?![a-z]+:|\/\/|#|\?)([^"#?]*)[^"]*"/g)) {
+      const cible = join(root, "ar", c, m[1]);
+      if (!existsSync(cible) || (statSync(cible).isDirectory() && !existsSync(join(cible, "index.html")))) mal.push(c + " : lien mort " + m[1]);
+      else if (/\/$|^\.\.\/$|^$/.test(m[1]) && !cible.startsWith(join(root, "ar")) && !/video\/$/.test(m[1])) mal.push(c + " : la page arabe mène vers une page française " + m[1]);
+    }
+  }
+  check(`une adresse par langue : chaque page en français seul ET en arabe seul (lang, dir), hreflang réciproques, canonical, og:url, og:locale, titres arabes uniques <= 70, liens valides ${mal.join(" | ")}`, mal.length === 0);
+  const locs = [...lire("sitemap.xml").matchAll(/<loc>https:\/\/voiture\.clicvia\.com\/([^<]*)<\/loc>/g)].map(m => m[1]);
+  check("plan du site : pages françaises ET arabes (ar/…) + video/", chemins.every(c => locs.includes(c) && locs.includes("ar/" + c)) && locs.includes("video/"));
+  // menu et pied de la page arabe : liens vers les pages ARABES
+  const wa = (await page("vignette/index.html", { lang: "ar" })).d;
+  const liensAr = [...wa.querySelectorAll("#entete nav.menu a:not(.menu-annuaire), #pied nav a")].map(a => a.href).filter(h => h.startsWith(BASE));
+  check("page arabe : menu et pied de page mènent aux pages arabes (ar/…), logo -> ar/", liensAr.length >= 12 && liensAr.every(h => h.startsWith(BASE + "ar/")) && wa.querySelector("#entete a.logo").href === BASE + "ar/");
+  const wf = (await page("vignette/index.html")).d;
+  check("page française : menu et pied de page restent en français", [...wf.querySelectorAll("#entete nav.menu a:not(.menu-annuaire), #pied nav a")].map(a => a.href).filter(h => h.startsWith(BASE)).every(h => !h.startsWith(BASE + "ar/")));
+  // bouton de langue et renvoi d'un ancien lien « ?lang=ar » : vers l'autre adresse (mêmes paramètres, même ancre)
+  async function avecRenvoi(chemin, suite, referrer, stockage = {}) {
+    const dossier = dirname(chemin), allers = [];
+    const html = lire(chemin).replace(/<script[^>]*gc\.zgo\.at[^>]*><\/script>/, "")
+      .replace(/<script( defer)? src="((?:\.\.\/)*assets\/[^"?]+)(\?[^"]*)?"( defer)?><\/script>/g, (_, d, f) => `<script>${lire(join(dossier, f).replace(/\\/g, "/"))}</script>`);
+    const dom = new JSDOM(html, { url: BASE + chemin.replace(/index\.html$/, "") + suite, referrer, runScripts: "dangerously", pretendToBeVisual: true,
+      virtualConsole: new VirtualConsole(), beforeParse(w) { w.allerVers = u => allers.push(new URL(u, w.location.href).href); for (const [k, v] of Object.entries(stockage)) w.localStorage.setItem(k, v); w.scrollTo = () => {}; } });
+    await new Promise(ok => setTimeout(ok, 60));
+    return { w: dom.window, allers };
+  }
+  let r = await avecRenvoi("vignette/index.html", "?lang=ar#bareme");
+  check("ancien lien vignette/?lang=ar#bareme -> renvoyé vers ar/vignette/#bareme", r.allers.length === 1 && r.allers[0] === BASE + "ar/vignette/#bareme");
+  r = await avecRenvoi("ar/carburant/index.html", "?x=1");
+  check("page arabe ouverte directement (lien partagé, Google) : aucun renvoi, page en arabe", r.allers.length === 0 && r.w.document.documentElement.lang === "ar");
+  r.w.document.querySelector("#entete button.langue").click();
+  check("bouton de langue de la page arabe -> page française, mêmes paramètres", r.allers.length === 1 && r.allers[0] === BASE + "carburant/?x=1"
+    && r.w.document.querySelector("#entete button.langue").textContent === "Fr");
+  r = await avecRenvoi("index.html", "");
+  r.w.document.querySelector("#entete button.langue").click();
+  check("bouton de langue de l'accueil -> ar/", r.allers.length === 1 && r.allers[0] === BASE + "ar/");
+  r = await avecRenvoi("pass/conditions/index.html", "", "https://www.google.com/", { langue: "ar" });
+  check("page française venue de Google avec l'arabe gardé dans le téléphone : reste en français (jamais de bascule pour un lien extérieur)", r.allers.length === 0 && r.w.document.documentElement.lang === "fr");
+  r = await avecRenvoi("pass/conditions/index.html", "", BASE + "ar/pass/", { langue: "ar" });
+  check("page française ouverte depuis une page arabe du site (arabe gardé) -> renvoyée vers ar/pass/conditions/", r.allers.length === 1 && r.allers[0] === BASE + "ar/pass/conditions/");
+  // calculs justes en arabe
+  const { d: dv, js: jv } = await page("vignette/index.html", { lang: "ar" });
+  check("page arabe de la vignette : exemple 6 CV essence → 130,000, date limite 05/03/2027, aucune erreur", jv.length === 0 && /130,000/.test(dv.getElementById("v-montant")?.textContent || dv.body.textContent)
+    && /05\/03\/2027/.test(dv.body.textContent) && dv.documentElement.dir === "rtl");
+  const { d: dc, js: jc } = await page("carburant/index.html", { lang: "ar" });
+  const { d: dcf } = await page("carburant/index.html");
+  const nombres = el => (el.textContent.match(/\d[\d  ]*,\d{3}/g) || []).join("|");
+  check("page arabe du carburant : même coût de trajet qu'en français, aucune erreur", jc.length === 0 && nombres(dc.querySelector("main")) && nombres(dc.querySelector("main")) === nombres(dcf.querySelector("main")));
+  const { d: dm, js: jm } = await page("achat-vente/index.html", { lang: "ar" });
+  const { d: dmf } = await page("achat-vente/index.html");
+  check("page arabe d'achat-vente : mêmes frais de mutation qu'en français, aucune erreur", jm.length === 0 && nombres(dm.querySelector("main")) === nombres(dmf.querySelector("main")) && /\d/.test(nombres(dm.querySelector("main"))));
+  const { w: wi, d: di, js: ji } = await page("index.html", { lang: "ar", stockage: { "mv-voitures-v1": VOITURE } });
+  const ics = wi.fabriquerIcs ? wi.fabriquerIcs([{ id: "x", date: new wi.Date("2027-03-05T12:00:00"), titre: "معلوم الجولان", description: "اختبار" }]) : "";
+  check("accueil arabe (ar/) : échéances calculées (vignette 05/03/2027), fichier agenda valide, liens « كل التفاصيل » vers ar/…", ji.length === 0 && /05\/03\/2027/.test(di.getElementById("liste-echeances").textContent)
+    && /DTSTART;VALUE=DATE:20270305/.test(ics) && [...di.querySelectorAll("#liste-echeances a.lien-ech")].every(a => a.href.startsWith(BASE + "ar/")));
+}
 
 console.log(`\n${erreurs ? erreurs + " PROBLÈME(S)" : "TOUT PASSE"} (${total} vérifications)`);
 process.exit(erreurs ? 1 : 0);

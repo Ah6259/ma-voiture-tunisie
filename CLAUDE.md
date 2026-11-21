@@ -37,8 +37,8 @@ Règles communes à tous les sites d'Ahmed : `../../regles communes a tous les s
 
 ## Fabrication et tests
 - Pages : `python tools/construire.py` (gabarits `tools/gabarits/<page>.html`, « __ » = sous-dossier ; en-tête technique
-  commun ; **une seule version ?v=** `VERSION` pour tout le site, accueil compris — la changer à chaque modification d'assets/).
-  L'accueil `index.html` est écrit à la main.
+  commun ; **une seule version ?v=** `VERSION` pour tout le site, accueil et video/ compris — la changer à chaque modification d'assets/).
+  L'accueil est écrit à la main dans `tools/sources/index.html` (depuis le 21/11/2026, voir « Une adresse par langue »).
 - Tests (tout doit être vert avant d'envoyer) : `node tools/test_site.mjs` (date FIXÉE au 09/10/2026, montants et dates de
   référence vérifiés à la main), `node tools/test_sw.mjs`, `node tools/test_avis.mjs`, `python tools/test_robot.py`,
   `python tools/test_sabotage.py` (6 sabotages qui doivent tous être détectés). Tous lancés par `tests.yml` à chaque envoi.
@@ -96,3 +96,19 @@ tests du site, pas de commit si rien de neuf) ; passage complet le LUNDI ou lanc
 - **21/11/2026 — mode sombre lisible (Ahmed, tous les sites)** : bloc final de `assets/style.css` : en sombre, texte foncé sur la couleur
   principale devenue claire (menu actif « Mes échéances », `.btn-principal` « Ajouter les rappels à mon agenda », « Envoyer », onglets), `.partage`
   vert plus foncé, fonds blancs codés en dur -> `--carte`. Mode clair inchangé. Contrôle « contraste < 3 » : 3 -> 0 (8 pages). VERSION 20261121a.
+
+- **21/11/2026 — UNE ADRESSE PAR LANGUE (règle commune § 8 point 9, demande d'Ahmed ; méthode d'Outils pratiques et de Code de la route)** :
+  chaque page publique (accueil, vignette, visite-technique, carburant, achat-vente, entretien, pass, pass/conditions, a-propos) existe en
+  français seul à son adresse et en arabe seul sous `ar/<même chemin>` (lang="ar" dir="rtl", titre / description / titre de partage arabes de
+  `tools/textes-ar.json`, canonical et og:url ar/…, og:locale ar_AR, FAQ Google française retirée, alt / placeholders / listes déjà en arabe,
+  fichiers communs pris à la racine), hreflang fr / ar / x-default (= français) réciproques. **Sources** : `tools/gabarits/*.html` (bilingues,
+  spans data-l), l'accueil `tools/sources/index.html` (bilingue, écrit à la main ; `index.html` à la racine est FABRIQUÉ), `tools/textes-ar.json`.
+  `python tools/construire.py` écrit les pages FR + `ar/`, le `sitemap.xml` (FR + AR + video/, lastmod = jour du changement), la version de
+  `video/index.html` et `tools/modele-video.html` (À propos bilingue = modèle de `node tools/page_video.mjs` ; video/ garde une seule adresse
+  `?lang=ar`). **Modifier les sources/gabarits puis construire, JAMAIS une page ni `ar/` à la main** : `python tools/construire.py --verifier`
+  (robot tests) sonne rouge sinon. `assets/page.js` : langue = celle de l'adresse (`data-langue-fixe`), bouton de langue = autre adresse
+  (`data-autre-langue`, paramètres et ancre gardés, crochet `window.allerVers` des tests), ancien lien `?lang=ar` renvoyé vers ar/, langue
+  gardée renvoyée seulement en venant d'une page du site (jamais robot, Google, lien partagé, cadre) ; liens de pages = `window.racinePages()`
+  (aussi dans pass.js), fichiers = `data-racine`. Descriptions françaises sans mots arabes (la page arabe a les siens). Tests : bloc « une adresse
+  par langue » de test_site.mjs (88 vérifications), 2 sabotages de plus (8), scénarios arabes du visiteur simulé sur `ar/…`, `page(…, { lang: "ar" })`
+  ouvre ar/<chemin>. Boutons WhatsApp (`.partage`, `.btn-wa`) en vert #1A7F45 (contraste 4,5 en clair). VERSION 20261121c, CACHE_VERSION 2 (sw.js : ar/ = pages HTML, réseau d'abord).
