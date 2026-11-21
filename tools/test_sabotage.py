@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""Sabotage volontaire (règle commune) : on abîme une COPIE du site de 6 façons ; chaque fois, tools/test_site.mjs doit échouer.
+"""Sabotage volontaire (règle commune) : on abîme une COPIE du site de 8 façons ; chaque fois, tools/test_site.mjs doit échouer.
   python tools/test_sabotage.py      (lancé aussi par .github/workflows/tests.yml)
 Ancres courtes et stables (règle du 08/10/2026) : si une ancre n'est plus trouvée, le test le dit (à adapter dans le même commit)."""
 import os, shutil, subprocess, sys, tempfile
@@ -12,6 +12,9 @@ SABOTAGES = [
     ("assets/page.js", '<button class="partager"', '<button class="x-partager"', "bouton Partager retiré"),
     ("assets/agenda.js", "alarmes: [15, 7, 1]", "alarmes: [15, 7]", "une alarme de l'agenda retirée"),
     ("assets/carnet.js", "coutKm = entre.reduce", "coutKm = 2 * entre.reduce", "coût au kilomètre faux"),
+    # une adresse par langue (21/11/2026) : page arabe modifiée à la main (hreflang retiré), renvoi « ?lang=ar » oublié
+    ("ar/vignette/index.html", '<link rel="alternate" hreflang="x-default"', '<link rel="alternate" hreflang="x-defaut"', "page arabe modifiée à la main (hreflang)"),
+    ("assets/page.js", "if (voulue && voulue !== FIXE && !robot) aller();", "", "ancien lien ?lang=ar plus renvoyé vers ar/"),
 ]
 IGNORER = shutil.ignore_patterns("node_modules", ".git", "_icone", "__pycache__")
 

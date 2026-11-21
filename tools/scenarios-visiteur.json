@@ -630,7 +630,7 @@
   "lire": "#liste-echeances"
  },
  {
-  "page": "?lang=ar",
+  "page": "ar/",
   "nom": "accueil en arabe : fiche voiture -> échéances",
   "etapes": [
    {
@@ -643,5 +643,116 @@
    }
   ],
   "lire": "#liste-echeances"
+ },
+ {
+  "page": "ar/vignette/",
+  "nom": "vignette en arabe (ar/) : essence 4 CV",
+  "etapes": [
+   {
+    "sel": "#energie",
+    "valeur": "essence"
+   },
+   {
+    "sel": "#cv",
+    "valeur": "4"
+   }
+  ],
+  "lire": "#grand",
+  "groupe": "vignette-ar",
+  "ordre": 4,
+  "croissant": true
+ },
+ {
+  "page": "ar/vignette/",
+  "nom": "vignette en arabe (ar/) : essence 9 CV",
+  "etapes": [
+   {
+    "sel": "#energie",
+    "valeur": "essence"
+   },
+   {
+    "sel": "#cv",
+    "valeur": "9"
+   }
+  ],
+  "lire": "#grand",
+  "groupe": "vignette-ar",
+  "ordre": 9,
+  "croissant": true
+ },
+ {
+  "page": "ar/carburant/",
+  "nom": "carburant en arabe (ar/) : trajet 5 km",
+  "etapes": [
+   {
+    "sel": "#distance",
+    "valeur": "5"
+   }
+  ],
+  "lire": "#grand",
+  "groupe": "carburant-ar",
+  "ordre": 5,
+  "croissant": true
+ },
+ {
+  "page": "ar/carburant/",
+  "nom": "carburant en arabe (ar/) : trajet 50 km",
+  "etapes": [
+   {
+    "sel": "#distance",
+    "valeur": "50"
+   }
+  ],
+  "lire": "#grand",
+  "groupe": "carburant-ar",
+  "ordre": 50,
+  "croissant": true
+ },
+ {
+  "page": "ar/achat-vente/",
+  "nom": "mutation en arabe (ar/) : 4 CV, 8 ans",
+  "etapes": [
+   {
+    "sel": "#cv",
+    "valeur": "4"
+   },
+   {
+    "sel": "#age",
+    "valeur": "8"
+   }
+  ],
+  "lire": "#grand",
+  "groupe": "mutation-ar",
+  "ordre": 4,
+  "croissant": true
+ },
+ {
+  "page": "ar/achat-vente/",
+  "nom": "mutation en arabe (ar/) : 9 CV, 8 ans",
+  "etapes": [
+   {
+    "sel": "#cv",
+    "valeur": "9"
+   },
+   {
+    "sel": "#age",
+    "valeur": "8"
+   }
+  ],
+  "lire": "#grand",
+  "groupe": "mutation-ar",
+  "ordre": 9,
+  "croissant": true
+ },
+ {
+  "page": "ar/visite-technique/",
+  "nom": "visite technique en arabe (ar/) : voiture de 2020",
+  "etapes": [
+   {
+    "sel": "#circulation",
+    "valeur": "2020-06-15"
+   }
+  ],
+  "lire": "#grand"
  }
 ]

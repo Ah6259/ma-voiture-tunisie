@@ -76,8 +76,11 @@ async function ouvrir(chemin, { lang = "fr" } = {}) {
   const vc = new VirtualConsole();
   vc.on("jsdomError", e => { if (!/Not implemented|Could not load (img|link|script)/.test(e.message)) fautes.push(e.message); });
   const appels = [];
+  // une adresse par langue (21/11/2026) : la page arabe est ar/<chemin> (sinon ?lang=ar, page vidéo)
+  let q = "?lang=" + lang;
+  if (lang === "ar" && !chemin.startsWith("ar/") && existsSync(join(root, "ar", chemin))) { chemin = "ar/" + chemin; q = ""; }
   const dom = new JSDOM(lire(chemin), {
-    url: BASE + chemin.replace(/index\.html$/, "") + "?lang=" + lang,
+    url: BASE + chemin.replace(/index\.html$/, "") + q,
     runScripts: "dangerously", resources: ressources(), pretendToBeVisual: true, virtualConsole: vc,
     beforeParse(w) {
       // faux fetch : on note chaque envoi, rien ne part sur Internet
@@ -97,7 +100,8 @@ let w = await ouvrir("index.html"), d = w.document;
 check("accueil : aucune erreur JavaScript" + (w.fautes.length ? " — " + w.fautes[0] : ""), !w.fautes.length);
 const sec = d.getElementById("avis"), form = d.getElementById("avis-form");
 check("accueil : section #avis présente avec le formulaire #avis-form", !!sec && !!form && sec.contains(form));
-check("section : titre et textes en français ET en arabe", !!sec && /Votre avis/.test(sec.innerHTML) && /[؀-ۿ]/.test(sec.querySelector('[data-l="ar"]')?.textContent || ""));
+check("section : titre et textes en français ET en arabe (page arabe : ar/)", !!sec && /Votre avis/.test(sec.innerHTML)
+  && (/[؀-ۿ]/.test(sec.querySelector('[data-l="ar"]')?.textContent || "") || (existsSync(join(root, "ar/index.html")) && /id="avis"[\s\S]*رأيك/.test(lire("ar/index.html")))));
 check("formulaire : action = " + FORMSPREE + ", méthode POST", form?.getAttribute("action") === FORMSPREE && /post/i.test(form?.getAttribute("method") || ""));
 const msg = form?.querySelector("textarea[name=message]"), mail = form?.querySelector("input[name=email]");
 check("message : obligatoire, 1000 caractères max", !!msg && msg.required && msg.maxLength === 1000);
@@ -186,7 +190,7 @@ for (const p of pages) {
   const pied = ww.document.getElementById("pied") || ww.document.querySelector("footer");
   const liens = pied ? [...pied.querySelectorAll("a[href]")] : [];
   const ok = liens.some(l => { const u = new URL(l.getAttribute("href"), ww.location.href);
-    return u.hash === "#avis" && (u.origin + u.pathname).replace(/index\.html$/, "") === BASE && /Votre avis/.test(l.textContent); });
+    return u.hash === "#avis" && [BASE, BASE + "ar/"].includes((u.origin + u.pathname).replace(/index\.html$/, "")) && /Votre avis|رأيك/.test(l.textContent); });
   if (!ok) sansLien.push(p);
   if (ww.fautes.length) fautes.push(p + " : " + ww.fautes[0]);
   ww.close();

@@ -9,6 +9,10 @@ En ligne : https://voiture.clicvia.com/
 Page **« Comment fonctionne le site ? »** : https://voiture.clicvia.com/a-propos/ — mise à jour à chaque modification visible
 (règle commune § 44, gabarit `tools/gabarits/a-propos.html`, test `FONCTIONS` de `tools/test_site.mjs`).
 
+**Une adresse par langue** (21/11/2026) : chaque page existe en français (adresse actuelle) et en arabe (https://voiture.clicvia.com/ar/…),
+fabriquées par `python tools/construire.py` depuis `tools/gabarits/`, `tools/sources/index.html` (accueil) et `tools/textes-ar.json` ;
+ne jamais modifier les pages ni `ar/` à la main.
+
 ## Comment il vit tout seul
 - Site statique sur GitHub Pages ; tous les calculs se font dans le téléphone du visiteur (rien n'est envoyé).
 - Robot `surveillance.yml` (chaque jour) : guette les annonces officielles et les tarifs de l'ATTT ; en cas de changement,
