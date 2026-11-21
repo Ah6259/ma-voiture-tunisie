@@ -412,3 +412,17 @@ table.bareme td:last-child:not(.m){white-space:normal;text-align:start}
 .rappel-pass .rappel-avis{font-weight:700;color:var(--vert)}
 .rappel-fermer{position:absolute;top:6px;inset-inline-end:6px;width:36px;height:36px;border:0;background:transparent;color:var(--doux);font-size:24px;line-height:1;cursor:pointer;border-radius:50%}
 .rappel-fermer:hover,.rappel-fermer:focus-visible{background:var(--ligne);color:var(--texte)}
+
+/* ---- mode sombre lisible (21/11/2026) : en sombre, la couleur principale devient claire -> texte foncé dessus ;
+   fonds blancs codés en dur -> fond de carte ---- */
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]) .menu a[aria-current="page"],
+  :root:not([data-theme="light"]) .btn-principal,
+  :root:not([data-theme="light"]) .avis-envoyer,
+  :root:not([data-theme="light"]) .btn-video-site,
+  :root:not([data-theme="light"]) .voitures-onglets button.on,
+  :root:not([data-theme="light"]) .paie-etapes>li::before{color:#0E1222}
+  :root:not([data-theme="light"]) .appli-btn,
+  :root:not([data-theme="light"]) .btn-video-partager{background:var(--carte)}
+  :root:not([data-theme="light"]) .partage{background:#157A3F}
+}

@@ -92,3 +92,7 @@ tests du site, pas de commit si rien de neuf) ; passage complet le LUNDI ou lanc
   (modèle `outils communs/page-404/` de projets-ahmed : le modifier là-bas puis `installer.py site "Ma voiture Tunisie" "#2B3990"`) ;
   pied (assets/page.js) : liens https://clicvia.com/confidentialite/ et /conditions/ (versions ar/ quand la page est en arabe) ;
   test_site.mjs bloque si la 404 ou un lien manque (FR + AR, toutes les pages) ; 404.html exclue de test_sw / test_avis. Version 20261117a.
+
+- **21/11/2026 — mode sombre lisible (Ahmed, tous les sites)** : bloc final de `assets/style.css` : en sombre, texte foncé sur la couleur
+  principale devenue claire (menu actif « Mes échéances », `.btn-principal` « Ajouter les rappels à mon agenda », « Envoyer », onglets), `.partage`
+  vert plus foncé, fonds blancs codés en dur -> `--carte`. Mode clair inchangé. Contrôle « contraste < 3 » : 3 -> 0 (8 pages). VERSION 20261121a.
