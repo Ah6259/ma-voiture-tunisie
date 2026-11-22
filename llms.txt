@@ -1,22 +1,23 @@
 # Ma voiture Tunisie — vignette, visite technique, assurance : vos échéances
 
-> Gratuit, sans inscription : date limite de la vignette 2026 (5 mars pair, 5 avril impair), prochaine visite technique, fin d'assurance et vidange, avec des rappels dans l'agenda de votre téléphone. معلوم الجولان، الفحص الفني، التأمين.
+> Gratuit, sans inscription : date limite de la vignette, prochaine visite technique, fin d'assurance et vidange de votre voiture en Tunisie, avec des rappels dans l'agenda de votre téléphone. معلوم الجولان، الفحص الفني، التأمين.
 
 Site gratuit et indépendant, publié par Clicvia (https://clicvia.com/), le portail de services pratiques pour la Tunisie. Adresse : https://voiture.clicvia.com/
-Langues : français, arabe.
+Langues : français (https://voiture.clicvia.com/) et arabe (https://voiture.clicvia.com/ar/), une adresse par langue.
 
 ## Pages principales
 
-- [Vignette 2026 : combien et avant quand ?](https://voiture.clicvia.com/vignette/) : Combien coûte la vignette 2026 de votre voiture ? Barème officiel selon la puissance fiscale et le carburant (essence, diesel, GPL, électrique −50 %), date limite selon votre numéro, payer en ligne. معلوم الجولان 2026.
-- [Visite technique : quand la passer ?](https://voiture.clicvia.com/visite-technique/) : Calculez la date de votre prochaine visite technique (voiture particulière) : 4e année, puis tous les 2 ans, puis chaque année après 10 ans. Prix 36,500 DT depuis 2025, rendez-vous ATTT. الفحص الفني للسيارات.
-- [Prix des carburants en Tunisie et coût d'un trajet](https://voiture.clicvia.com/carburant/) : Prix officiels des carburants en Tunisie : sans plomb 2,525 DT, gasoil sans soufre 2,205 DT, gasoil 1,985 DT le litre (inchangés depuis novembre 2022). Calculez le coût d'un trajet et de votre mois. سعر البنزين في تونس.
-- [Acheter ou vendre une voiture : frais et papiers](https://voiture.clicvia.com/achat-vente/) : Combien coûte la mutation de la carte grise (barème ATTT : 145 DT jusqu'à 5 CV + 15 DT par CV, supplément selon l'âge) ? Liste des papiers, délai de 15 jours, contrat de vente prêt à remplir. نقل ملكية سيارة.
-- [Entretien de la voiture : quand faire quoi ?](https://voiture.clicvia.com/entretien/) : Tous les combien faire la vidange, changer la courroie de distribution, les pneus, le liquide de frein ? Repères simples et carnet des pleins et des réparations avec le coût au kilomètre. صيانة السيارة وتغيير الزيت.
-- [À propos et méthode](https://voiture.clicvia.com/a-propos/) : Comment Ma voiture Tunisie calcule vos échéances (vignette, visite technique, assurance, vidange) : sources officielles, limites, données gardées dans votre téléphone, crédits des photos.
+- [Mes échéances](https://voiture.clicvia.com/) : la fiche de votre voiture (groupe de la vignette, carburant, puissance fiscale, dates) donne la liste de vos prochaines échéances et un fichier agenda avec des rappels.
+- [Vignette : montant et date limite](https://voiture.clicvia.com/vignette/) : barème officiel selon la puissance fiscale et le carburant, date limite selon le numéro d'immatriculation, lien de paiement officiel.
+- [Visite technique : quand la passer ?](https://voiture.clicvia.com/visite-technique/) : date de la prochaine visite technique d'une voiture particulière, prix, prise de rendez-vous à l'ATTT.
+- [Prix des carburants et coût d'un trajet](https://voiture.clicvia.com/carburant/) : prix officiels des carburants en Tunisie, coût d'un trajet et du mois.
+- [Acheter ou vendre une voiture](https://voiture.clicvia.com/achat-vente/) : frais de mutation de la carte grise (estimation d'après le barème ATTT), papiers à fournir, délais.
+- [Entretien de la voiture](https://voiture.clicvia.com/entretien/) : quand faire la vidange, la courroie, les pneus ; carnet des pleins et des réparations.
+- [Comment fonctionne le site ?](https://voiture.clicvia.com/a-propos/) : sources officielles, méthode, limites, données gardées dans votre téléphone.
 
 ## À savoir
 
-- Calculs indicatifs à partir des barèmes officiels (vignette, visite technique) ; la date de mise à jour des règles est écrite sur chaque page.
-- Site non officiel : en cas de doute, la source officielle indiquée sur la page fait foi.
-- Pour citer : « Ma voiture Tunisie — vignette, visite technique, assurance : vos échéances » avec le lien de la page utilisée.
+- Calculs indicatifs à partir des barèmes officiels ; la date de vérification des règles est écrite sur chaque page (montants à lire sur la page, toujours à jour).
+- Site non officiel, sans lien avec l'ATTT ni le ministère des Finances : en cas de doute, la source officielle indiquée sur la page fait foi.
+- Pour citer : « Ma voiture Tunisie (voiture.clicvia.com) » avec le lien de la page utilisée.
 - Les assistants IA qui répondent à une question en citant leur source sont les bienvenus ; l'aspiration du contenu pour entraîner un modèle n'est pas autorisée (voir robots.txt).
