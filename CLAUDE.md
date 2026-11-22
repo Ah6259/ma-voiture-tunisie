@@ -112,3 +112,13 @@ tests du site, pas de commit si rien de neuf) ; passage complet le LUNDI ou lanc
   (aussi dans pass.js), fichiers = `data-racine`. Descriptions françaises sans mots arabes (la page arabe a les siens). Tests : bloc « une adresse
   par langue » de test_site.mjs (88 vérifications), 2 sabotages de plus (8), scénarios arabes du visiteur simulé sur `ar/…`, `page(…, { lang: "ar" })`
   ouvre ar/<chemin>. Boutons WhatsApp (`.partage`, `.btn-wa`) en vert #1A7F45 (contraste 4,5 en clair). VERSION 20261121c, CACHE_VERSION 2 (sw.js : ar/ = pages HTML, réseau d'abord).
+
+## 22/11/2026 — Google + IA (demande d'Ahmed : « que Google et les IA indexent nos sites »)
+- État Search Console (21/11) : accueil « Crawled - currently not indexed » (dernière visite de Google le 12/10), vignette/ inconnue de Google ;
+  requêtes vues : « vignette tunisie » (position ~48), « prix vignette tunisie », « vignette tunisie 2026 ».
+- Accueil (tools/sources/index.html) : JSON-LD WebSite + éditeur `Organization` Clicvia (@id https://clicvia.com/#organisation, page Facebook),
+  retiré de la page arabe avec la FAQ (construire.py, comme avant).
+- « Comment fonctionne le site ? » (FR + AR, carte « Mises à jour automatiques et site indépendant ») : « Publié par Clicvia… pour nous
+  écrire : Votre avis » + ligne `FONCTIONS` (éditeur Clicvia).
+- `llms.txt` réécrit à la main SANS chiffre ni année (l'ancien, de l'outil commun du 13/10, écrivait prix des carburants, barème et « 2026 »).
+- À revoir en janvier 2027 : « 2026 » est écrit en dur dans la page vignette/ (titre, H1, description, FAQ) et dans la description de l'accueil.

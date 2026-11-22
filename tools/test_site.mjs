@@ -413,7 +413,8 @@ check("À propos : la page introuvable et les liens Confidentialité / Condition
     ["rappel de fin du Pass", /afficherRappel/.test(js), /avant la fin du Pass, un bandeau vous prévient/],
     ["vie privée", true, /Vos voitures, vos dates et vos dépenses sont gardées dans votre téléphone/],
     ["mises à jour automatiques", existsSync(join(root, "tools/surveillance.py")), /Un robot surveille chaque jour les annonces officielles/],
-    ["site indépendant", true, /Ce site est indépendant/]];
+    ["site indépendant", true, /Ce site est indépendant/],
+    ["éditeur Clicvia (données pour Google, 22/11/2026)", /clicvia\.com\/#organisation/.test(acc), /Publié par Clicvia/]];
   const manque = FONCTIONS.filter(([, sur, re]) => sur && !re.test(ap)).map(([n]) => n);
   check(`page « Comment fonctionne le site ? » à jour : titre et chaque fonction du site expliquée (${FONCTIONS.length} fonctions)` + (manque.length ? " — manque : " + manque.join(", ") : ""),
     manque.length === 0 && /<h1>[^]*?Comment fonctionne le site \?[^]*?كيف يعمل الموقع؟[^]*?<\/h1>/.test(brut)
