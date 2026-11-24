@@ -365,6 +365,29 @@ const VOITURE = JSON.stringify([{ id: "abcd1234", nom: "Clio", groupe: "pair", e
     && d.querySelector("header .entete-pass"));
   check("pass : formulaire Formspree (site « Ma voiture Tunisie », formule 9 DT 12 mois), saisie du code", d.querySelector('#pass-form[action="https://formspree.io/f/mwlpakqj"] input[name="site"][value="Ma voiture Tunisie"]')
     && d.querySelector('#pass-form input[name="formule"][value="Pass Ma voiture - 9 DT - 12 mois"]') && d.getElementById("code-form"));
+  // 24/11/2026 (règle d'Ahmed) : e-mail OBLIGATOIRE dans le formulaire du Pass (FR et ar/) ; sans e-mail -> message, rien n'est envoyé
+  {
+    const champOk = h => /<input id="pass-email" type="email" name="email" required maxlength="200" autocomplete="email">/.test(h);
+    check("pass : champ e-mail obligatoire (name=\"email\" required) juste après le téléphone, pages FR et ar/", champOk(lire("pass/index.html")) && champOk(lire("ar/pass/index.html"))
+      && d.querySelector("#pass-tel + label[for=pass-email] + input#pass-email[name=email][required]"));
+    const { d: d2, w: w2 } = await page("pass/index.html");
+    let envois = 0;
+    w2.fetch = async () => { envois++; return { ok: true, status: 200, json: async () => ({}) }; };
+    const f = d2.getElementById("pass-form");
+    f.querySelector("[name=nom]").value = "Test"; f.querySelector("[name=telephone]").value = "24 321 390"; f.querySelector("[name=conditions]").checked = true;
+    f.dispatchEvent(new w2.Event("submit", { bubbles: true, cancelable: true }));
+    const vide = d2.getElementById("pass-status").textContent;
+    f.querySelector("[name=email]").value = "pas-un-email";
+    f.dispatchEvent(new w2.Event("submit", { bubbles: true, cancelable: true }));
+    const faux = d2.getElementById("pass-status").textContent;
+    check("pass : sans e-mail ou e-mail invalide -> message d'erreur et rien n'est envoyé", envois === 0 && /Indiquez votre e-mail/.test(vide) && /E-mail invalide/.test(faux));
+    f.querySelector("[name=email]").value = "client@exemple.com";
+    let corps = null;
+    w2.fetch = async (u, o) => { envois++; corps = o && o.body; return { ok: true, status: 200, json: async () => ({}) }; };
+    f.dispatchEvent(new w2.Event("submit", { bubbles: true, cancelable: true }));
+    await new Promise(r => setTimeout(r, 20));
+    check("pass : avec un e-mail valide, la demande part à Formspree avec l'e-mail", envois === 1 && corps && corps.get("email") === "client@exemple.com" && /email: client@exemple\.com/.test(corps.get("pour_activer")));
+  }
   check("aucune trace de l'ancien Pass Journée (Outils pratiques) dans les pages du Pass", !/Pass Journée|Outils pratiques|باقة اليوم/.test(lire("pass/index.html") + lire("pass/conditions/index.html")));
 }
 

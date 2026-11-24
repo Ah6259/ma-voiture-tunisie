@@ -32,10 +32,10 @@
 <meta property="og:locale:alternate" content="ar_AR">
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;600;700;800&family=Noto+Kufi+Arabic:wght@400;600;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="../assets/style.css?v=20261121c">
-<script src="../assets/regles.js?v=20261121c"></script>
-<script src="../assets/page.js?v=20261121c"></script>
-<script src="../assets/pass.js?v=20261121c"></script>
+<link rel="stylesheet" href="../assets/style.css?v=20261124a">
+<script src="../assets/regles.js?v=20261124a"></script>
+<script src="../assets/page.js?v=20261124a"></script>
+<script src="../assets/pass.js?v=20261124a"></script>
 </head>
 <body data-pass>
 <header class="entete" id="entete"></header>
@@ -101,6 +101,8 @@
       <input id="pass-nom" name="nom" required maxlength="100" autocomplete="name">
       <label class="abo-etiquette" for="pass-tel"><span data-l="fr">Téléphone WhatsApp (8 chiffres)</span></label>
       <input id="pass-tel" name="telephone" required inputmode="tel" pattern="[0-9 +]{8,16}" maxlength="16" autocomplete="tel">
+      <label class="abo-etiquette" for="pass-email"><span data-l="fr">E-mail (vous y recevez votre code et les étapes du paiement)</span></label>
+      <input id="pass-email" type="email" name="email" required maxlength="200" autocomplete="email">
       <label class="case"><input type="checkbox" name="conditions" value="oui" required id="pass-conditions"> <span><span data-l="fr">J'accepte les <a href="conditions/">conditions du Pass Ma voiture</a>.</span></span></label>
       <input type="hidden" name="formule" value="Pass Ma voiture - 9 DT - 12 mois">
       <input type="hidden" name="site" value="Ma voiture Tunisie">
@@ -109,7 +111,7 @@
       <input type="text" name="_gotcha" class="abo-piege" tabindex="-1" autocomplete="off" aria-hidden="true">
       <button type="submit" class="btn-pro"><span data-l="fr">Envoyer ma demande</span></button>
       <p id="pass-status" role="status" aria-live="polite"></p>
-      <p class="petit"><span data-l="fr">Votre nom et votre téléphone servent seulement à vous envoyer votre code : ils ne sont jamais publiés ni vendus (envoi par le service Formspree). Rien n'est envoyé sans clic sur « Envoyer ».</span></p>
+      <p class="petit"><span data-l="fr">Votre nom, votre téléphone et votre e-mail servent seulement à vous envoyer votre code : ils ne sont jamais publiés ni vendus (envoi par le service Formspree). Rien n'est envoyé sans clic sur « Envoyer ».</span></p>
     </form>
     <div class="apres-abo" id="apres-pass" hidden>
       <h3><span data-l="fr">Merci, votre demande est bien reçue</span></h3>

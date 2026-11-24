@@ -150,6 +150,10 @@ function brancherFormulairePass() {
     const tel = telephoneTn(val("telephone"));
     if (!val("nom")) { dire("err", "Indiquez votre nom.", "اكتب اسمك."); champ("nom").focus(); return; }
     if (!tel) { dire("err", "Téléphone : 8 chiffres, par exemple 24 321 390.", "الهاتف: " + isoP("8") + " أرقام، مثال " + isoP("24 321 390") + "."); champ("telephone").focus(); return; }
+    // 24/11/2026 (règle d'Ahmed) : e-mail OBLIGATOIRE (un e-mail automatique enverra le code et les étapes du paiement)
+    const email = val("email");
+    if (!email) { dire("err", "Indiquez votre e-mail : vous y recevez votre code et les étapes du paiement.", "اكتب بريدك الإلكتروني: يصلك عليه رمزك وخطوات الدفع."); champ("email").focus(); return; }
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email)) { dire("err", "E-mail invalide, par exemple nom@exemple.com.", "البريد الإلكتروني غير صحيح، مثال " + isoP("nom@exemple.com") + "."); champ("email").focus(); return; }
     if (!champ("conditions").checked) { dire("err", "Cochez « J'accepte les conditions du Pass Ma voiture ».", "يجب الموافقة على شروط باقة سيارتك."); return; }
     const fini = () => {
       // message WhatsApp de la preuve de paiement : on ajoute le nom et le téléphone (= motif du paiement)
@@ -162,8 +166,9 @@ function brancherFormulairePass() {
     champ("page").value = location.href.split("#")[0];
     const donnees = new FormData(form);
     donnees.set("telephone", tel);
+    donnees.set("email", email);
     // ligne prête à recopier dans le bouton GitHub « pass » (dépôt privé)
-    donnees.set("pour_activer", "action: paye ; nom: " + val("nom") + " ; telephone: " + tel);
+    donnees.set("pour_activer", "action: paye ; nom: " + val("nom") + " ; telephone: " + tel + " ; email: " + email);
     bouton.disabled = true;
     dire("", "Envoi…", "جارٍ الإرسال…");
     fetch(form.getAttribute("action"), { method: "POST", body: donnees, headers: { "Accept": "application/json" } })

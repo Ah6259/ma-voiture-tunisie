@@ -32,10 +32,10 @@
 <meta property="og:locale:alternate" content="fr_FR">
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;600;700;800&family=Noto+Kufi+Arabic:wght@400;600;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="../../assets/style.css?v=20261121c">
-<script src="../../assets/regles.js?v=20261121c"></script>
-<script src="../../assets/page.js?v=20261121c"></script>
-<script src="../../assets/pass.js?v=20261121c"></script>
+<link rel="stylesheet" href="../../assets/style.css?v=20261124a">
+<script src="../../assets/regles.js?v=20261124a"></script>
+<script src="../../assets/page.js?v=20261124a"></script>
+<script src="../../assets/pass.js?v=20261124a"></script>
 </head>
 <body data-pass>
 <header class="entete" id="entete"></header>
@@ -101,6 +101,8 @@
       <input id="pass-nom" name="nom" required maxlength="100" autocomplete="name">
       <label class="abo-etiquette" for="pass-tel"><span data-l="ar">هاتف واتساب (⁦8⁩ أرقام)</span></label>
       <input id="pass-tel" name="telephone" required inputmode="tel" pattern="[0-9 +]{8,16}" maxlength="16" autocomplete="tel">
+      <label class="abo-etiquette" for="pass-email"><span data-l="ar">البريد الإلكتروني (يصلك عليه رمزك وخطوات الدفع)</span></label>
+      <input id="pass-email" type="email" name="email" required maxlength="200" autocomplete="email">
       <label class="case"><input type="checkbox" name="conditions" value="oui" required id="pass-conditions"> <span><span data-l="ar">أوافق على <a href="conditions/">شروط باقة سيارتك</a>.</span></span></label>
       <input type="hidden" name="formule" value="Pass Ma voiture - 9 DT - 12 mois">
       <input type="hidden" name="site" value="Ma voiture Tunisie">
@@ -109,7 +111,7 @@
       <input type="text" name="_gotcha" class="abo-piege" tabindex="-1" autocomplete="off" aria-hidden="true">
       <button type="submit" class="btn-pro"><span data-l="ar">أرسل طلبي</span></button>
       <p id="pass-status" role="status" aria-live="polite"></p>
-      <p class="petit"><span data-l="ar">يُستعمل اسمك وهاتفك فقط لإرسال الرمز إليك: لا يُنشران ولا يُباعان أبدًا (إرسال عبر خدمة ⁨Formspree⁩). لا يُرسل أي شيء دون الضغط على «أرسل».</span></p>
+      <p class="petit"><span data-l="ar">يُستعمل اسمك وهاتفك وبريدك الإلكتروني فقط لإرسال الرمز إليك: لا تُنشر ولا تُباع أبدًا (إرسال عبر خدمة ⁨Formspree⁩). لا يُرسل أي شيء دون الضغط على «أرسل».</span></p>
     </form>
     <div class="apres-abo" id="apres-pass" hidden>
       <h3><span data-l="ar">شكرًا، وصلنا طلبك</span></h3>

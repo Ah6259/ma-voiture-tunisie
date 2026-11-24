@@ -77,6 +77,8 @@ corps: data-pass
       <input id="pass-nom" name="nom" required maxlength="100" autocomplete="name">
       <label class="abo-etiquette" for="pass-tel"><span data-l="fr">Téléphone WhatsApp (8 chiffres)</span><span data-l="ar">هاتف واتساب (⁦8⁩ أرقام)</span></label>
       <input id="pass-tel" name="telephone" required inputmode="tel" pattern="[0-9 +]{8,16}" maxlength="16" autocomplete="tel">
+      <label class="abo-etiquette" for="pass-email"><span data-l="fr">E-mail (vous y recevez votre code et les étapes du paiement)</span><span data-l="ar">البريد الإلكتروني (يصلك عليه رمزك وخطوات الدفع)</span></label>
+      <input id="pass-email" type="email" name="email" required maxlength="200" autocomplete="email">
       <label class="case"><input type="checkbox" name="conditions" value="oui" required id="pass-conditions"> <span><span data-l="fr">J'accepte les <a href="conditions/">conditions du Pass Ma voiture</a>.</span><span data-l="ar">أوافق على <a href="conditions/">شروط باقة سيارتك</a>.</span></span></label>
       <input type="hidden" name="formule" value="Pass Ma voiture - 9 DT - 12 mois">
       <input type="hidden" name="site" value="Ma voiture Tunisie">
@@ -85,7 +87,7 @@ corps: data-pass
       <input type="text" name="_gotcha" class="abo-piege" tabindex="-1" autocomplete="off" aria-hidden="true">
       <button type="submit" class="btn-pro"><span data-l="fr">Envoyer ma demande</span><span data-l="ar">أرسل طلبي</span></button>
       <p id="pass-status" role="status" aria-live="polite"></p>
-      <p class="petit"><span data-l="fr">Votre nom et votre téléphone servent seulement à vous envoyer votre code : ils ne sont jamais publiés ni vendus (envoi par le service Formspree). Rien n'est envoyé sans clic sur « Envoyer ».</span><span data-l="ar">يُستعمل اسمك وهاتفك فقط لإرسال الرمز إليك: لا يُنشران ولا يُباعان أبدًا (إرسال عبر خدمة ⁨Formspree⁩). لا يُرسل أي شيء دون الضغط على «أرسل».</span></p>
+      <p class="petit"><span data-l="fr">Votre nom, votre téléphone et votre e-mail servent seulement à vous envoyer votre code : ils ne sont jamais publiés ni vendus (envoi par le service Formspree). Rien n'est envoyé sans clic sur « Envoyer ».</span><span data-l="ar">يُستعمل اسمك وهاتفك وبريدك الإلكتروني فقط لإرسال الرمز إليك: لا تُنشر ولا تُباع أبدًا (إرسال عبر خدمة ⁨Formspree⁩). لا يُرسل أي شيء دون الضغط على «أرسل».</span></p>
     </form>
     <div class="apres-abo" id="apres-pass" hidden>
       <h3><span data-l="fr">Merci, votre demande est bien reçue</span><span data-l="ar">شكرًا، وصلنا طلبك</span></h3>

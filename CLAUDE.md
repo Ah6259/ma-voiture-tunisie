@@ -131,3 +131,8 @@ tests du site, pas de commit si rien de neuf) ; passage complet le LUNDI ou lanc
   écrire : Votre avis » + ligne `FONCTIONS` (éditeur Clicvia).
 - `llms.txt` réécrit à la main SANS chiffre ni année (l'ancien, de l'outil commun du 13/10, écrivait prix des carburants, barème et « 2026 »).
 - À revoir en janvier 2027 : « 2026 » est écrit en dur dans la page vignette/ (titre, H1, description, FAQ) et dans la description de l'accueil.
+
+## 24/11/2026 — Pass : e-mail OBLIGATOIRE (règle d'Ahmed, tous les sites à Pass)
+- Formulaire `#pass-form` (gabarit `tools/gabarits/pass.html`, FR + ar/) : champ `#pass-email` (`type="email" name="email" required`) après le
+  téléphone ; `assets/pass.js` refuse l'envoi sans e-mail ou e-mail invalide, l'envoie à Formspree (et dans `pour_activer`). Conditions § données
+  et petit texte du formulaire : e-mail ajouté. Tests test_site.mjs (champ FR + AR, jsdom : rien n'est envoyé sans e-mail). VERSION 20261124a.
