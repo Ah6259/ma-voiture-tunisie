@@ -149,3 +149,4 @@ tests du site, pas de commit si rien de neuf) ; passage complet le LUNDI ou lanc
   (mauvais format ou déjà utilisé = refusé) ; champ code vide = ancien comportement. Le Pass dure toujours 12 mois à partir de l'activation.
 - Textes : motif = code de commande partout (pass, conditions § 4-5, a-propos) ; test « plus aucun motif : nom et téléphone ».
   Tests « parcours commun » de test_site.mjs (FR + AR) + ligne FONCTIONS ; 9 sabotages de plus dans test_sabotage.py (17). VERSION 20261125b.
+- **25/11/2026 (soir, demande d'Ahmed)** : WhatsApp de la preuve = code + NOM + formule (nom lu au formulaire, jamais gardé dans `pass-commande` : au retour, code + formule) ; étiquette « E-mail » seule et erreur « Indiquez votre e-mail. » tant que `EMAIL_AUTO = false` (promesse dans `.email-auto`, cachée) ; 2 sabotages de plus (19). VERSION 20261125c.

@@ -381,7 +381,7 @@ const VOITURE = JSON.stringify([{ id: "abcd1234", nom: "Clio", groupe: "pair", e
     f.querySelector("[name=email]").value = "pas-un-email";
     f.dispatchEvent(new w2.Event("submit", { bubbles: true, cancelable: true }));
     const faux = d2.getElementById("pass-status").textContent;
-    check("pass : sans e-mail ou e-mail invalide -> message d'erreur et rien n'est envoyé", envois === 0 && /Indiquez votre e-mail/.test(vide) && /E-mail invalide/.test(faux));
+    check("pass : sans e-mail (erreur courte « Indiquez votre e-mail. », sans promesse) ou e-mail invalide -> message d'erreur et rien n'est envoyé", envois === 0 && vide === "Indiquez votre e-mail." && /E-mail invalide/.test(faux));
     f.querySelector("[name=email]").value = "client@exemple.com";
     let corps = null;
     w2.fetch = async (u, o) => { envois++; corps = o && o.body; return { ok: true, status: 200, json: async () => ({}) }; };
@@ -406,6 +406,12 @@ const VOITURE = JSON.stringify([{ id: "abcd1234", nom: "Clio", groupe: "pair", e
     const L = lang === "ar" ? " (ar/)" : "";
     const { w, d } = await page("pass/index.html", { lang });
     const f = d.getElementById("pass-form");
+    { // 25/11/2026 : l'e-mail automatique n'est pas encore en service -> l'étiquette ne promet rien (partie « vous y recevez… » cachée)
+      const lab = d.querySelector('label[for="pass-email"]'), cache = lab && lab.querySelector(".email-auto");
+      const court = lab ? lab.querySelector(`:scope > [data-l="${lang}"]`).textContent : "";
+      check(`formulaire${L} : étiquette « ${lang === "ar" ? "البريد الإلكتروني" : "E-mail"} » seule, promesse « ${lang === "ar" ? "يصلك عليه رمزك وخطوات الدفع" : "vous y recevez votre code et les étapes du paiement"} » PAS visible (EMAIL_AUTO = false)`,
+        court === (lang === "ar" ? "البريد الإلكتروني" : "E-mail") && !!cache && cache.hidden
+        && cache.textContent.includes(lang === "ar" ? "يصلك عليه رمزك وخطوات الدفع" : "vous y recevez votre code et les étapes du paiement")); }
     const requis = ["nom", "telephone", "email", "conditions"].every(n => f.querySelector(`[name="${n}"][required]`)) && /\S/.test(f.querySelector('[name="formule"]').value);
     let envois = 0, corps = null;
     w.fetch = async (u, o) => { envois++; corps = o && o.body; return { ok: true, status: 200, json: async () => ({}) }; };
@@ -418,6 +424,8 @@ const VOITURE = JSON.stringify([{ id: "abcd1234", nom: "Clio", groupe: "pair", e
     await attendre(() => !d.getElementById("apres-pass").hidden);
     const apres = d.getElementById("apres-pass"), code = (d.getElementById("commande-code") || {}).textContent || "";
     const ta = apres.textContent.replace(/\s+/g, " ");
+    // lien WhatsApp lu tout de suite (les essais EMAIL_AUTO ci-dessous refont la page sans le nom, comme un retour sur la page)
+    const wa = decodeURIComponent((apres.querySelector("a.btn-wa") || { href: "" }).href.split("?text=")[1] || "");
     check(`parcours commun${L} : après l'envoi, « Dernière étape » remplace le formulaire, code au bon format affiché en gros (dir=ltr)`,
       envois === 1 && f.hidden && !apres.hidden && FORMAT.test(code) && d.getElementById("commande-code").getAttribute("dir") === "ltr" && d.querySelector("#apres-pass .code-gros#commande-code"));
     // l'e-mail automatique n'est PAS encore en service (25/11/2026) : la phrase « Vous le recevez aussi par e-mail » existe mais reste CACHÉE (EMAIL_AUTO = false)
@@ -437,9 +445,8 @@ const VOITURE = JSON.stringify([{ id: "abcd1234", nom: "Clio", groupe: "pair", e
     check(`parcours commun${L} : paiement en 3 étapes (D17, IZI, ${lang === "ar" ? "24321390 sans espaces" : "24 321 390"}), motif = le code`,
       etapes.length === 3 && apres.querySelector('img[alt="D17"]') && apres.querySelector('img[alt="IZI"]') && etapes[1].textContent.includes(lang === "ar" ? "24321390" : "24 321 390")
       && etapes[2].textContent.includes(code) && (lang === "ar" ? /سبب الدفع/.test(etapes[2].textContent) : /Motif/.test(etapes[2].textContent)));
-    const wa = decodeURIComponent((apres.querySelector("a.btn-wa") || { href: "" }).href.split("?text=")[1] || "");
-    check(`parcours commun${L} : bouton vert WhatsApp pré-rempli AVEC le code et la formule`, lang === "ar"
-      ? wa.startsWith("هذا وصل الدفع — مواعيد سيارتك — الرمز " + code + " — ") : wa === "Voici ma preuve de paiement — Ma voiture Tunisie — code " + code + " — Pass Ma voiture - 9 DT - 12 mois");
+    check(`parcours commun${L} : bouton vert WhatsApp pré-rempli AVEC le code, le NOM (25/11/2026) et la formule`, lang === "ar"
+      ? wa === "هذا وصل الدفع — مواعيد سيارتك — الرمز " + code + " — Client Test — باقة سيارتك - 9 د - 12 شهرًا" : wa === "Voici ma preuve de paiement — Ma voiture Tunisie — code " + code + " — Client Test — Pass Ma voiture - 9 DT - 12 mois");
     check(`parcours commun${L} : le code part à Formspree (champ code, sujet, ligne pour_activer « … ; code: CODE »)`,
       corps && corps.get("code") === code && /code [A-Z2-9]{8}$/.test(corps.get("_subject")) && corps.get("pour_activer") === `action: paye ; nom: Client Test ; telephone: 24321390 ; email: client@exemple.com ; code: ${code}`);
     let memo = {}; try { memo = JSON.parse(w.localStorage.getItem("pass-commande")); } catch (e) {}
@@ -453,7 +460,7 @@ const VOITURE = JSON.stringify([{ id: "abcd1234", nom: "Clio", groupe: "pair", e
     const ban = r.d.getElementById("commande-attente");
     check(`parcours commun${L} : retour sur la page = bandeau « commande en attente » (code + formule), « En attente de votre paiement », étapes et WhatsApp avec le code, « Nouvelle commande »`,
       !ban.hidden && ban.textContent.includes(code) && (lang === "ar" ? /طلبك في الانتظار/.test(ban.textContent) && /في انتظار دفعتك/.test(ban.textContent) : /Votre commande en attente :/.test(ban.textContent) && /En attente de votre paiement/.test(ban.textContent))
-      && !r.d.getElementById("apres-pass").hidden && r.d.getElementById("pass-form").hidden && r.d.querySelector("#apres-pass a.btn-wa").href.includes(code) && r.d.getElementById("commande-nouvelle") && !r.w.eval("passActif()"));
+      && !r.d.getElementById("apres-pass").hidden && r.d.getElementById("pass-form").hidden && r.d.querySelector("#apres-pass a.btn-wa").href.includes(code) && !decodeURIComponent(r.d.querySelector("#apres-pass a.btn-wa").href).includes("Client Test") && r.d.getElementById("commande-nouvelle") && !r.w.eval("passActif()"));
     r.d.getElementById("commande-nouvelle").click();
     check(`parcours commun${L} : « Nouvelle commande » efface la mémoire et rouvre le formulaire`, !r.w.localStorage.getItem("pass-commande") && !r.d.getElementById("pass-form").hidden && r.d.getElementById("apres-pass").hidden && r.d.getElementById("commande-attente").hidden);
   }

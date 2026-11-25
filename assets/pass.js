@@ -168,17 +168,19 @@ function ecrireCommande(c) {
   } catch (e) {}
 }
 function formuleLisible(f) { return T(f || "Pass Ma voiture - 9 DT - 12 mois", "باقة سيارتك - " + isoP("9") + " د - " + isoP("12") + " شهرًا"); }
-// message WhatsApp de la preuve de paiement, AVEC le code (le client n'a rien à recopier)
-function texteWhatsappCommande(c) {
-  return T("Voici ma preuve de paiement — Ma voiture Tunisie — code " + c.code + " — " + (c.formule || "Pass Ma voiture - 9 DT - 12 mois"),
-    "هذا وصل الدفع — مواعيد سيارتك — الرمز " + c.code + " — باقة سيارتك - 9 د - 12 شهرًا");
+// message WhatsApp de la preuve de paiement, AVEC le code et le NOM (demande d'Ahmed du 25/11/2026 ; le client n'a rien à recopier).
+// Le nom vient du formulaire au moment de l'envoi ; il n'est JAMAIS gardé par le téléphone : au retour (bandeau), code + formule seulement.
+function texteWhatsappCommande(c, nom) {
+  const n = nom ? " — " + nom : "";
+  return T("Voici ma preuve de paiement — Ma voiture Tunisie — code " + c.code + n + " — " + (c.formule || "Pass Ma voiture - 9 DT - 12 mois"),
+    "هذا وصل الدفع — مواعيد سيارتك — الرمز " + c.code + n + " — باقة سيارتك - 9 د - 12 شهرًا");
 }
-function montrerCommande(c, { bandeau } = {}) {
+function montrerCommande(c, { bandeau, nom } = {}) {
   document.querySelectorAll(".code-commande-txt").forEach(e => { e.textContent = c.code; });
   document.querySelectorAll(".commande-formule").forEach(e => { e.textContent = formuleLisible(c.formule); });
   document.querySelectorAll(".commande-email").forEach(e => { e.hidden = !PASS.emailAuto; });
   document.querySelectorAll("a.btn-wa[data-texte]").forEach(a =>
-    a.setAttribute("href", "https://wa.me/" + PASS.whatsapp + "?text=" + encodeURIComponent(texteWhatsappCommande(c))));
+    a.setAttribute("href", "https://wa.me/" + PASS.whatsapp + "?text=" + encodeURIComponent(texteWhatsappCommande(c, nom))));
   const form = document.getElementById("pass-form"), apres = document.getElementById("apres-pass"), haut = document.getElementById("commande-attente");
   if (form) form.hidden = true;
   if (apres) apres.hidden = false;
@@ -217,6 +219,8 @@ function brancherFormulairePass() {
   const form = document.getElementById("pass-form");
   if (!form || form.dataset.branche) return;
   form.dataset.branche = "1";
+  // « vous y recevez votre code et les étapes du paiement » (étiquette de l'e-mail) : montré seulement quand l'e-mail automatique marche
+  document.querySelectorAll(".email-auto").forEach(x => { x.hidden = !EMAIL_AUTO; });
   const statut = document.getElementById("pass-status"), bouton = form.querySelector("button[type=submit]");
   const apres = document.getElementById("apres-pass");
   const dire = (classe, fr, ar) => { statut.className = classe; statut.textContent = T(fr, ar); };
@@ -236,7 +240,11 @@ function brancherFormulairePass() {
     if (!tel) { dire("err", "Téléphone : 8 chiffres, par exemple 24 321 390.", "الهاتف: " + isoP("8") + " أرقام، مثال " + isoP("24 321 390") + "."); champ("telephone").focus(); return; }
     // 24/11/2026 (règle d'Ahmed) : e-mail OBLIGATOIRE (un e-mail automatique enverra le code et les étapes du paiement)
     const email = val("email");
-    if (!email) { dire("err", "Indiquez votre e-mail : vous y recevez votre code et les étapes du paiement.", "اكتب بريدك الإلكتروني: يصلك عليه رمزك وخطوات الدفع."); champ("email").focus(); return; }
+    if (!email) {
+      if (EMAIL_AUTO) dire("err", "Indiquez votre e-mail : vous y recevez votre code et les étapes du paiement.", "اكتب بريدك الإلكتروني: يصلك عليه رمزك وخطوات الدفع.");
+      else dire("err", "Indiquez votre e-mail.", "اكتب بريدك الإلكتروني.");
+      champ("email").focus(); return;
+    }
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email)) { dire("err", "E-mail invalide, par exemple nom@exemple.com.", "البريد الإلكتروني غير صحيح، مثال " + isoP("nom@exemple.com") + "."); champ("email").focus(); return; }
     if (!champ("conditions").checked) { dire("err", "Cochez « J'accepte les conditions du Pass Ma voiture ».", "يجب الموافقة على شروط باقة سيارتك."); return; }
     // formulaire valide : le code de commande est créé ICI (jamais après le paiement)
@@ -244,7 +252,7 @@ function brancherFormulairePass() {
     const commande = { code: codeEnCours, formule: val("formule"), date: aujourdhui() };
     const fini = () => {
       ecrireCommande(commande);
-      montrerCommande(commande);
+      montrerCommande(commande, { nom: val("nom") });       // nom dans le message WhatsApp, jamais dans la mémoire
       if (apres) { try { apres.scrollIntoView({ block: "start" }); } catch (x) {} }
     };
     if (val("_gotcha")) { fini(); return; }                // champ piège rempli = robot : rien n'est envoyé

@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""Sabotage volontaire (règle commune) : on abîme une COPIE du site de 17 façons ; chaque fois, tools/test_site.mjs doit échouer.
+"""Sabotage volontaire (règle commune) : on abîme une COPIE du site de 19 façons ; chaque fois, tools/test_site.mjs doit échouer.
   python tools/test_sabotage.py      (lancé aussi par .github/workflows/tests.yml)
 Ancres courtes et stables (règle du 08/10/2026) : si une ancre n'est plus trouvée, le test le dit (à adapter dans le même commit)."""
 import os, shutil, subprocess, sys, tempfile
@@ -26,6 +26,9 @@ SABOTAGES = [
     ("assets/pass.js", "age <= PASS.commandeJours", "age <= 9999", "commande gardée plus de 60 jours"),
     ("assets/pass.js", 'if (haut && bandeau) haut.hidden = false;', "", "bandeau « commande en attente » absent au retour"),
     ("assets/pass.js", "e.hidden = !PASS.emailAuto;", "e.hidden = false;", "phrase « aussi par e-mail » affichée alors que l'e-mail automatique n'existe pas"),
+    # 25/11/2026 (demande d'Ahmed) : nom dans le message WhatsApp ; pas de promesse d'e-mail dans l'étiquette tant que EMAIL_AUTO = false
+    ("assets/pass.js", 'const n = nom ? " — " + nom : "";', 'const n = "";', "nom absent du message WhatsApp de la preuve"),
+    ("assets/pass.js", "x.hidden = !EMAIL_AUTO; });", "x.hidden = false; });", "étiquette de l'e-mail qui promet le code par e-mail"),
 ]
 IGNORER = shutil.ignore_patterns("node_modules", ".git", "_icone", "__pycache__")
 
