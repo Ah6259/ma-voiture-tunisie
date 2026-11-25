@@ -51,7 +51,7 @@ const MENU_SITE = [
   window.T = (fr, ar) => html.lang === "ar" ? ar : fr;
 
   function cadre() {
-    // bouton doré « Pass Rappels » : SEULEMENT sur les pages du Pass (<body data-pass>), jamais sur l'accueil
+    // bouton doré « Pass Ma voiture » (un seul nom partout depuis le 25/11/2026, avant « Pass Rappels ») : SEULEMENT sur les pages du Pass (<body data-pass>), jamais sur l'accueil
     // (règle commune : le payant est découvert au moment du besoin). Voir assets/pass.js.
     const passIci = !!document.body && document.body.hasAttribute("data-pass");
     const ici = location.pathname.replace(/index\.html$/, ""), P = site();
@@ -64,7 +64,7 @@ const MENU_SITE = [
             <small>${T("Gratuit · vignette, visite, assurance", "مجاني · الجولان، الفحص، التأمين")}</small></span>
         </a>
         <div class="entete-boutons">
-          ${passIci ? `<a class="entete-pass${typeof passActif === "function" && passActif() ? " actif" : ""}" href="${P}pass/"><span class="long">${T("Pass Rappels", "باقة التذكير")}</span><span class="court">${T("Pass", "الباقة")}</span></a>` : ""}
+          ${passIci ? `<a class="entete-pass${typeof passActif === "function" && passActif() ? " actif" : ""}" href="${P}pass/" data-clic="pass-entete"><span class="long">${T("Pass Ma voiture", "باقة سيارتك")}</span><span class="court">${T("Pass", "الباقة")}</span></a>` : ""}
           <button class="partager" type="button" aria-label="${T("Partager cette page", "شارك هذه الصفحة")}" title="${T("Partager", "شارك")}"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="M8.6 13.5l6.8 4M15.4 6.5l-6.8 4"/></svg></button>
           <button class="langue" type="button" aria-label="${T("Lire en arabe", "Lire en français")}" title="${T("العربية", "Français")}">${T("ع", "Fr")}</button>
         </div>
@@ -84,7 +84,7 @@ const MENU_SITE = [
           <a href="${P}achat-vente/">${T("Acheter ou vendre une voiture", "شراء أو بيع سيارة")}</a>
           <a href="${P}entretien/">${T("Entretien", "الصيانة")}</a>
           <a href="${P}a-propos/">${T("Comment fonctionne le site ?", "كيف يعمل الموقع؟")}</a>
-          ${P ? `<a href="${P}pass/">${T("Pass Rappels", "باقة التذكير")}</a>` : ""}
+          ${P ? `<a href="${P}pass/" data-clic="pass-pied">${T("Pass Ma voiture", "باقة سيارتك")}</a>` : ""}
           <a href="${P}#avis">${T("Votre avis", "رأيك")}</a>
         <a href="https://clicvia.com/" rel="noopener" target="_blank">${T("Tous nos services", "كل خدماتنا")}</a>
         <a href="${T("https://clicvia.com/confidentialite/", "https://clicvia.com/ar/confidentialite/")}" rel="noopener" target="_blank">${T("Confidentialité", "الخصوصية")}</a>
@@ -197,6 +197,22 @@ document.addEventListener("click", e => {
   const a = e.target.closest && e.target.closest("a[data-compteur]");
   if (!a) return;
   try { if (window.goatcounter && window.goatcounter.count) window.goatcounter.count({ path: a.dataset.compteur, title: "Lien vers un autre site : " + a.dataset.compteur, event: true }); } catch (x) { /* rien : le lien marche sans */ }
+});
+
+/* Clics vers le Pass Ma voiture (25/11/2026, décision d'Ahmed ; PAS de gratuité) : tout lien data-clic="<nom>" (encadrés des pages vignette
+   et visite technique, encart de la 2e voiture et du carnet, pied de page, en-tête des pages du Pass, rappel « Renouveler mon Pass ») est compté
+   dans GoatCounter comme un ÉVÉNEMENT « /ma-voiture-tunisie/clic/<nom> » (préfixe du site, compteur commun), sans savoir qui clique.
+   Rien si GoatCounter est absent ou bloqué ; le lien s'ouvre toujours. */
+const TITRES_CLIC = { "pass-vignette": "Clic vers le Pass (page vignette)", "pass-visite": "Clic vers le Pass (page visite technique)",
+  "pass-2e-voiture": "Clic vers le Pass (2e voiture)", "pass-entretien": "Clic vers le Pass (carnet des dépenses)", "pass-pied": "Clic vers le Pass (pied de page)",
+  "pass-entete": "Clic vers le Pass (en-tête)", "pass-rappel": "Clic « Renouveler mon Pass » (rappel de fin)", "pass-a-propos": "Clic vers le Pass (Comment fonctionne le site)" };
+document.addEventListener("click", e => {
+  const a = e.target && e.target.closest && e.target.closest("a[data-clic]");
+  if (!a) return;
+  const nom = (a.getAttribute("data-clic") || "").replace(/[^a-z0-9-]/g, "");
+  if (!nom) return;
+  try { if (window.goatcounter && typeof window.goatcounter.count === "function")
+    window.goatcounter.count({ path: "/ma-voiture-tunisie/clic/" + nom, title: TITRES_CLIC[nom] || "Clic " + nom, event: true }); } catch (x) { /* rien : le lien marche sans */ }
 });
 
 /* >>> vidéo de présentation : page video/ partagée par le bouton « Partager » (outil vidéos d'Ahmed) */

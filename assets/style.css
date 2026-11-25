@@ -435,3 +435,8 @@ table.bareme td:last-child:not(.m){white-space:normal;text-align:start}
   :root:not([data-theme="light"]) .btn-video-partager{background:var(--carte)}
   :root:not([data-theme="light"]) .partage{background:#157A3F}
 }
+/* 25/11/2026 — encadré « Vous avez plusieurs voitures ? » vers le Pass Ma voiture (pages vignette et visite technique ; décision d'Ahmed, pas de gratuité) */
+.encadre-pass{border-left:5px solid #F2B33D}
+html[dir="rtl"] .encadre-pass{border-left:1px solid var(--ligne);border-right:5px solid #F2B33D}
+.encadre-pass .encadre-texte{margin:0;font-weight:700;font-size:16px;line-height:1.45;color:var(--texte)}
+.encadre-pass .encadre-bouton{margin:0}

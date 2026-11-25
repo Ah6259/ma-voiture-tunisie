@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""Sabotage volontaire (règle commune) : on abîme une COPIE du site de 20 façons ; chaque fois, tools/test_site.mjs doit échouer.
+"""Sabotage volontaire (règle commune) : on abîme une COPIE du site de 25 façons ; chaque fois, tools/test_site.mjs doit échouer.
   python tools/test_sabotage.py      (lancé aussi par .github/workflows/tests.yml)
 Ancres courtes et stables (règle du 08/10/2026) : si une ancre n'est plus trouvée, le test le dit (à adapter dans le même commit)."""
 import os, shutil, subprocess, sys, tempfile
@@ -28,6 +28,12 @@ SABOTAGES = [
     ("assets/pass-reglages.js", 'd.set("email", c.email);', 'd.delete("email");', "e-mail pas envoyé à Formspree"),
     ("tools/gabarits/pass.html", "tete: pass.js, pass-commun.js, pass-reglages.js", "tete: pass.js, pass-commun.js", "réglage du site pas chargé par la page"),
     ("tools/construire.py", "https://formspree.io https://api-email.clicvia.com;", "https://formspree.io;", "CSP qui bloque le service d'e-mail"),
+    # vers le Pass Ma voiture (25/11/2026, décision d'Ahmed, pas de gratuité) : un seul nom, encadrés, clics comptés
+    ("assets/page.js", '${T("Pass Ma voiture", "باقة سيارتك")}</a>` : ""}', '${T("Pass Rappels", "باقة التذكير")}</a>` : ""}', "ancien nom « Pass Rappels » remis dans le pied de page"),
+    ("assets/page.js", 'path: "/ma-voiture-tunisie/clic/" + nom', 'path: "clic/" + nom', "clic vers le Pass compté sans le préfixe du site"),
+    ("vignette/index.html", ' data-clic="pass-vignette"', "", "encadré de la page vignette sans clic compté"),
+    ("assets/pass.js", '${clic ? ` data-clic="${clic}"` : ""}', "", "encart de la 2e voiture et du carnet sans clic compté"),
+    ("tools/modele-video.html", "<b>Pass Ma voiture sur les pages vignette et visite technique</b>", "<b>Pass</b>", "« Comment fonctionne le site ? » sans l'encadré du Pass"),
 ]
 IGNORER = shutil.ignore_patterns("node_modules", ".git", "_icone", "__pycache__")
 

@@ -173,3 +173,18 @@ tests du site, pas de commit si rien de neuf) ; passage complet le LUNDI ou lanc
   rempli = commande pas gardée. Retour en arrière de l'e-mail : `emailAuto: false` dans pass-reglages.js.
 - Tests : test_site.mjs (empreinte, copie identique au module si projets-ahmed est à côté — variable `PROJETS_AHMED` pour une autre copie —,
   scripts dans l'ordre, module branché) ; test_sabotage.py : 20 sabotages (11 du réglage / module). VERSION 20261125e (module 2026-11-25c : 20261125f).
+
+## 25/11/2026 — Vers le Pass Ma voiture : un seul nom, encadrés, clics comptés ; PAS de gratuité (décision d'Ahmed)
+- **Un seul nom : « Pass Ma voiture » / « باقة سيارتك »** partout (avant : « Pass Rappels » / « باقة التذكير » dans le bouton de l'en-tête des pages
+  du Pass et le lien du pied, et « باقة سيارتي » dans la page arabe « Comment fonctionne le site ? »). Le service d'e-mail (sites.json de projets-ahmed,
+  bloc voiture) disait déjà « Pass Ma voiture » / « باقة سيارتك ». Test : plus aucun ancien nom dans les pages, assets ni gabarits.
+- **Encadré** sur `vignette/` et `visite-technique/` (FR + ar/, gabarits, juste sous le résultat, entre `<!--encadre-pass-->`) : « Vous avez plusieurs
+  voitures ? Rappels pour 5 voitures et carnet des dépenses : Pass Ma voiture, 9 DT par an. » / « لديك أكثر من سيارة؟ تذكيرات لـ5 سيارات ودفتر المصاريف:
+  باقة سيارتك، 9 د في السنة. » + vrai bouton doré « Voir le Pass Ma voiture » -> pass/ (« 12 mois, sans renouvellement automatique »). Prix inchangés,
+  rien de gratuit en plus ; rien de nouveau sur l'accueil ni dans l'en-tête.
+- **Clics vers pass/ comptés** (page.js, tout lien `data-clic`) : événements GoatCounter `/ma-voiture-tunisie/clic/pass-vignette`, `…/pass-visite`,
+  `…/pass-2e-voiture` (encart de la 2e voiture de l'accueil), `…/pass-entretien` (encart du carnet), `…/pass-pied`, `…/pass-entete` (pages du Pass),
+  `…/pass-rappel` (« Renouveler mon Pass »), `…/pass-a-propos`. Rien si GoatCounter est bloqué. Dans GoatCounter : chercher « clic/ ».
+  `htmlEncartPass(quoi, clic)` / `htmlBoutonPass(id, clic)` de pass.js prennent le nom du clic.
+- « Comment fonctionne le site ? » (FR + AR) : ligne de l'encadré + clics dans « Vos données » ; FONCTIONS. Tests (bloc « 25/11/2026 » de test_site.mjs)
+  + 5 sabotages (25). VERSION 20261125i.

@@ -575,6 +575,52 @@ check("page 404 commune à la racine publiée : 404.html (nom du site, couleur) 
   && lire("404.html").includes('<script src="/404.js"></script>') && lire("404.js").includes("Recherche de la page"));
 check("À propos : la page introuvable et les liens Confidentialité / Conditions sont expliqués (FR + AR)", lire("a-propos/index.html").includes("Page introuvable, confidentialité, conditions") && lire("ar/a-propos/index.html").includes("صفحة غير موجودة، الخصوصية، الشروط"));
 
+// ---- 25/11/2026 (décision d'Ahmed : amener vers le Pass, PAS de gratuité) : un seul nom « Pass Ma voiture » / « باقة سيارتك » (V.1),
+//      encadré « Vous avez plusieurs voitures ? » sur vignette/ et visite-technique/ (V.2), clics vers pass/ comptés (/ma-voiture-tunisie/clic/<nom>)
+{
+  const anciens = /Pass Rappels|باقة التذكير|باقة سيارتي(?!ك)/;
+  const ou = [...PAGES, "assets/page.js", "assets/pass.js", "assets/accueil.js", "assets/carnet.js", "assets/pass-reglages.js", ...readdirSync(join(root, "tools/gabarits")).map(f => "tools/gabarits/" + f)]
+    .filter(f => existsSync(join(root, f)) && anciens.test(f.startsWith("assets/page.js") ? lire(f).replace(/\/\/[^\n]*/g, "") : lire(f)));
+  check("un seul nom pour l'offre : « Pass Ma voiture » / « باقة سيارتك » partout (plus jamais « Pass Rappels », « باقة التذكير » ni « باقة سيارتي »)" + (ou.length ? " — " + ou.slice(0, 4).join(", ") : ""), !ou.length);
+  for (const lang of ["fr", "ar"]) {
+    const { d, js } = await page("pass/index.html", { lang }), e = d.querySelector(".entete-pass .long"), p = d.querySelector('#pied a[data-clic="pass-pied"]');
+    const nom = lang === "fr" ? "Pass Ma voiture" : "باقة سيارتك";
+    check(`${lang} : bouton de l'en-tête des pages du Pass et lien du pied de page = « ${nom} » (clics « pass-entete » / « pass-pied »)`,
+      !js.length && e && e.textContent.trim() === nom && e.closest("a").getAttribute("data-clic") === "pass-entete" && p && p.textContent.trim() === nom && /pass\/$/.test(p.getAttribute("href")));
+  }
+  { const { d } = await page("vignette/index.html");
+    check("en-tête : pas de bouton du Pass hors des pages du Pass (accueil, vignette : décision d'Ahmed)", !d.querySelector(".entete-pass") && !(lire("index.html").match(/class="entete-pass/))); }
+  // V.2 : encadré sur vignette/ et visite-technique/, FR + ar/
+  const enc = h => (h.match(/<!--encadre-pass-->([\s\S]*?)<!--\/encadre-pass-->/) || [])[1] || "";
+  const ko = [];
+  for (const [ch, clic] of [["vignette/", "pass-vignette"], ["visite-technique/", "pass-visite"]]) for (const pref of ["", "ar/"]) {
+    const h = lire(pref + ch + "index.html"), e = enc(h), t = e.replace(/<[^>]+>/g, " ").replace(/&nbsp;/g, " ").replace(/[ ⁦-⁩]/g, " ").replace(/\s+/g, " ");
+    const bon = pref ? /لديك أكثر من سيارة؟ تذكيرات لـ 5 سيارات ودفتر المصاريف: باقة سيارتك، 9 د في السنة\./.test(t) && !/[A-Za-z]{3,}/.test(t)
+      : /Vous avez plusieurs voitures \? Rappels pour 5 voitures et carnet des dépenses : Pass Ma voiture, 9 DT par an\./.test(t) && !/[؀-ۿ]/.test(t);
+    const a = e.match(/<a class="btn-pass-grand" id="encadre-btn" href="([^"]*)" data-clic="([a-z0-9-]+)">/) || [];
+    if (!bon || a[1] !== "../pass/" || a[2] !== clic || (h.match(/id="encadre-pass"/g) || []).length !== 1 || /gratuit|offert|essai|مجان|تجربة/i.test(t)) ko.push(pref + ch);
+  }
+  check("encadré « Vous avez plusieurs voitures ? Rappels pour 5 voitures et carnet des dépenses : Pass Ma voiture, 9 DT par an » sur vignette/ et visite-technique/ (FR + ar/), vrai bouton vers pass/, clic compté, aucune gratuité" + (ko.length ? " — " + ko.join(", ") : ""), !ko.length);
+  // C.1 : clics comptés (faux GoatCounter) ; sans GoatCounter (bloqué) : rien, aucune erreur
+  const essai = async (chemin, lang, sel, nom, { stockage, avantClic } = {}) => {
+    for (const gc of [true, false]) {
+      const { w, d, js } = await page(chemin, { lang, stockage }), comptes = [];
+      if (gc) w.goatcounter.count = o => comptes.push(o); else delete w.goatcounter.count;
+      if (avantClic) avantClic(d);
+      comptes.length = 0;   // (l'accueil compte déjà « pass-bloque/voitures » à l'ouverture de l'encart : seul le clic compte ici)
+      const a = d.querySelector(sel);
+      if (a) { a.addEventListener("click", e => e.preventDefault()); a.dispatchEvent(new w.MouseEvent("click", { bubbles: true, cancelable: true })); }
+      check(gc ? `clic compté (faux GoatCounter) ${lang} ${chemin} ${sel} → événement « /ma-voiture-tunisie/clic/${nom} »` : `sans GoatCounter (bloqué) ${lang} ${chemin} ${sel} : aucun compte, aucune erreur`,
+        !!a && !js.length && (gc ? comptes.length === 1 && comptes[0].path === "/ma-voiture-tunisie/clic/" + nom && comptes[0].event === true && !!comptes[0].title : !comptes.length));
+    }
+  };
+  await essai("vignette/index.html", "fr", "#encadre-btn", "pass-vignette");
+  await essai("visite-technique/index.html", "ar", "#encadre-btn", "pass-visite");
+  await essai("carburant/index.html", "fr", '#pied a[data-clic="pass-pied"]', "pass-pied");
+  await essai("entretien/index.html", "ar", "#carnet-encart .btn-pass-grand", "pass-entretien", { stockage: { "mv-voitures-v1": VOITURE } });
+  await essai("index.html", "fr", "#encart-voitures .btn-pass-grand", "pass-2e-voiture", { stockage: { "mv-voitures-v1": VOITURE }, avantClic: d => clic(d, "#ajouter-voiture") });
+  check("rappel de fin du Pass : « Renouveler mon Pass » compté (« pass-rappel »)", /pass\/#offre" data-clic="pass-rappel">/.test(lire("assets/pass.js")));
+}
 // 25/10/2026 (RÈGLE d'Ahmed, règle commune § 44 : « la page Comment fonctionne le site doit être mise à jour chaque fois qu'on modifie le site ») :
 // chaque fonction visible du site (repère dans le code ou les pages) doit être expliquée dans a-propos/ (gabarit tools/gabarits/a-propos.html) ; nouvelle fonction = une ligne ici + son explication FR + AR
 { const brut = lireSource("a-propos/index.html"), ap = brut.replace(/<[^>]+>/g, " ").replace(/&nbsp;/g, " ").replace(/[\u00a0\u2066-\u2069]/g, " ").replace(/\s+/g, " ");
@@ -595,6 +641,7 @@ check("À propos : la page introuvable et les liens Confidentialité / Condition
     ["installation et hors connexion", existsSync(join(root, "sw.js")), /Installer sur le téléphone/],
     ["vidéo de présentation", existsSync(join(root, "video/index.html")), /Vidéo de présentation : courte vidéo/],
     ["une voiture gratuite et Pass Ma voiture (prix, 5 voitures, code)", existsSync(join(root, "pass/index.html")), /une voiture avec ses rappels[\s\S]*Pass Ma voiture \(payant, 9 DT pour 12 mois\) ajoute jusqu'à 5 voitures[\s\S]*code/],
+    ["encadré du Pass Ma voiture sur vignette et visite technique, clics comptés (25/11/2026)", /id="encadre-pass"/.test(lire("vignette/index.html")) && /clic\//.test(js), /Pass Ma voiture sur les pages vignette et visite technique : un encadré « Vous avez plusieurs voitures \? »[\s\S]{0,200}Les clics vers la page du Pass sont comptés, sans savoir qui clique/],
     ["e-mail de confirmation automatique (A.17, 25/11/2026)", /const EMAIL_AUTO = true;/.test(js), /E-mail de confirmation : dans la minute qui suit, vous recevez aussi tout cela par e-mail[\s\S]*Resend/],
     ["rappel de fin du Pass", /afficherRappel/.test(js), /avant la fin du Pass, un bandeau vous prévient/],
     ["code de commande au formulaire = motif du paiement, reconnu tout seul (parcours commun du Pass, 25/11/2026)", /pass-commande/.test(js), /le formulaire vous donne aussitôt votre code de commande, à écrire comme motif du paiement[^.]*la page du Pass le reconnaît toute seule/],

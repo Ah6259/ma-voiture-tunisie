@@ -64,7 +64,7 @@ function afficherCarnet() {
   const ferme = !accesPass();
   document.getElementById("carnet-form").hidden = ferme;
   document.getElementById("carnet-encart").innerHTML = ferme ? htmlEncartPass(T("Avec le <b>Pass Ma voiture à 9 DT par an</b>, continuez à noter vos pleins et vos réparations, et suivez le coût au kilomètre de vos voitures.",
-    "مع <b>باقة سيارتك بـ" + isoP("9") + " د في السنة</b>، واصل تسجيل تعبئاتك وإصلاحاتك وتابع كلفة الكيلومتر لسياراتك.")) :
+    "مع <b>باقة سيارتك بـ" + isoP("9") + " د في السنة</b>، واصل تسجيل تعبئاتك وإصلاحاتك وتابع كلفة الكيلومتر لسياراتك."), "pass-entretien") :
     (essaiActif() && !passActif() ? `<p class="pass-note">${T("Pass ouvert sur ce téléphone jusqu'au " + finLisible(finEssai()) + ".", "الباقة مفتوحة على هذا الهاتف إلى غاية " + finLisible(finEssai(), true) + ".")} <a class="btn-pass-petit" href="../pass/">${T("Pass 9 DT par an", "الباقة " + isoP("9") + " د في السنة")}</a></p>` : "");
   const b = bilanCarnet(liste);
   document.getElementById("carnet-bilan").innerHTML = liste.length ? `<div class="prix-carbu" style="margin:12px 0">

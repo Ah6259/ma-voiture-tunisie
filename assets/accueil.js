@@ -79,7 +79,7 @@ function ajouterVoiture() {
   if (VOITURES.length >= PASS.voituresGratuites && !passActif()) {
     if (!essaiActif() && (essaiFini() || !demarrerEssai())) {
       $("encart-voitures").innerHTML = htmlEncartPass(T("Avec le <b>Pass Ma voiture à 9 DT par an</b>, suivez jusqu'à 5 voitures (toute la famille) et tenez le carnet de leurs dépenses.",
-        "مع <b>باقة سيارتك بـ" + isoP("9") + " د في السنة</b>، تابع إلى غاية " + isoP("5") + " سيارات (كل العائلة) ودفتر مصاريفها."));
+        "مع <b>باقة سيارتك بـ" + isoP("9") + " د في السنة</b>، تابع إلى غاية " + isoP("5") + " سيارات (كل العائلة) ودفتر مصاريفها."), "pass-2e-voiture");
       try { if (window.goatcounter && window.goatcounter.count) window.goatcounter.count({ path: "pass-bloque/voitures", title: "Pass demandé : 2e voiture", event: true }); } catch (e) {}
       return;
     }
@@ -99,8 +99,8 @@ function noteEssai() {
   if (!n) return;
   if (VOITURES.length > PASS.voituresGratuites && essaiActif() && !passActif()) {
     n.hidden = false;
-    n.innerHTML = T(`Pass ouvert sur ce téléphone jusqu'au ${finLisible(finEssai())} : ensuite, seule la première voiture reste gratuite. <a href="pass/">Pass Ma voiture : 9 DT par an</a>`,
-      `الباقة مفتوحة على هذا الهاتف إلى غاية ${finLisible(finEssai(), true)}: بعدها تبقى السيارة الأولى فقط مجانية. <a href="pass/">باقة سيارتك: ${isoP("9")} د في السنة</a>`);
+    n.innerHTML = T(`Pass ouvert sur ce téléphone jusqu'au ${finLisible(finEssai())} : ensuite, seule la première voiture reste gratuite. <a href="pass/" data-clic="pass-2e-voiture">Pass Ma voiture : 9 DT par an</a>`,
+      `الباقة مفتوحة على هذا الهاتف إلى غاية ${finLisible(finEssai(), true)}: بعدها تبقى السيارة الأولى فقط مجانية. <a href="pass/" data-clic="pass-2e-voiture">باقة سيارتك: ${isoP("9")} د في السنة</a>`);
   } else n.hidden = true;
 }
 

@@ -69,16 +69,16 @@ function racineSite() { return document.documentElement.dataset.racine || ""; } 
 // pages : dossier de la langue (ar/… sur une page arabe, une adresse par langue depuis le 21/11/2026)
 function racinePagesPass() { return window.racinePages ? window.racinePages() : racineSite(); }
 const ICONE_TICKET = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16v4a2 2 0 0 0 0 4v4H4v-4a2 2 0 0 0 0-4z"/><path d="M14 7v12"/></svg>';
-function htmlBoutonPass(id) {
-  return `<a class="btn-pass-grand" id="${id}" href="${racinePagesPass()}pass/">${ICONE_TICKET}<span>${T("Pass Ma voiture : 9 DT par an", "باقة سيارتك: " + isoP("9") + " د في السنة")}<small>${T("Jusqu'à 5 voitures et le carnet des dépenses", "إلى غاية " + isoP("5") + " سيارات ودفتر المصاريف")}</small></span></a>`;
+function htmlBoutonPass(id, clic) {
+  return `<a class="btn-pass-grand" id="${id}" href="${racinePagesPass()}pass/"${clic ? ` data-clic="${clic}"` : ""}>${ICONE_TICKET}<span>${T("Pass Ma voiture : 9 DT par an", "باقة سيارتك: " + isoP("9") + " د في السنة")}<small>${T("Jusqu'à 5 voitures et le carnet des dépenses", "إلى غاية " + isoP("5") + " سيارات ودفتر المصاريف")}</small></span></a>`;
 }
 // encart affiché à la place d'une fonction du Pass (sans Pass)
-function htmlEncartPass(quoi) {
+function htmlEncartPass(quoi, clic) {   // clic : nom du clic compté (page.js, 25/11/2026)
   // titre juste selon l'état (octobre 2026) : un Pass payé terminé n'est pas un « essai terminé »
   const titre = lirePass() ? T("Votre Pass Ma voiture est terminé", "انتهت باقة سيارتك")
     : T("Fonction du Pass Ma voiture", "ميزة من باقة سيارتك");
   return `<div class="pass-bloque"><h2>${titre}</h2>
-    <p>${quoi}</p>${htmlBoutonPass("encart-pass")}
+    <p>${quoi}</p>${htmlBoutonPass("encart-pass", clic)}
     <p class="demain">${T("Votre première voiture, ses échéances et ses rappels restent gratuits pour toujours.", "سيارتك الأولى ومواعيدها وتذكيراتها تبقى مجانية دائمًا.")}</p>
     <p class="pass-liens"><a href="${racinePagesPass()}pass/#code-acces">${T("J'ai déjà un code", "لدي رمز")}</a></p></div>`;
 }
@@ -230,7 +230,7 @@ function dessinerRappel() {
         T("Votre Pass Ma voiture se termine le " + finLisible(e.fin) + ".", "تنتهي باقة سيارتك في " + finLisible(e.fin, true) + ".") + "</p>"
       : "<p><b>" + T("Votre Pass Ma voiture est terminé — merci !", "انتهت باقة سيارتك — شكرًا لك!") + "</b> " +
         T("Il a pris fin le " + finLisible(e.fin) + ".", "انتهت في " + finLisible(e.fin, true) + ".") + "</p>") +
-    '<p class="rappel-actions"><a class="btn-pro rappel-renouveler" href="' + racine + 'pass/#offre">' + T("Renouveler mon Pass", "جدّد باقتي") + "</a>" +
+    '<p class="rappel-actions"><a class="btn-pro rappel-renouveler" href="' + racine + 'pass/#offre" data-clic="pass-rappel">' + T("Renouveler mon Pass", "جدّد باقتي") + "</a>" +
     '<a class="rappel-avis" href="' + racine + '#avis">' + T("Donner mon avis", "أعطِ رأيك") + "</a></p>";
   // tout en haut, sous l'en-tête (avant le grand bandeau de la page) : vu sans faire défiler
   const zone = document.createElement("div");
