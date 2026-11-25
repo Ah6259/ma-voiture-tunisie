@@ -22,6 +22,9 @@ import html as H, json, os, re, sys
 ICI = os.path.dirname(os.path.abspath(__file__)); RACINE = os.path.dirname(ICI)
 VERSION = "20261125i"           # à changer à chaque modification des fichiers assets/ (le test vérifie une seule version)
 BASE = "https://voiture.clicvia.com/"
+sys.path.insert(0, ICI)
+import lastmod  # noqa: E402  (dates honnêtes du plan du site, 25/11/2026)
+MEMOIRE = "donnees/lastmod.json"
 CSP = ("default-src 'self'; script-src 'self' https://gc.zgo.at; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; "
        "font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https://prix-eaux-tunisie.goatcounter.com; "
        "connect-src 'self' https://prix-eaux-tunisie.goatcounter.com https://formspree.io https://api-email.clicvia.com; object-src 'none'; base-uri 'self'; "
@@ -314,6 +317,8 @@ def main(argv):
     if "--verifier" in argv:
         tous = chemins + ["ar/" + c for c in chemins] + ["video/"]
         manque = differents + orphelines + ([] if all(dates.get(BASE + c) for c in tous) else ["sitemap.xml"])
+        if not differents and lastmod.honnete(plan, RACINE, BASE, MEMOIRE, ecrire_memoire=False) != sm:
+            manque.append("sitemap.xml (dates du dernier vrai changement)")
         if manque:
             print("ÉCHEC - pages fabriquées pas à jour (modifier tools/gabarits/ ou tools/sources/ puis lancer python tools/construire.py) : " + ", ".join(manque))
             return 1
@@ -329,6 +334,9 @@ def main(argv):
         for dossier, _, _ in sorted(os.walk(base), key=lambda x: -len(x[0])):
             if dossier != base and not os.listdir(dossier):
                 os.rmdir(dossier)
+    # plan Google du 25/11/2026 (B.2) : date du dernier VRAI changement du contenu (empreinte gardée dans donnees/lastmod.json,
+    # outil commun tools/lastmod.py) ; un ?v= ou un menu changé ne change plus la date ; une page noindex sort du plan
+    plan = lastmod.honnete(plan, RACINE, BASE, MEMOIRE)
     if plan != sm:
         open(os.path.join(RACINE, "sitemap.xml"), "w", encoding="utf-8", newline="\n").write(plan)
     print(f"{len(chemins)} page(s) : français + arabe (ar/) ; {len(differents)} fichier(s) refait(s) ; version {VERSION} ; plan du site à jour")

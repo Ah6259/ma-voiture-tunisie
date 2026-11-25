@@ -30,6 +30,8 @@ jobs:
         # 21/11/2026 : pages FR et ar/ fabriquées depuis tools/gabarits/ et tools/sources/ par tools/construire.py ;
         # une page modifiée à la main (au lieu de sa source) = rouge
         run: python tools/construire.py --verifier
+      - name: Test des dates honnetes du plan du site (lastmod) et des pages noindex
+        run: python tools/test_lastmod.py donnees/lastmod.json
       - run: node tools/test_site.mjs
       - run: node tools/test_sw.mjs
       - run: node tools/test_avis.mjs

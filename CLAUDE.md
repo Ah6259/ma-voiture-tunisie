@@ -188,3 +188,10 @@ tests du site, pas de commit si rien de neuf) ; passage complet le LUNDI ou lanc
   `htmlEncartPass(quoi, clic)` / `htmlBoutonPass(id, clic)` de pass.js prennent le nom du clic.
 - « Comment fonctionne le site ? » (FR + AR) : ligne de l'encadré + clics dans « Vos données » ; FONCTIONS. Tests (bloc « 25/11/2026 » de test_site.mjs)
   + 5 sabotages (25). VERSION 20261125i.
+
+## 25/11/2026 — plan Google (B.2, « fais » d'Ahmed après la chute Google d'octobre)
+- **lastmod HONNÊTE** : tools/construire.py passe le plan du site par `tools/lastmod.py` (outil COMMUN, copié tel quel) : date du dernier
+  VRAI changement du contenu de chaque page (empreinte du titre, de la description, du texte et des images, SANS menus, pied, scripts,
+  ?v= ni dates) gardée dans `donnees/lastmod.json` (enregistré avec les pages) ; page noindex = hors du plan ; `--verifier` contrôle aussi
+  les dates. Test : `python tools/test_lastmod.py donnees/lastmod.json` (tests.yml ; données inventées + vrai plan ; vérifié par sabotage).
+  Aucune page maigre (19 adresses, toutes gardées).
