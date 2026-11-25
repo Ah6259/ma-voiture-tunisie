@@ -160,3 +160,16 @@ tests du site, pas de commit si rien de neuf) ; passage complet le LUNDI ou lanc
   CSP `connect-src` + https://api-email.clicvia.com (construire.py). Resend cité dans pass/, pass/conditions/ et a-propos/ (FR + AR) ; ligne FONCTIONS.
 - Tests : test_site.mjs (FR + AR : demande JSON, piège, CSP, JSON ACCEPTÉ par le vrai `verifier()` chargé depuis projets-ahmed s'il existe,
   sauté sur GitHub) ; test_sabotage.py : 23 sabotages (EMAIL_AUTO = false, appel supprimé, champ mal nommé, CSP). VERSION 20261125d.
+
+## 25/11/2026 — Pass : MODULE COMMUN du parcours d'achat (PASS.1, règle commune § 70.8 ; `outils communs/pass-commun/` de projets-ahmed)
+- La page pass/ (FR + ar/) charge `assets/pass.js` (codes d'accès, Pass ouvert, rappels : inchangé) puis **`assets/pass-commun.js`**
+  (COPIE EXACTE du module de projets-ahmed, empreinte `assets/pass-commun.empreinte` : NE JAMAIS LA MODIFIER ICI ; on améliore le module
+  puis `python3 "outils communs/pass-commun/synchroniser.py"`) puis **`assets/pass-reglages.js`** (ce qui est propre à ce site : nom,
+  formule unique, code = `PASS.alphabet` / `PASS.longueur`, textes de ce site, `pour_activer`, essai du code au retour par `verifierCode()`,
+  ouverture du Pass `passOuvert`, options `apresAuRetour`, `classesEtat`, `focusNouvelle: false`). Gabarit `pass.html` : `tete: pass.js, pass-commun.js,
+  pass-reglages.js` et attributs `data-code`, `data-formule`, `data-email-auto`, `data-etat-commande`. Ancien code du formulaire retiré de pass.js.
+- Rien ne change pour le visiteur (comparaison avant / après : mêmes textes, mêmes erreurs, même code, même Formspree, même WhatsApp, même
+  mémoire) ; différences voulues du module : e-mail automatique UNE fois par commande (même après un échec de Formspree), piège anti-robot
+  rempli = commande pas gardée. Retour en arrière de l'e-mail : `emailAuto: false` dans pass-reglages.js.
+- Tests : test_site.mjs (empreinte, copie identique au module si projets-ahmed est à côté — variable `PROJETS_AHMED` pour une autre copie —,
+  scripts dans l'ordre, module branché) ; test_sabotage.py : 20 sabotages (11 du réglage / module). VERSION 20261125e.

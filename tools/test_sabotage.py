@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""Sabotage volontaire (règle commune) : on abîme une COPIE du site de 23 façons ; chaque fois, tools/test_site.mjs doit échouer.
+"""Sabotage volontaire (règle commune) : on abîme une COPIE du site de 20 façons ; chaque fois, tools/test_site.mjs doit échouer.
   python tools/test_sabotage.py      (lancé aussi par .github/workflows/tests.yml)
 Ancres courtes et stables (règle du 08/10/2026) : si une ancre n'est plus trouvée, le test le dit (à adapter dans le même commit)."""
 import os, shutil, subprocess, sys, tempfile
@@ -15,24 +15,18 @@ SABOTAGES = [
     # une adresse par langue (21/11/2026) : page arabe modifiée à la main (hreflang retiré), renvoi « ?lang=ar » oublié
     ("ar/vignette/index.html", '<link rel="alternate" hreflang="x-default"', '<link rel="alternate" hreflang="x-defaut"', "page arabe modifiée à la main (hreflang)"),
     ("assets/page.js", "if (voulue && voulue !== FIXE && !robot) aller();", "", "ancien lien ?lang=ar plus renvoyé vers ar/"),
-    # parcours commun du Pass (25/11/2026, règle commune § 70) : chaque nouvelle vérification doit attraper son sabotage
-    ("assets/pass.js", "const n = PASS.longueur, t", "const n = PASS.longueur + 1, t", "code de commande au mauvais format (9 caractères)"),
-    ("assets/pass.js", 'donnees.set("code", commande.code);', "", "code de commande pas envoyé à Formspree"),
-    ("assets/pass.js", "ecrireCommande(commande);", "", "commande pas gardée dans le téléphone"),
-    ("assets/pass.js", "JSON.stringify({ code: c.code, formule: c.formule, date: c.date })",
-     'JSON.stringify({ code: c.code, formule: c.formule, date: c.date, tel: (document.getElementById("pass-tel") || {}).value })', "téléphone du client gardé dans localStorage"),
-    ("assets/pass.js", '"Voici ma preuve de paiement — Ma voiture Tunisie — code " + c.code', '"Voici ma preuve de paiement — Ma voiture Tunisie — code "', "code absent du message WhatsApp"),
-    ("assets/pass.js", "const r = await verifierCode(c.code);", 'const r = { etat: "inconnu" };', "code de commande activé pas essayé tout seul au retour"),
-    ("assets/pass.js", "age <= PASS.commandeJours", "age <= 9999", "commande gardée plus de 60 jours"),
-    ("assets/pass.js", 'if (haut && bandeau) haut.hidden = false;', "", "bandeau « commande en attente » absent au retour"),
-    ("assets/pass.js", "e.hidden = !PASS.emailAuto;", "e.hidden = true;", "phrase « aussi par e-mail » cachée alors que l'e-mail automatique est en service"),
-    # 25/11/2026 (demande d'Ahmed) : nom dans le message WhatsApp ; pas de promesse d'e-mail dans l'étiquette tant que EMAIL_AUTO = false
-    ("assets/pass.js", 'const n = nom ? " — " + nom : "";', 'const n = "";', "nom absent du message WhatsApp de la preuve"),
-    ("assets/pass.js", "x.hidden = !EMAIL_AUTO; });", "x.hidden = true; });", "étiquette de l'e-mail sans la promesse alors que l'e-mail automatique est en service"),
-    # e-mail automatique au client (A.17, 25/11/2026, méthode commune BRANCHER-UN-SITE.md)
-    ("assets/pass.js", "const EMAIL_AUTO = true;", "const EMAIL_AUTO = false;", "e-mail automatique coupé (EMAIL_AUTO = false)"),
-    ("assets/pass.js", "    envoyerEmail({", "    if (0) envoyerEmail({", "appel au service d'e-mail supprimé"),
-    ("assets/pass.js", "code: commande.code, formule: val(\"formule\") });", "numero: commande.code, formule: val(\"formule\") });", "champ du JSON mal nommé (numero au lieu de code)"),
+    # parcours commun du Pass : depuis le 25/11/2026 (PASS.1) par le MODULE COMMUN assets/pass-commun.js + le réglage assets/pass-reglages.js
+    ("assets/pass-commun.js", "if (!robot) memoriser(cmdNouvelle);", "", "copie du module commun modifiée dans le site"),
+    ("assets/pass-reglages.js", "longueur: PASS.longueur }", "longueur: PASS.longueur + 1 }", "code de commande au mauvais format (9 caractères)"),
+    ("assets/pass-reglages.js", '" ; code: " + c.code; }', '""; }', "code absent de la ligne pour_activer"),
+    ("assets/pass-reglages.js", 'nomSite: { fr: "Ma voiture Tunisie"', 'nomSite: { fr: "Ma voiture"', "nom du site faux dans le message WhatsApp"),
+    ("assets/pass-reglages.js", "return verifierCode(code).then(", "return Promise.resolve({}).then(", "code de commande activé pas essayé tout seul au retour"),
+    ("assets/pass-reglages.js", "apresAuRetour: true,", "apresAuRetour: false,", "étapes du paiement absentes au retour"),
+    ("assets/pass-reglages.js", "ecrirePass({ code: r.code, fin: r.fin, verifie: Date.now() });", "", "code activé au retour mais Pass pas ouvert"),
+    ("assets/pass-reglages.js", "emailAuto: true,", "emailAuto: false,", "e-mail automatique coupé (emailAuto: false)"),
+    ("assets/pass-reglages.js", 'site: "voiture",', 'site: "voitures",', "mauvaise clé du site pour l'e-mail automatique"),
+    ("assets/pass-reglages.js", 'd.set("email", c.email);', 'd.delete("email");', "e-mail pas envoyé à Formspree"),
+    ("tools/gabarits/pass.html", "tete: pass.js, pass-commun.js, pass-reglages.js", "tete: pass.js, pass-commun.js", "réglage du site pas chargé par la page"),
     ("tools/construire.py", "https://formspree.io https://api-email.clicvia.com;", "https://formspree.io;", "CSP qui bloque le service d'e-mail"),
 ]
 IGNORER = shutil.ignore_patterns("node_modules", ".git", "_icone", "__pycache__")

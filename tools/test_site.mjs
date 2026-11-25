@@ -402,7 +402,28 @@ const VOITURE = JSON.stringify([{ id: "abcd1234", nom: "Clio", groupe: "pair", e
   const t0 = new Date(AUJ).getTime(), futur = new Date(t0 + 300 * 864e5).toISOString();
   const attendre = async (cond) => { for (let i = 0; i < 150 && !cond(); i++) await new Promise(r => setTimeout(r, 20)); };
   check("parcours commun : le format des codes de commande est celui des codes d'accès (alphabet sans O/0/I/1, 8 caractères), inchangé",
-    /alphabet: "ABCDEFGHJKLMNPQRSTUVWXYZ23456789"/.test(lire("assets/pass.js")) && /longueur: 8,/.test(lire("assets/pass.js")));
+    /alphabet: "ABCDEFGHJKLMNPQRSTUVWXYZ23456789"/.test(lire("assets/pass.js")) && /longueur: 8,/.test(lire("assets/pass.js"))
+    && /code: \{ alphabet: PASS\.alphabet, longueur: PASS\.longueur \}/.test(lire("assets/pass-reglages.js")));
+  // 25/11/2026 (PASS.1, module commun du parcours d'achat, règle commune § 70.8) : assets/pass-commun.js = COPIE EXACTE du module de
+  // projets-ahmed (« outils communs/pass-commun/pass-commun.js », recopié par synchroniser.py) ; assets/pass-reglages.js = ce qui est propre au site
+  { const { createHash } = await import("crypto");
+    const copie = readFileSync(join(root, "assets/pass-commun.js")), emp = createHash("sha256").update(copie).digest("hex");
+    const attendue = existsSync(join(root, "assets/pass-commun.empreinte")) ? lire("assets/pass-commun.empreinte").trim() : "";
+    check("module commun du Pass : assets/pass-commun.js NON modifié dans le site (empreinte écrite par synchroniser.py)", emp === attendue);
+    const PROJ = [process.env.PROJETS_AHMED, join(root, "../projets-ahmed")].filter(Boolean).concat([join(root, "../../projets-ahmed"), join(root, "../.."), "/home/user/projets-ahmed"])
+      .find(x => existsSync(join(x, "outils communs/pass-commun/pass-commun.js")));
+    if (PROJ) check("module commun du Pass : copie identique au module de projets-ahmed (sinon : python3 synchroniser.py)",
+      readFileSync(join(PROJ, "outils communs/pass-commun/pass-commun.js")).equals(copie));
+    else console.log("  (comparaison avec le module de projets-ahmed sautée : dépôt absent, normal sur GitHub)");
+    const scripts = h => (h.match(/<script src="[^"]*assets\/[^"?]+/g) || []).map(x => x.replace(/^.*assets\//, ""));
+    const sp = scripts(lire("pass/index.html")), sa = scripts(lire("ar/pass/index.html"));
+    check("module commun du Pass : pass/ et ar/pass/ chargent pass.js, puis pass-commun.js, puis pass-reglages.js (et seulement ces pages)",
+      [sp, sa].every(x => x.indexOf("pass.js") >= 0 && x.indexOf("pass.js") < x.indexOf("pass-commun.js") && x.indexOf("pass-commun.js") === x.indexOf("pass-reglages.js") - 1)
+      && !/pass-commun\.js/.test(lire("index.html") + lire("entretien/index.html") + lire("pass/conditions/index.html"))
+      && !/brancherFormulairePass|nouveauCodeCommande|envoyerEmail/.test(lire("assets/pass.js")));
+    const { w } = await page("pass/index.html");
+    check(`module commun du Pass : branché sur le formulaire (version ${w.PassCommun && w.PassCommun.version}), réglage du site « voiture »`,
+      !!w.PassCommun && w.PassCommun.reglage && w.PassCommun.reglage.site === "voiture" && w.document.getElementById("pass-form").getAttribute("data-branche") === "1"); }
   const emailsEnvoyes = [];   // JSON envoyés au service d'e-mail (FR puis AR), revérifiés plus bas par le VRAI verifier() du Worker
   for (const lang of ["fr", "ar"]) {
     const L = lang === "ar" ? " (ar/)" : "";
@@ -412,7 +433,7 @@ const VOITURE = JSON.stringify([{ id: "abcd1234", nom: "Clio", groupe: "pair", e
       const lab = d.querySelector('label[for="pass-email"]'), cache = lab && lab.querySelector(".email-auto");
       const court = lab ? lab.querySelector(`:scope > [data-l="${lang}"]`).textContent : "";
       check(`formulaire${L} : étiquette « ${lang === "ar" ? "البريد الإلكتروني" : "E-mail"} » seule, promesse « ${lang === "ar" ? "يصلك عليه رمزك وخطوات الدفع" : "vous y recevez votre code et les étapes du paiement"} » AFFICHÉE (EMAIL_AUTO = true)`,
-        court === (lang === "ar" ? "البريد الإلكتروني" : "E-mail") && !!cache && !cache.hidden && /const EMAIL_AUTO = true;/.test(lire("assets/pass.js"))
+        court === (lang === "ar" ? "البريد الإلكتروني" : "E-mail") && !!cache && !cache.hidden && /emailAuto: true,/.test(lire("assets/pass-reglages.js"))
         && cache.textContent.includes(lang === "ar" ? "يصلك عليه رمزك وخطوات الدفع" : "vous y recevez votre code et les étapes du paiement")); }
     const requis = ["nom", "telephone", "email", "conditions"].every(n => f.querySelector(`[name="${n}"][required]`)) && /\S/.test(f.querySelector('[name="formule"]').value);
     let envois = 0, corps = null;
@@ -436,7 +457,7 @@ const VOITURE = JSON.stringify([{ id: "abcd1234", nom: "Clio", groupe: "pair", e
     const visibleP = el => { for (let e = el; e; e = e.parentElement) if (e.hidden || w.getComputedStyle(e).display === "none") return false; return true; };
     check(`parcours commun${L} : « ${lang === "ar" ? "يصلك أيضًا عبر البريد الإلكتروني" : "Vous le recevez aussi par e-mail"} » AFFICHÉ (e-mail automatique en service, EMAIL_AUTO = true)`,
       phraseEmail.length === 1 && visibleP(phraseEmail[0]) && phraseEmail[0].textContent.includes(lang === "ar" ? "يصلك أيضًا عبر البريد الإلكتروني." : "Vous le recevez aussi par e-mail.")
-      && /const EMAIL_AUTO = true;/.test(lire("assets/pass.js")));
+      && /emailAuto: true,/.test(lire("assets/pass-reglages.js")));
     { // UNE demande au service d'e-mail, en JSON, avec exactement les champs attendus par verifier() de worker.js (site « voiture »)
       const e = emails[0], j = e ? JSON.parse(e[1].body) : {};
       check(`e-mail automatique${L} : UNE demande à https://api-email.clicvia.com/inscription (POST, JSON) avec site voiture, langue ${lang}, nom, e-mail, CE code et la formule`,

@@ -129,73 +129,12 @@ async function reverifierPass() {
   if (avant !== passActif() || r.etat === "ok" && r.fin !== p.fin) annoncerPass();
 }
 
-/* ---- page pass/ : formulaire de demande (Formspree), saisie du code, état du Pass ---- */
-function telephoneTn(v) {
-  let n = String(v || "").replace(/\D/g, "");
-  if (n.length === 11 && n.indexOf("216") === 0) n = n.slice(3);
-  return n.length === 8 ? n : "";
-}
-/* ---- commande du Pass (25/11/2026, parcours commun du Pass, règle commune § 70) ----
-   Le code est créé AU FORMULAIRE (crypto.getRandomValues, même alphabet et même longueur que les codes d'accès) : c'est le
-   numéro de commande, à écrire dans le motif du paiement. Ahmed l'active TEL QUEL (bouton « pass » du dépôt privé, champ code) :
-   c'est alors le code d'accès du Pass. Le téléphone garde la commande (PASS.cleCommande = { code, formule, date } seulement :
-   ni nom, ni téléphone, ni e-mail) 60 jours ; en revenant, la page essaie le code toute seule. */
-PASS.cleCommande = "pass-commande";
-PASS.commandeJours = 60;
-// E-mail automatique au client (A.17) : EN SERVICE depuis le 25/11/2026 (service api-email.clicvia.com : Worker « email-clients » + Resend,
-// copie à Ahmed). EMAIL_AUTO = true : phrases « vous y recevez votre code… » / « Vous le recevez aussi par e-mail » affichées et demande
-// envoyée au service ; false = tout caché, rien envoyé (retour en arrière en un mot si le service tombe).
-const EMAIL_AUTO = true;
-const EMAIL_API = "https://api-email.clicvia.com/inscription";
-PASS.emailAuto = EMAIL_AUTO;
-// envoi au service d'e-mail : sans attendre la réponse, jamais bloquant (Formspree et le code restent la voie principale)
-function envoyerEmail(d) {
-  if (!EMAIL_AUTO || typeof fetch !== "function") return;
-  try {
-    fetch(EMAIL_API, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(d), keepalive: true })
-      .catch(function () {});
-  } catch (e) {}
-}
-function nouveauCodeCommande() {
-  const n = PASS.longueur, t = new Uint8Array(n);
-  if (window.crypto && typeof window.crypto.getRandomValues === "function") window.crypto.getRandomValues(t);
-  else for (let i = 0; i < n; i++) t[i] = Math.floor(Math.random() * 256);
-  // 256 est un multiple de 32 (taille de l'alphabet) : chaque caractère a la même chance
-  return Array.from(t, x => PASS.alphabet[x % PASS.alphabet.length]).join("");
-}
-function lireCommande() {
-  let c = null;
-  try { c = JSON.parse(localStorage.getItem(PASS.cleCommande) || "null"); } catch (e) { c = null; }
-  if (!c || typeof c.code !== "string" || !formeCodeOk(c.code) || !/^\d{4}-\d{2}-\d{2}$/.test(String(c.date || ""))) return null;
-  const age = (Date.parse(aujourdhui() + "T00:00:00Z") - Date.parse(c.date + "T00:00:00Z")) / 864e5;
-  if (!(age >= 0 && age <= PASS.commandeJours)) { ecrireCommande(null); return null; }   // gardée 60 jours
-  return { code: c.code, formule: String(c.formule || ""), date: c.date };
-}
-function ecrireCommande(c) {
-  try {
-    if (c) localStorage.setItem(PASS.cleCommande, JSON.stringify({ code: c.code, formule: c.formule, date: c.date }));
-    else localStorage.removeItem(PASS.cleCommande);
-  } catch (e) {}
-}
-function formuleLisible(f) { return T(f || "Pass Ma voiture - 9 DT - 12 mois", "باقة سيارتك - " + isoP("9") + " د - " + isoP("12") + " شهرًا"); }
-// message WhatsApp de la preuve de paiement, AVEC le code et le NOM (demande d'Ahmed du 25/11/2026 ; le client n'a rien à recopier).
-// Le nom vient du formulaire au moment de l'envoi ; il n'est JAMAIS gardé par le téléphone : au retour (bandeau), code + formule seulement.
-function texteWhatsappCommande(c, nom) {
-  const n = nom ? " — " + nom : "";
-  return T("Voici ma preuve de paiement — Ma voiture Tunisie — code " + c.code + n + " — " + (c.formule || "Pass Ma voiture - 9 DT - 12 mois"),
-    "هذا وصل الدفع — مواعيد سيارتك — الرمز " + c.code + n + " — باقة سيارتك - 9 د - 12 شهرًا");
-}
-function montrerCommande(c, { bandeau, nom } = {}) {
-  document.querySelectorAll(".code-commande-txt").forEach(e => { e.textContent = c.code; });
-  document.querySelectorAll(".commande-formule").forEach(e => { e.textContent = formuleLisible(c.formule); });
-  document.querySelectorAll(".commande-email").forEach(e => { e.hidden = !PASS.emailAuto; });
-  document.querySelectorAll("a.btn-wa[data-texte]").forEach(a =>
-    a.setAttribute("href", "https://wa.me/" + PASS.whatsapp + "?text=" + encodeURIComponent(texteWhatsappCommande(c, nom))));
-  const form = document.getElementById("pass-form"), apres = document.getElementById("apres-pass"), haut = document.getElementById("commande-attente");
-  if (form) form.hidden = true;
-  if (apres) apres.hidden = false;
-  if (haut && bandeau) haut.hidden = false;
-}
+/* ---- page pass/ : formulaire de demande et commande du Pass ----
+   Depuis le 25/11/2026 (PASS.1, règle commune § 70.8) : le parcours d'achat (vérifications, code de commande créé au formulaire,
+   Formspree, e-mail automatique, page « Dernière étape », mémoire « pass-commande », code essayé tout seul au retour, « Nouvelle
+   commande ») est fait par le MODULE COMMUN assets/pass-commun.js (copie exacte de projets-ahmed, ne pas la modifier ici) avec le
+   réglage de ce site assets/pass-reglages.js. Ici reste seulement ce qui sert aussi à la case « J'ai un code ». */
+// la commande en attente est terminée : formulaire de nouveau visible, boutons WhatsApp remis à leur message de départ
 function cacherCommande() {
   const form = document.getElementById("pass-form"), apres = document.getElementById("apres-pass"), haut = document.getElementById("commande-attente");
   if (form) form.hidden = false;
@@ -204,92 +143,8 @@ function cacherCommande() {
   document.querySelectorAll("a.btn-wa[data-texte]").forEach(a =>
     a.setAttribute("href", "https://wa.me/" + PASS.whatsapp + "?text=" + encodeURIComponent(a.getAttribute("data-texte"))));
 }
-// retour sur la page avec une commande gardée : bandeau + étapes + WhatsApp ; le code est essayé tout seul
-async function reprendreCommande() {
-  const c = lireCommande();
-  if (!c || !document.getElementById("pass-form")) return;
-  montrerCommande(c, { bandeau: true });
-  const statut = document.getElementById("commande-statut");
-  const dire = (classe, fr, ar) => { if (statut) { statut.className = classe; statut.textContent = T(fr, ar); } };
-  dire("", "Vérification de votre code…", "جارٍ التثبت من رمزك…");
-  const r = await verifierCode(c.code);       // même vérification que la case « J'ai un code »
-  if (r.etat === "ok") {
-    ecrirePass({ code: r.code, fin: r.fin, verifie: Date.now() });
-    ecrireCommande(null);
-    cacherCommande();
-    const cs = document.getElementById("code-status");
-    if (cs) { cs.className = "ok"; cs.textContent = T("Paiement reçu : votre Pass Ma voiture est ouvert sur ce téléphone jusqu'au " + finLisible(r.fin) + ".",
-      "تم استلام الدفع: باقة سيارتك مفتوحة على هذا الهاتف إلى غاية " + finLisible(r.fin, true) + "."); }
-    annoncerPass();
-  } else if (r.etat === "reseau") dire("err", "Pas de connexion : votre code sera vérifié à votre prochaine visite.", "لا يوجد اتصال: سيتم التثبت من رمزك في زيارتك القادمة.");
-  else dire("", "En attente de votre paiement : dès qu'il est reçu, votre code est activé et votre Pass s'ouvre ici tout seul.",
-    "في انتظار دفعتك: بمجرد استلامها يُفعَّل رمزك وتُفتح باقتك هنا وحدها.");
-}
-function brancherFormulairePass() {
-  const form = document.getElementById("pass-form");
-  if (!form || form.dataset.branche) return;
-  form.dataset.branche = "1";
-  // « vous y recevez votre code et les étapes du paiement » (étiquette de l'e-mail) : montré seulement quand l'e-mail automatique marche
-  document.querySelectorAll(".email-auto").forEach(x => { x.hidden = !EMAIL_AUTO; });
-  const statut = document.getElementById("pass-status"), bouton = form.querySelector("button[type=submit]");
-  const apres = document.getElementById("apres-pass");
-  const dire = (classe, fr, ar) => { statut.className = classe; statut.textContent = T(fr, ar); };
-  const champ = n => form.querySelector('[name="' + n + '"]');
-  const val = n => { const x = champ(n); return x ? String(x.value || "").trim() : ""; };
-  let codeEnCours = "";                       // le même code si l'envoi échoue et que le client réessaie
-  const nouvelle = document.getElementById("commande-nouvelle");
-  if (nouvelle) nouvelle.addEventListener("click", () => {
-    ecrireCommande(null); codeEnCours = ""; cacherCommande(); statut.className = ""; statut.textContent = "";
-    try { form.scrollIntoView({ block: "start" }); } catch (x) {}
-  });
-  form.addEventListener("submit", e => {
-    e.preventDefault();
-    if (bouton.disabled) return;
-    const tel = telephoneTn(val("telephone"));
-    if (!val("nom")) { dire("err", "Indiquez votre nom.", "اكتب اسمك."); champ("nom").focus(); return; }
-    if (!tel) { dire("err", "Téléphone : 8 chiffres, par exemple 24 321 390.", "الهاتف: " + isoP("8") + " أرقام، مثال " + isoP("24 321 390") + "."); champ("telephone").focus(); return; }
-    // 24/11/2026 (règle d'Ahmed) : e-mail OBLIGATOIRE (un e-mail automatique enverra le code et les étapes du paiement)
-    const email = val("email");
-    if (!email) {
-      if (EMAIL_AUTO) dire("err", "Indiquez votre e-mail : vous y recevez votre code et les étapes du paiement.", "اكتب بريدك الإلكتروني: يصلك عليه رمزك وخطوات الدفع.");
-      else dire("err", "Indiquez votre e-mail.", "اكتب بريدك الإلكتروني.");
-      champ("email").focus(); return;
-    }
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email)) { dire("err", "E-mail invalide, par exemple nom@exemple.com.", "البريد الإلكتروني غير صحيح، مثال " + isoP("nom@exemple.com") + "."); champ("email").focus(); return; }
-    if (!champ("conditions").checked) { dire("err", "Cochez « J'accepte les conditions du Pass Ma voiture ».", "يجب الموافقة على شروط باقة سيارتك."); return; }
-    // formulaire valide : le code de commande est créé ICI (jamais après le paiement)
-    if (!codeEnCours) codeEnCours = nouveauCodeCommande();
-    const commande = { code: codeEnCours, formule: val("formule"), date: aujourdhui() };
-    const fini = () => {
-      ecrireCommande(commande);
-      montrerCommande(commande, { nom: val("nom") });       // nom dans le message WhatsApp, jamais dans la mémoire
-      if (apres) { try { apres.scrollIntoView({ block: "start" }); } catch (x) {} }
-    };
-    if (val("_gotcha")) { fini(); return; }                // champ piège rempli = robot : rien n'est envoyé
-    champ("page").value = location.href.split("#")[0];
-    const donnees = new FormData(form);
-    donnees.set("telephone", tel);
-    donnees.set("email", email);
-    donnees.set("code", commande.code);
-    donnees.set("_subject", "Pass Ma voiture — Ma voiture Tunisie — code " + commande.code);
-    // ligne prête à recopier dans le bouton GitHub « pass » (dépôt privé) : le code est activé TEL QUEL
-    donnees.set("pour_activer", "action: paye ; nom: " + val("nom") + " ; telephone: " + tel + " ; email: " + email + " ; code: " + commande.code);
-    // e-mail automatique au client (code, prix, paiement, WhatsApp, lien de la page du Pass ; langue de la page ; Ahmed en copie)
-    envoyerEmail({ site: "voiture", langue: document.documentElement.lang === "ar" ? "ar" : "fr", nom: val("nom"), email: email,
-      code: commande.code, formule: val("formule") });
-    bouton.disabled = true;
-    dire("", "Envoi…", "جارٍ الإرسال…");
-    fetch(form.getAttribute("action"), { method: "POST", body: donnees, headers: { "Accept": "application/json" } })
-      .then(r => {
-        if (!r.ok) throw new Error("HTTP " + r.status);
-        dire("ok", "Merci ! Votre demande a bien été envoyée.", "شكرًا! تم إرسال طلبك.");
-        fini();
-      })
-      .catch(() => dire("err", "Échec de l'envoi — vérifiez votre connexion et réessayez, ou écrivez-nous sur WhatsApp au 24 321 390.",
-        "تعذّر الإرسال — تحقّق من الاتصال وأعد المحاولة، أو راسلنا عبر واتساب على " + isoP("24321390") + "."))
-      .then(() => { bouton.disabled = false; });
-  });
-}
+// commande gardée par le module commun (« pass-commande ») : son code, ou "" (rien de personnel n'y est gardé)
+function codeCommande() { const c = window.PASS_COMMANDE && window.PASS_COMMANDE.relire(); return c ? c.code : ""; }
 function brancherCodeAcces() {
   const form = document.getElementById("code-form");
   if (!form || form.dataset.branche) return;
@@ -316,8 +171,10 @@ function brancherCodeAcces() {
     statut.textContent = T(M[0], M[1]);
     if (r.etat === "ok") {
       champ.value = "";
-      const c = lireCommande();
-      if (c && c.code === r.code) { ecrireCommande(null); cacherCommande(); }   // la commande en attente est activée
+      if (codeCommande() && codeCommande() === r.code) {                       // la commande en attente est activée
+        try { localStorage.removeItem("pass-commande"); } catch (x) {}
+        cacherCommande();
+      }
     }
   });
 }
@@ -398,10 +255,8 @@ document.addEventListener("langue", () => { if (rappelMontre) dessinerRappel(); 
 document.addEventListener("pass", () => { majEtatPass(); document.dispatchEvent(new Event("recalcul")); });
 document.addEventListener("langue", majEtatPass);
 document.addEventListener("DOMContentLoaded", () => {
-  brancherFormulairePass();
   brancherCodeAcces();
   majEtatPass();
-  reprendreCommande().catch(() => {});
   noterFinPass();
   reverifierPass().catch(() => {}).then(() => { noterFinPass(); afficherRappel(); });
 });
