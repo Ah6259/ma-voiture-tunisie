@@ -142,6 +142,10 @@ function telephoneTn(v) {
    ni nom, ni téléphone, ni e-mail) 60 jours ; en revenant, la page essaie le code toute seule. */
 PASS.cleCommande = "pass-commande";
 PASS.commandeJours = 60;
+// e-mail automatique au client : PAS ENCORE en service (25/11/2026) -> la phrase « Vous le recevez aussi par e-mail » reste cachée.
+// Mettre true seulement le jour où l'e-mail automatique part vraiment (le test vérifie qu'elle est cachée tant que c'est false).
+const EMAIL_AUTO = false;
+PASS.emailAuto = EMAIL_AUTO;
 function nouveauCodeCommande() {
   const n = PASS.longueur, t = new Uint8Array(n);
   if (window.crypto && typeof window.crypto.getRandomValues === "function") window.crypto.getRandomValues(t);
@@ -172,6 +176,7 @@ function texteWhatsappCommande(c) {
 function montrerCommande(c, { bandeau } = {}) {
   document.querySelectorAll(".code-commande-txt").forEach(e => { e.textContent = c.code; });
   document.querySelectorAll(".commande-formule").forEach(e => { e.textContent = formuleLisible(c.formule); });
+  document.querySelectorAll(".commande-email").forEach(e => { e.hidden = !PASS.emailAuto; });
   document.querySelectorAll("a.btn-wa[data-texte]").forEach(a =>
     a.setAttribute("href", "https://wa.me/" + PASS.whatsapp + "?text=" + encodeURIComponent(texteWhatsappCommande(c))));
   const form = document.getElementById("pass-form"), apres = document.getElementById("apres-pass"), haut = document.getElementById("commande-attente");

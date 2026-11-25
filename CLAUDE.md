@@ -140,7 +140,7 @@ tests du site, pas de commit si rien de neuf) ; passage complet le LUNDI ou lanc
 ## 25/11/2026 — Pass : PARCOURS COMMUN D'ACHAT (règle commune § 70, référence `outils communs/pass-commun/CONSIGNES.md` de projets-ahmed)
 - Le **code de commande est créé AU FORMULAIRE** (`nouveauCodeCommande()` de `assets/pass.js`, `crypto.getRandomValues`, MÊME alphabet et
   MÊME longueur que les codes d'accès : 8 caractères sans O/0/I/1) : envoyé à Formspree (champ `code`, sujet, `pour_activer … ; code: X`).
-  Bloc « Dernière étape » (`#apres-pass` du gabarit `pass.html`, FR + AR) : code en gros (`#commande-code`), phrase « numéro de commande »,
+  Bloc « Dernière étape » (`#apres-pass` du gabarit `pass.html`, FR + AR) : code en gros (`#commande-code`), phrase « numéro de commande » (« Vous le recevez aussi par e-mail » CACHÉE tant que `EMAIL_AUTO = false` dans pass.js : e-mail automatique pas encore en service),
   3 étapes du paiement (motif = le code ; AR 24321390 sans espaces), WhatsApp pré-rempli avec le code, « Ensuite », filet « code oublié »,
   bouton « Nouvelle commande ». Mémoire `pass-commande` = { code, formule, date } SEULEMENT (60 jours ; séparée de `mv-voitures-v1`, `mv-pass-v1`…).
   Retour sur pass/ : bandeau `#commande-attente` + code essayé tout seul (`reprendreCommande()`, même vérification que « J'ai un code ») :
@@ -148,4 +148,4 @@ tests du site, pas de commit si rien de neuf) ; passage complet le LUNDI ou lanc
 - Activation (dépôt privé voiture-pass) : bouton « pass », action `paye` + **code** (celui de l'e-mail) + nom + téléphone : activé TEL QUEL
   (mauvais format ou déjà utilisé = refusé) ; champ code vide = ancien comportement. Le Pass dure toujours 12 mois à partir de l'activation.
 - Textes : motif = code de commande partout (pass, conditions § 4-5, a-propos) ; test « plus aucun motif : nom et téléphone ».
-  Tests « parcours commun » de test_site.mjs (FR + AR) + ligne FONCTIONS ; 8 sabotages de plus dans test_sabotage.py (16). VERSION 20261125a.
+  Tests « parcours commun » de test_site.mjs (FR + AR) + ligne FONCTIONS ; 9 sabotages de plus dans test_sabotage.py (17). VERSION 20261125b.

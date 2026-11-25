@@ -420,9 +420,19 @@ const VOITURE = JSON.stringify([{ id: "abcd1234", nom: "Clio", groupe: "pair", e
     const ta = apres.textContent.replace(/\s+/g, " ");
     check(`parcours commun${L} : après l'envoi, « Dernière étape » remplace le formulaire, code au bon format affiché en gros (dir=ltr)`,
       envois === 1 && f.hidden && !apres.hidden && FORMAT.test(code) && d.getElementById("commande-code").getAttribute("dir") === "ltr" && d.querySelector("#apres-pass .code-gros#commande-code"));
-    check(`parcours commun${L} : phrase « numéro de commande … motif du paiement » + « aussi par e-mail » + filet de sécurité`, lang === "ar"
-      ? ta.includes("هذا رقم طلبك: اكتبه في خانة سبب الدفع، يساعدنا على التعرّف على دفعتك.") && ta.includes("يصلك أيضًا عبر البريد الإلكتروني.") && ta.includes("نسيت الرمز في سبب الدفع؟ لا بأس: أرسل الوصل على واتساب وسنجد طلبك.")
-      : ta.includes("C'est votre numéro de commande : écrivez-le dans le motif du paiement, il nous sert à reconnaître votre paiement.") && ta.includes("Vous le recevez aussi par e-mail.") && ta.includes("Vous avez oublié le code dans le motif ? Ce n'est pas grave : envoyez quand même la preuve sur WhatsApp, nous retrouvons votre demande."));
+    // l'e-mail automatique n'est PAS encore en service (25/11/2026) : la phrase « Vous le recevez aussi par e-mail » existe mais reste CACHÉE (EMAIL_AUTO = false)
+    const phraseEmail = [...apres.querySelectorAll(".commande-email")];
+    const visibleP = el => { for (let e = el; e; e = e.parentElement) if (e.hidden || w.getComputedStyle(e).display === "none") return false; return true; };
+    check(`parcours commun${L} : « Vous le recevez aussi par e-mail » PAS visible aujourd'hui (e-mail automatique pas encore en service, EMAIL_AUTO = false)`,
+      phraseEmail.length === 1 && !visibleP(phraseEmail[0]) && /const EMAIL_AUTO = false;/.test(lire("assets/pass.js")));
+    // le jour où l'e-mail automatique est en service (EMAIL_AUTO = true) : la phrase apparaît
+    w.eval("PASS.emailAuto = true; montrerCommande(lireCommande());");
+    check(`parcours commun${L} : avec EMAIL_AUTO = true, « ${lang === "ar" ? "يصلك أيضًا عبر البريد الإلكتروني" : "Vous le recevez aussi par e-mail"} » apparaît`,
+      phraseEmail.length === 1 && visibleP(phraseEmail[0]) && phraseEmail[0].textContent.includes(lang === "ar" ? "يصلك أيضًا عبر البريد الإلكتروني." : "Vous le recevez aussi par e-mail."));
+    w.eval("PASS.emailAuto = EMAIL_AUTO; montrerCommande(lireCommande());");
+    check(`parcours commun${L} : phrase « numéro de commande … motif du paiement » + filet de sécurité`, lang === "ar"
+      ? ta.includes("هذا رقم طلبك: اكتبه في خانة سبب الدفع، يساعدنا على التعرّف على دفعتك.") && ta.includes("نسيت الرمز في سبب الدفع؟ لا بأس: أرسل الوصل على واتساب وسنجد طلبك.")
+      : ta.includes("C'est votre numéro de commande : écrivez-le dans le motif du paiement, il nous sert à reconnaître votre paiement.") && ta.includes("Vous avez oublié le code dans le motif ? Ce n'est pas grave : envoyez quand même la preuve sur WhatsApp, nous retrouvons votre demande."));
     const etapes = [...apres.querySelectorAll(".paie-etapes > li")];
     check(`parcours commun${L} : paiement en 3 étapes (D17, IZI, ${lang === "ar" ? "24321390 sans espaces" : "24 321 390"}), motif = le code`,
       etapes.length === 3 && apres.querySelector('img[alt="D17"]') && apres.querySelector('img[alt="IZI"]') && etapes[1].textContent.includes(lang === "ar" ? "24321390" : "24 321 390")
