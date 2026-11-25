@@ -172,4 +172,4 @@ tests du site, pas de commit si rien de neuf) ; passage complet le LUNDI ou lanc
   mémoire) ; différences voulues du module : e-mail automatique UNE fois par commande (même après un échec de Formspree), piège anti-robot
   rempli = commande pas gardée. Retour en arrière de l'e-mail : `emailAuto: false` dans pass-reglages.js.
 - Tests : test_site.mjs (empreinte, copie identique au module si projets-ahmed est à côté — variable `PROJETS_AHMED` pour une autre copie —,
-  scripts dans l'ordre, module branché) ; test_sabotage.py : 20 sabotages (11 du réglage / module). VERSION 20261125e.
+  scripts dans l'ordre, module branché) ; test_sabotage.py : 20 sabotages (11 du réglage / module). VERSION 20261125e (module 2026-11-25c : 20261125f).
