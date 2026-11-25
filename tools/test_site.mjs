@@ -373,7 +373,7 @@ const VOITURE = JSON.stringify([{ id: "abcd1234", nom: "Clio", groupe: "pair", e
       && d.querySelector("#pass-tel + label[for=pass-email] + input#pass-email[name=email][required]"));
     const { d: d2, w: w2 } = await page("pass/index.html");
     let envois = 0;
-    w2.fetch = async () => { envois++; return { ok: true, status: 200, json: async () => ({}) }; };
+    w2.fetch = async () => { envois++; return { ok: true, status: 200, json: async () => ({}) }; };   // Formspree ET service d'e-mail comptés
     const f = d2.getElementById("pass-form");
     f.querySelector("[name=nom]").value = "Test"; f.querySelector("[name=telephone]").value = "24 321 390"; f.querySelector("[name=conditions]").checked = true;
     f.dispatchEvent(new w2.Event("submit", { bubbles: true, cancelable: true }));
@@ -381,10 +381,11 @@ const VOITURE = JSON.stringify([{ id: "abcd1234", nom: "Clio", groupe: "pair", e
     f.querySelector("[name=email]").value = "pas-un-email";
     f.dispatchEvent(new w2.Event("submit", { bubbles: true, cancelable: true }));
     const faux = d2.getElementById("pass-status").textContent;
-    check("pass : sans e-mail (erreur courte « Indiquez votre e-mail. », sans promesse) ou e-mail invalide -> message d'erreur et rien n'est envoyé", envois === 0 && vide === "Indiquez votre e-mail." && /E-mail invalide/.test(faux));
+    check("pass : sans e-mail (« Indiquez votre e-mail : vous y recevez votre code et les étapes du paiement. ») ou e-mail invalide -> message d'erreur et rien n'est envoyé (ni Formspree ni e-mail automatique)",
+      envois === 0 && vide === "Indiquez votre e-mail : vous y recevez votre code et les étapes du paiement." && /E-mail invalide/.test(faux));
     f.querySelector("[name=email]").value = "client@exemple.com";
     let corps = null;
-    w2.fetch = async (u, o) => { envois++; corps = o && o.body; return { ok: true, status: 200, json: async () => ({}) }; };
+    w2.fetch = async (u, o) => { if (/api-email\.clicvia\.com/.test(u)) return { ok: true }; envois++; corps = o && o.body; return { ok: true, status: 200, json: async () => ({}) }; };
     f.dispatchEvent(new w2.Event("submit", { bubbles: true, cancelable: true }));
     await new Promise(r => setTimeout(r, 20));
     check("pass : avec un e-mail valide, la demande part à Formspree avec l'e-mail", envois === 1 && corps && corps.get("email") === "client@exemple.com" && /email: client@exemple\.com/.test(corps.get("pour_activer")));
@@ -402,24 +403,26 @@ const VOITURE = JSON.stringify([{ id: "abcd1234", nom: "Clio", groupe: "pair", e
   const attendre = async (cond) => { for (let i = 0; i < 150 && !cond(); i++) await new Promise(r => setTimeout(r, 20)); };
   check("parcours commun : le format des codes de commande est celui des codes d'accès (alphabet sans O/0/I/1, 8 caractères), inchangé",
     /alphabet: "ABCDEFGHJKLMNPQRSTUVWXYZ23456789"/.test(lire("assets/pass.js")) && /longueur: 8,/.test(lire("assets/pass.js")));
+  const emailsEnvoyes = [];   // JSON envoyés au service d'e-mail (FR puis AR), revérifiés plus bas par le VRAI verifier() du Worker
   for (const lang of ["fr", "ar"]) {
     const L = lang === "ar" ? " (ar/)" : "";
     const { w, d } = await page("pass/index.html", { lang });
     const f = d.getElementById("pass-form");
-    { // 25/11/2026 : l'e-mail automatique n'est pas encore en service -> l'étiquette ne promet rien (partie « vous y recevez… » cachée)
+    { // 25/11/2026 : e-mail automatique EN SERVICE -> l'étiquette annonce « vous y recevez votre code et les étapes du paiement »
       const lab = d.querySelector('label[for="pass-email"]'), cache = lab && lab.querySelector(".email-auto");
       const court = lab ? lab.querySelector(`:scope > [data-l="${lang}"]`).textContent : "";
-      check(`formulaire${L} : étiquette « ${lang === "ar" ? "البريد الإلكتروني" : "E-mail"} » seule, promesse « ${lang === "ar" ? "يصلك عليه رمزك وخطوات الدفع" : "vous y recevez votre code et les étapes du paiement"} » PAS visible (EMAIL_AUTO = false)`,
-        court === (lang === "ar" ? "البريد الإلكتروني" : "E-mail") && !!cache && cache.hidden
+      check(`formulaire${L} : étiquette « ${lang === "ar" ? "البريد الإلكتروني" : "E-mail"} » seule, promesse « ${lang === "ar" ? "يصلك عليه رمزك وخطوات الدفع" : "vous y recevez votre code et les étapes du paiement"} » AFFICHÉE (EMAIL_AUTO = true)`,
+        court === (lang === "ar" ? "البريد الإلكتروني" : "E-mail") && !!cache && !cache.hidden && /const EMAIL_AUTO = true;/.test(lire("assets/pass.js"))
         && cache.textContent.includes(lang === "ar" ? "يصلك عليه رمزك وخطوات الدفع" : "vous y recevez votre code et les étapes du paiement")); }
     const requis = ["nom", "telephone", "email", "conditions"].every(n => f.querySelector(`[name="${n}"][required]`)) && /\S/.test(f.querySelector('[name="formule"]').value);
     let envois = 0, corps = null;
-    w.fetch = async (u, o) => { envois++; corps = o && o.body; return { ok: true, status: 200, json: async () => ({}) }; };
+    const emails = [];   // demandes au service d'e-mail automatique (A.17), gardées à part des envois Formspree
+    w.fetch = async (u, o) => { if (/api-email\.clicvia\.com/.test(u)) { emails.push([String(u), o]); return { ok: true }; } envois++; corps = o && o.body; return { ok: true, status: 200, json: async () => ({}) }; };
     const remplir = (nom, tel, email, cond) => { f.querySelector("[name=nom]").value = nom; f.querySelector("[name=telephone]").value = tel; f.querySelector("[name=email]").value = email; f.querySelector("[name=conditions]").checked = cond; };
     const envoyer = () => f.dispatchEvent(new w.Event("submit", { bubbles: true, cancelable: true }));
     for (const essai of [["", "24321390", "a@exemple.com", true], ["Client Test", "", "a@exemple.com", true], ["Client Test", "24321390", "", true], ["Client Test", "24321390", "a@exemple.com", false]]) { remplir(...essai); envoyer(); }
     check(`parcours commun${L} : formulaire à 5 champs obligatoires (nom, téléphone, e-mail, formule, conditions) : un seul manque = rien n'est envoyé, aucun code créé`,
-      requis && envois === 0 && !w.localStorage.getItem("pass-commande") && d.getElementById("apres-pass").hidden);
+      requis && envois === 0 && emails.length === 0 && !w.localStorage.getItem("pass-commande") && d.getElementById("apres-pass").hidden);
     remplir("Client Test", "+216 24 321 390", "client@exemple.com", true); envoyer();
     await attendre(() => !d.getElementById("apres-pass").hidden);
     const apres = d.getElementById("apres-pass"), code = (d.getElementById("commande-code") || {}).textContent || "";
@@ -428,16 +431,19 @@ const VOITURE = JSON.stringify([{ id: "abcd1234", nom: "Clio", groupe: "pair", e
     const wa = decodeURIComponent((apres.querySelector("a.btn-wa") || { href: "" }).href.split("?text=")[1] || "");
     check(`parcours commun${L} : après l'envoi, « Dernière étape » remplace le formulaire, code au bon format affiché en gros (dir=ltr)`,
       envois === 1 && f.hidden && !apres.hidden && FORMAT.test(code) && d.getElementById("commande-code").getAttribute("dir") === "ltr" && d.querySelector("#apres-pass .code-gros#commande-code"));
-    // l'e-mail automatique n'est PAS encore en service (25/11/2026) : la phrase « Vous le recevez aussi par e-mail » existe mais reste CACHÉE (EMAIL_AUTO = false)
+    // e-mail automatique EN SERVICE (25/11/2026) : la phrase « Vous le recevez aussi par e-mail » est AFFICHÉE
     const phraseEmail = [...apres.querySelectorAll(".commande-email")];
     const visibleP = el => { for (let e = el; e; e = e.parentElement) if (e.hidden || w.getComputedStyle(e).display === "none") return false; return true; };
-    check(`parcours commun${L} : « Vous le recevez aussi par e-mail » PAS visible aujourd'hui (e-mail automatique pas encore en service, EMAIL_AUTO = false)`,
-      phraseEmail.length === 1 && !visibleP(phraseEmail[0]) && /const EMAIL_AUTO = false;/.test(lire("assets/pass.js")));
-    // le jour où l'e-mail automatique est en service (EMAIL_AUTO = true) : la phrase apparaît
-    w.eval("PASS.emailAuto = true; montrerCommande(lireCommande());");
-    check(`parcours commun${L} : avec EMAIL_AUTO = true, « ${lang === "ar" ? "يصلك أيضًا عبر البريد الإلكتروني" : "Vous le recevez aussi par e-mail"} » apparaît`,
-      phraseEmail.length === 1 && visibleP(phraseEmail[0]) && phraseEmail[0].textContent.includes(lang === "ar" ? "يصلك أيضًا عبر البريد الإلكتروني." : "Vous le recevez aussi par e-mail."));
-    w.eval("PASS.emailAuto = EMAIL_AUTO; montrerCommande(lireCommande());");
+    check(`parcours commun${L} : « ${lang === "ar" ? "يصلك أيضًا عبر البريد الإلكتروني" : "Vous le recevez aussi par e-mail"} » AFFICHÉ (e-mail automatique en service, EMAIL_AUTO = true)`,
+      phraseEmail.length === 1 && visibleP(phraseEmail[0]) && phraseEmail[0].textContent.includes(lang === "ar" ? "يصلك أيضًا عبر البريد الإلكتروني." : "Vous le recevez aussi par e-mail.")
+      && /const EMAIL_AUTO = true;/.test(lire("assets/pass.js")));
+    { // UNE demande au service d'e-mail, en JSON, avec exactement les champs attendus par verifier() de worker.js (site « voiture »)
+      const e = emails[0], j = e ? JSON.parse(e[1].body) : {};
+      check(`e-mail automatique${L} : UNE demande à https://api-email.clicvia.com/inscription (POST, JSON) avec site voiture, langue ${lang}, nom, e-mail, CE code et la formule`,
+        emails.length === 1 && e[0] === "https://api-email.clicvia.com/inscription" && e[1].method === "POST" && /application\/json/.test(e[1].headers["Content-Type"])
+        && j.site === "voiture" && j.langue === lang && j.nom === "Client Test" && j.email === "client@exemple.com" && j.code === code
+        && j.formule === "Pass Ma voiture - 9 DT - 12 mois" && !j.piege);
+      emailsEnvoyes.push(j); }
     check(`parcours commun${L} : phrase « numéro de commande … motif du paiement » + filet de sécurité`, lang === "ar"
       ? ta.includes("هذا رقم طلبك: اكتبه في خانة سبب الدفع، يساعدنا على التعرّف على دفعتك.") && ta.includes("نسيت الرمز في سبب الدفع؟ لا بأس: أرسل الوصل على واتساب وسنجد طلبك.")
       : ta.includes("C'est votre numéro de commande : écrivez-le dans le motif du paiement, il nous sert à reconnaître votre paiement.") && ta.includes("Vous avez oublié le code dans le motif ? Ce n'est pas grave : envoyez quand même la preuve sur WhatsApp, nous retrouvons votre demande."));
@@ -495,6 +501,35 @@ const VOITURE = JSON.stringify([{ id: "abcd1234", nom: "Clio", groupe: "pair", e
       && txt(lire("a-propos/index.html")).includes("à écrire comme motif du paiement") && txt(lire("ar/a-propos/index.html")).includes("تكتبه في خانة سبب الدفع")
       && cf.includes("12 mois à partir de l'activation du code"));
   }
+  // e-mail automatique (A.17, 25/11/2026) : piège anti-robot rempli = rien n'est envoyé au service ; CSP qui permet l'envoi ;
+  // JSON envoyé ACCEPTÉ par le VRAI verifier() du Worker (projets-ahmed/outils communs/email-clients ; absent sur GitHub = vérification sautée)
+  {
+    const { w, d } = await page("pass/index.html");
+    const emails = [];
+    w.fetch = async (u, o) => { if (/api-email\.clicvia\.com/.test(u)) emails.push(o); return { ok: true, status: 200, json: async () => ({}) }; };
+    const f = d.getElementById("pass-form");
+    f.querySelector("[name=nom]").value = "Robot"; f.querySelector("[name=telephone]").value = "24321390"; f.querySelector("[name=email]").value = "r@exemple.com";
+    f.querySelector("[name=conditions]").checked = true; f.querySelector("[name=_gotcha]").value = "spam";
+    f.dispatchEvent(new w.Event("submit", { bubbles: true, cancelable: true }));
+    await new Promise(r => setTimeout(r, 20));
+    check("e-mail automatique : piège anti-robot rempli = AUCUNE demande au service d'e-mail", emails.length === 0);
+    const csp = h => /connect-src[^;"]*https:\/\/api-email\.clicvia\.com/.test(h);
+    check("CSP des pages pass/ et ar/pass/ : connect-src autorise https://api-email.clicvia.com (sinon le navigateur bloque l'e-mail automatique)",
+      csp(lire("pass/index.html")) && csp(lire("ar/pass/index.html")));
+    const dossier = join(root, "..", "..", "projets-ahmed", "outils communs", "email-clients"), autre = "/home/user/projets-ahmed/outils communs/email-clients";
+    const ec = existsSync(join(dossier, "worker.js")) ? dossier : existsSync(join(autre, "worker.js")) ? autre : "";
+    if (!ec) console.log("  (vérification par le vrai verifier() du Worker sautée : projets-ahmed absent, normal sur GitHub)");
+    else {
+      const { writeFileSync, mkdtempSync } = await import("fs"), { tmpdir } = await import("os"), { pathToFileURL } = await import("url");
+      const wk = readFileSync(join(ec, "worker.js"), "utf8").replace("/*SITES_ICI*/ {}", readFileSync(join(ec, "sites.json"), "utf8").trim());
+      const fic = join(mkdtempSync(join(tmpdir(), "email-")), "worker.mjs"); writeFileSync(fic, wk);
+      const W = await import(pathToFileURL(fic).href);
+      const res = emailsEnvoyes.map(j => W.verifier(j, "https://voiture.clicvia.com"));
+      check(`e-mail automatique : le JSON envoyé (FR et AR) est ACCEPTÉ par le vrai verifier() du Worker (site voiture) ${res.map(r => r.erreur || "ok")}`,
+        emailsEnvoyes.length === 2 && res.every(r => r.d && r.d.cle === "voiture") && res[0].d.langue === "fr" && res[1].d.langue === "ar"
+        && res.every((r, i) => r.d.code === emailsEnvoyes[i].code && r.d.prix === 9));
+    }
+  }
 }
 
 // ---- 9. bouton Partager et pied de page sur TOUTES les pages (règle commune)
@@ -539,6 +574,7 @@ check("À propos : la page introuvable et les liens Confidentialité / Condition
     ["installation et hors connexion", existsSync(join(root, "sw.js")), /Installer sur le téléphone/],
     ["vidéo de présentation", existsSync(join(root, "video/index.html")), /Vidéo de présentation : courte vidéo/],
     ["une voiture gratuite et Pass Ma voiture (prix, 5 voitures, code)", existsSync(join(root, "pass/index.html")), /une voiture avec ses rappels[\s\S]*Pass Ma voiture \(payant, 9 DT pour 12 mois\) ajoute jusqu'à 5 voitures[\s\S]*code/],
+    ["e-mail de confirmation automatique (A.17, 25/11/2026)", /const EMAIL_AUTO = true;/.test(js), /E-mail de confirmation : dans la minute qui suit, vous recevez aussi tout cela par e-mail[\s\S]*Resend/],
     ["rappel de fin du Pass", /afficherRappel/.test(js), /avant la fin du Pass, un bandeau vous prévient/],
     ["code de commande au formulaire = motif du paiement, reconnu tout seul (parcours commun du Pass, 25/11/2026)", /pass-commande/.test(js), /le formulaire vous donne aussitôt votre code de commande, à écrire comme motif du paiement[^.]*la page du Pass le reconnaît toute seule/],
     ["vie privée", true, /Vos voitures, vos dates et vos dépenses sont gardées dans votre téléphone/],

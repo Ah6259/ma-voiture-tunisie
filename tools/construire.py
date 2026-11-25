@@ -20,11 +20,11 @@ Ne JAMAIS modifier <chemin>/index.html ni ar/ à la main : modifier la source pu
 import html as H, json, os, re, sys
 
 ICI = os.path.dirname(os.path.abspath(__file__)); RACINE = os.path.dirname(ICI)
-VERSION = "20261125c"           # à changer à chaque modification des fichiers assets/ (le test vérifie une seule version)
+VERSION = "20261125d"           # à changer à chaque modification des fichiers assets/ (le test vérifie une seule version)
 BASE = "https://voiture.clicvia.com/"
 CSP = ("default-src 'self'; script-src 'self' https://gc.zgo.at; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; "
        "font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https://prix-eaux-tunisie.goatcounter.com; "
-       "connect-src 'self' https://prix-eaux-tunisie.goatcounter.com https://formspree.io; object-src 'none'; base-uri 'self'; "
+       "connect-src 'self' https://prix-eaux-tunisie.goatcounter.com https://formspree.io https://api-email.clicvia.com; object-src 'none'; base-uri 'self'; "
        "form-action 'self' https://formspree.io")
 
 

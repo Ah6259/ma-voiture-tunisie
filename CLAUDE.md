@@ -150,3 +150,13 @@ tests du site, pas de commit si rien de neuf) ; passage complet le LUNDI ou lanc
 - Textes : motif = code de commande partout (pass, conditions § 4-5, a-propos) ; test « plus aucun motif : nom et téléphone ».
   Tests « parcours commun » de test_site.mjs (FR + AR) + ligne FONCTIONS ; 9 sabotages de plus dans test_sabotage.py (17). VERSION 20261125b.
 - **25/11/2026 (soir, demande d'Ahmed)** : WhatsApp de la preuve = code + NOM + formule (nom lu au formulaire, jamais gardé dans `pass-commande` : au retour, code + formule) ; étiquette « E-mail » seule et erreur « Indiquez votre e-mail. » tant que `EMAIL_AUTO = false` (promesse dans `.email-auto`, cachée) ; 2 sabotages de plus (19). VERSION 20261125c.
+
+## 25/11/2026 — Pass : E-MAIL AUTOMATIQUE EN SERVICE (A.17, méthode `outils communs/email-clients/BRANCHER-UN-SITE.md` de projets-ahmed)
+- `assets/pass.js` : `EMAIL_AUTO = true`, `envoyerEmail()` (POST JSON à https://api-email.clicvia.com/inscription, keepalive, jamais bloquant ;
+  Formspree et le code restent la voie principale), appelé UNE fois juste avant Formspree, après les vérifications, jamais si le piège est rempli.
+  JSON = { site: "voiture", langue (fr / ar = langue de la page), nom, email, code (code de commande), formule (valeur exacte du formulaire) }
+  = champs de `verifier()` du Worker (clé `voiture` de sites.json, type pass-code). Retour en arrière en un mot : `EMAIL_AUTO = false`.
+- Promesses affichées : « (vous y recevez votre code et les étapes du paiement) », « Vous le recevez aussi par e-mail », erreur e-mail vide longue.
+  CSP `connect-src` + https://api-email.clicvia.com (construire.py). Resend cité dans pass/, pass/conditions/ et a-propos/ (FR + AR) ; ligne FONCTIONS.
+- Tests : test_site.mjs (FR + AR : demande JSON, piège, CSP, JSON ACCEPTÉ par le vrai `verifier()` chargé depuis projets-ahmed s'il existe,
+  sauté sur GitHub) ; test_sabotage.py : 23 sabotages (EMAIL_AUTO = false, appel supprimé, champ mal nommé, CSP). VERSION 20261125d.

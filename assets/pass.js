@@ -142,10 +142,20 @@ function telephoneTn(v) {
    ni nom, ni téléphone, ni e-mail) 60 jours ; en revenant, la page essaie le code toute seule. */
 PASS.cleCommande = "pass-commande";
 PASS.commandeJours = 60;
-// e-mail automatique au client : PAS ENCORE en service (25/11/2026) -> la phrase « Vous le recevez aussi par e-mail » reste cachée.
-// Mettre true seulement le jour où l'e-mail automatique part vraiment (le test vérifie qu'elle est cachée tant que c'est false).
-const EMAIL_AUTO = false;
+// E-mail automatique au client (A.17) : EN SERVICE depuis le 25/11/2026 (service api-email.clicvia.com : Worker « email-clients » + Resend,
+// copie à Ahmed). EMAIL_AUTO = true : phrases « vous y recevez votre code… » / « Vous le recevez aussi par e-mail » affichées et demande
+// envoyée au service ; false = tout caché, rien envoyé (retour en arrière en un mot si le service tombe).
+const EMAIL_AUTO = true;
+const EMAIL_API = "https://api-email.clicvia.com/inscription";
 PASS.emailAuto = EMAIL_AUTO;
+// envoi au service d'e-mail : sans attendre la réponse, jamais bloquant (Formspree et le code restent la voie principale)
+function envoyerEmail(d) {
+  if (!EMAIL_AUTO || typeof fetch !== "function") return;
+  try {
+    fetch(EMAIL_API, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(d), keepalive: true })
+      .catch(function () {});
+  } catch (e) {}
+}
 function nouveauCodeCommande() {
   const n = PASS.longueur, t = new Uint8Array(n);
   if (window.crypto && typeof window.crypto.getRandomValues === "function") window.crypto.getRandomValues(t);
@@ -264,6 +274,9 @@ function brancherFormulairePass() {
     donnees.set("_subject", "Pass Ma voiture — Ma voiture Tunisie — code " + commande.code);
     // ligne prête à recopier dans le bouton GitHub « pass » (dépôt privé) : le code est activé TEL QUEL
     donnees.set("pour_activer", "action: paye ; nom: " + val("nom") + " ; telephone: " + tel + " ; email: " + email + " ; code: " + commande.code);
+    // e-mail automatique au client (code, prix, paiement, WhatsApp, lien de la page du Pass ; langue de la page ; Ahmed en copie)
+    envoyerEmail({ site: "voiture", langue: document.documentElement.lang === "ar" ? "ar" : "fr", nom: val("nom"), email: email,
+      code: commande.code, formule: val("formule") });
     bouton.disabled = true;
     dire("", "Envoi…", "جارٍ الإرسال…");
     fetch(form.getAttribute("action"), { method: "POST", body: donnees, headers: { "Accept": "application/json" } })

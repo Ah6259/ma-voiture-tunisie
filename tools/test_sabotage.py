@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""Sabotage volontaire (règle commune) : on abîme une COPIE du site de 19 façons ; chaque fois, tools/test_site.mjs doit échouer.
+"""Sabotage volontaire (règle commune) : on abîme une COPIE du site de 23 façons ; chaque fois, tools/test_site.mjs doit échouer.
   python tools/test_sabotage.py      (lancé aussi par .github/workflows/tests.yml)
 Ancres courtes et stables (règle du 08/10/2026) : si une ancre n'est plus trouvée, le test le dit (à adapter dans le même commit)."""
 import os, shutil, subprocess, sys, tempfile
@@ -25,10 +25,15 @@ SABOTAGES = [
     ("assets/pass.js", "const r = await verifierCode(c.code);", 'const r = { etat: "inconnu" };', "code de commande activé pas essayé tout seul au retour"),
     ("assets/pass.js", "age <= PASS.commandeJours", "age <= 9999", "commande gardée plus de 60 jours"),
     ("assets/pass.js", 'if (haut && bandeau) haut.hidden = false;', "", "bandeau « commande en attente » absent au retour"),
-    ("assets/pass.js", "e.hidden = !PASS.emailAuto;", "e.hidden = false;", "phrase « aussi par e-mail » affichée alors que l'e-mail automatique n'existe pas"),
+    ("assets/pass.js", "e.hidden = !PASS.emailAuto;", "e.hidden = true;", "phrase « aussi par e-mail » cachée alors que l'e-mail automatique est en service"),
     # 25/11/2026 (demande d'Ahmed) : nom dans le message WhatsApp ; pas de promesse d'e-mail dans l'étiquette tant que EMAIL_AUTO = false
     ("assets/pass.js", 'const n = nom ? " — " + nom : "";', 'const n = "";', "nom absent du message WhatsApp de la preuve"),
-    ("assets/pass.js", "x.hidden = !EMAIL_AUTO; });", "x.hidden = false; });", "étiquette de l'e-mail qui promet le code par e-mail"),
+    ("assets/pass.js", "x.hidden = !EMAIL_AUTO; });", "x.hidden = true; });", "étiquette de l'e-mail sans la promesse alors que l'e-mail automatique est en service"),
+    # e-mail automatique au client (A.17, 25/11/2026, méthode commune BRANCHER-UN-SITE.md)
+    ("assets/pass.js", "const EMAIL_AUTO = true;", "const EMAIL_AUTO = false;", "e-mail automatique coupé (EMAIL_AUTO = false)"),
+    ("assets/pass.js", "    envoyerEmail({", "    if (0) envoyerEmail({", "appel au service d'e-mail supprimé"),
+    ("assets/pass.js", "code: commande.code, formule: val(\"formule\") });", "numero: commande.code, formule: val(\"formule\") });", "champ du JSON mal nommé (numero au lieu de code)"),
+    ("tools/construire.py", "https://formspree.io https://api-email.clicvia.com;", "https://formspree.io;", "CSP qui bloque le service d'e-mail"),
 ]
 IGNORER = shutil.ignore_patterns("node_modules", ".git", "_icone", "__pycache__")
 
