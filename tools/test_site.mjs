@@ -34,7 +34,7 @@ const PAGES = [];
 
 // charge une page comme un navigateur (scripts dans l'ordre), avec une horloge fixe et une mémoire de départ
 // UNE ADRESSE PAR LANGUE (21/11/2026) : lang "ar" = la page arabe ar/<chemin> (fabriquée par tools/construire.py) ; video/ garde ?lang=ar
-async function page(chemin = "index.html", { quand = AUJ, stockage = {}, lang, referrer } = {}) {
+async function page(chemin = "index.html", { quand = AUJ, stockage = {}, lang, referrer, avant } = {}) {
   if (lang === "ar" && !chemin.startsWith("ar/") && existsSync(join(root, "ar", chemin))) { chemin = "ar/" + chemin; lang = ""; }
   if (lang === "fr" && chemin.startsWith("ar/")) { chemin = chemin.slice(3); lang = ""; }
   const dossier = dirname(chemin);
@@ -54,6 +54,7 @@ async function page(chemin = "index.html", { quand = AUJ, stockage = {}, lang, r
       w.HTMLAnchorElement.prototype.click = function () {};
       w.scrollTo = () => {}; w.open = () => null;
       w.fetch = async (u) => { const f = String(u).replace(BASE, "").replace(/^(\.\.\/)+/, ""); return existsSync(join(root, f)) ? { ok: true, json: async () => JSON.parse(lire(f)) } : { ok: false, status: 404 }; };
+      if (avant) avant(w);
     } });
   await new Promise(r => setTimeout(r, 60));
   return { w: dom.window, d: dom.window.document, js };
@@ -391,6 +392,94 @@ const VOITURE = JSON.stringify([{ id: "abcd1234", nom: "Clio", groupe: "pair", e
   check("aucune trace de l'ancien Pass Journée (Outils pratiques) dans les pages du Pass", !/Pass Journée|Outils pratiques|باقة اليوم/.test(lire("pass/index.html") + lire("pass/conditions/index.html")));
 }
 
+// ---- 8 bis. PARCOURS COMMUN DU PASS (25/11/2026, règle commune § 70, référence : outils communs/pass-commun/CONSIGNES.md de projets-ahmed)
+// code de commande créé AU FORMULAIRE (même alphabet et même longueur que les codes d'accès), page « Dernière étape », motif = le code,
+// WhatsApp avec le code, mémoire « pass-commande » (code, formule, date seulement), code essayé tout seul au retour
+{
+  const { webcrypto, pbkdf2Sync } = await import("crypto");
+  const FORMAT = /^[ABCDEFGHJKLMNPQRSTUVWXYZ23456789]{8}$/;
+  const t0 = new Date(AUJ).getTime(), futur = new Date(t0 + 300 * 864e5).toISOString();
+  const attendre = async (cond) => { for (let i = 0; i < 150 && !cond(); i++) await new Promise(r => setTimeout(r, 20)); };
+  check("parcours commun : le format des codes de commande est celui des codes d'accès (alphabet sans O/0/I/1, 8 caractères), inchangé",
+    /alphabet: "ABCDEFGHJKLMNPQRSTUVWXYZ23456789"/.test(lire("assets/pass.js")) && /longueur: 8,/.test(lire("assets/pass.js")));
+  for (const lang of ["fr", "ar"]) {
+    const L = lang === "ar" ? " (ar/)" : "";
+    const { w, d } = await page("pass/index.html", { lang });
+    const f = d.getElementById("pass-form");
+    const requis = ["nom", "telephone", "email", "conditions"].every(n => f.querySelector(`[name="${n}"][required]`)) && /\S/.test(f.querySelector('[name="formule"]').value);
+    let envois = 0, corps = null;
+    w.fetch = async (u, o) => { envois++; corps = o && o.body; return { ok: true, status: 200, json: async () => ({}) }; };
+    const remplir = (nom, tel, email, cond) => { f.querySelector("[name=nom]").value = nom; f.querySelector("[name=telephone]").value = tel; f.querySelector("[name=email]").value = email; f.querySelector("[name=conditions]").checked = cond; };
+    const envoyer = () => f.dispatchEvent(new w.Event("submit", { bubbles: true, cancelable: true }));
+    for (const essai of [["", "24321390", "a@exemple.com", true], ["Client Test", "", "a@exemple.com", true], ["Client Test", "24321390", "", true], ["Client Test", "24321390", "a@exemple.com", false]]) { remplir(...essai); envoyer(); }
+    check(`parcours commun${L} : formulaire à 5 champs obligatoires (nom, téléphone, e-mail, formule, conditions) : un seul manque = rien n'est envoyé, aucun code créé`,
+      requis && envois === 0 && !w.localStorage.getItem("pass-commande") && d.getElementById("apres-pass").hidden);
+    remplir("Client Test", "+216 24 321 390", "client@exemple.com", true); envoyer();
+    await attendre(() => !d.getElementById("apres-pass").hidden);
+    const apres = d.getElementById("apres-pass"), code = (d.getElementById("commande-code") || {}).textContent || "";
+    const ta = apres.textContent.replace(/\s+/g, " ");
+    check(`parcours commun${L} : après l'envoi, « Dernière étape » remplace le formulaire, code au bon format affiché en gros (dir=ltr)`,
+      envois === 1 && f.hidden && !apres.hidden && FORMAT.test(code) && d.getElementById("commande-code").getAttribute("dir") === "ltr" && d.querySelector("#apres-pass .code-gros#commande-code"));
+    check(`parcours commun${L} : phrase « numéro de commande … motif du paiement » + « aussi par e-mail » + filet de sécurité`, lang === "ar"
+      ? ta.includes("هذا رقم طلبك: اكتبه في خانة سبب الدفع، يساعدنا على التعرّف على دفعتك.") && ta.includes("يصلك أيضًا عبر البريد الإلكتروني.") && ta.includes("نسيت الرمز في سبب الدفع؟ لا بأس: أرسل الوصل على واتساب وسنجد طلبك.")
+      : ta.includes("C'est votre numéro de commande : écrivez-le dans le motif du paiement, il nous sert à reconnaître votre paiement.") && ta.includes("Vous le recevez aussi par e-mail.") && ta.includes("Vous avez oublié le code dans le motif ? Ce n'est pas grave : envoyez quand même la preuve sur WhatsApp, nous retrouvons votre demande."));
+    const etapes = [...apres.querySelectorAll(".paie-etapes > li")];
+    check(`parcours commun${L} : paiement en 3 étapes (D17, IZI, ${lang === "ar" ? "24321390 sans espaces" : "24 321 390"}), motif = le code`,
+      etapes.length === 3 && apres.querySelector('img[alt="D17"]') && apres.querySelector('img[alt="IZI"]') && etapes[1].textContent.includes(lang === "ar" ? "24321390" : "24 321 390")
+      && etapes[2].textContent.includes(code) && (lang === "ar" ? /سبب الدفع/.test(etapes[2].textContent) : /Motif/.test(etapes[2].textContent)));
+    const wa = decodeURIComponent((apres.querySelector("a.btn-wa") || { href: "" }).href.split("?text=")[1] || "");
+    check(`parcours commun${L} : bouton vert WhatsApp pré-rempli AVEC le code et la formule`, lang === "ar"
+      ? wa.startsWith("هذا وصل الدفع — مواعيد سيارتك — الرمز " + code + " — ") : wa === "Voici ma preuve de paiement — Ma voiture Tunisie — code " + code + " — Pass Ma voiture - 9 DT - 12 mois");
+    check(`parcours commun${L} : le code part à Formspree (champ code, sujet, ligne pour_activer « … ; code: CODE »)`,
+      corps && corps.get("code") === code && /code [A-Z2-9]{8}$/.test(corps.get("_subject")) && corps.get("pour_activer") === `action: paye ; nom: Client Test ; telephone: 24321390 ; email: client@exemple.com ; code: ${code}`);
+    let memo = {}; try { memo = JSON.parse(w.localStorage.getItem("pass-commande")); } catch (e) {}
+    const tout = Object.keys(w.localStorage).map(k => w.localStorage.getItem(k)).join(" ");
+    check(`parcours commun${L} : le téléphone garde « pass-commande » = { code, formule, date } SEULEMENT, aucune donnée personnelle dans localStorage`,
+      Object.keys(memo).sort().join() === "code,date,formule" && memo.code === code && memo.date === "2026-10-09" && memo.formule === "Pass Ma voiture - 9 DT - 12 mois"
+      && !/Client Test|24321390|24 321 390|client@exemple\.com/.test(tout));
+    // retour sur la page : bandeau + étapes + WhatsApp, code essayé tout seul, pas encore activé = « En attente de votre paiement »
+    const r = await page("pass/index.html", { lang, stockage: { "pass-commande": JSON.stringify(memo) }, avant: w2 => { Object.defineProperty(w2, "crypto", { value: webcrypto, configurable: true }); } });
+    await attendre(() => /En attente|في انتظار/.test(r.d.getElementById("commande-statut").textContent));
+    const ban = r.d.getElementById("commande-attente");
+    check(`parcours commun${L} : retour sur la page = bandeau « commande en attente » (code + formule), « En attente de votre paiement », étapes et WhatsApp avec le code, « Nouvelle commande »`,
+      !ban.hidden && ban.textContent.includes(code) && (lang === "ar" ? /طلبك في الانتظار/.test(ban.textContent) && /في انتظار دفعتك/.test(ban.textContent) : /Votre commande en attente :/.test(ban.textContent) && /En attente de votre paiement/.test(ban.textContent))
+      && !r.d.getElementById("apres-pass").hidden && r.d.getElementById("pass-form").hidden && r.d.querySelector("#apres-pass a.btn-wa").href.includes(code) && r.d.getElementById("commande-nouvelle") && !r.w.eval("passActif()"));
+    r.d.getElementById("commande-nouvelle").click();
+    check(`parcours commun${L} : « Nouvelle commande » efface la mémoire et rouvre le formulaire`, !r.w.localStorage.getItem("pass-commande") && !r.d.getElementById("pass-form").hidden && r.d.getElementById("apres-pass").hidden && r.d.getElementById("commande-attente").hidden);
+  }
+  // code de commande ACTIVÉ (empreinte publiée par le robot privé) : le Pass s'ouvre tout seul, la commande est effacée
+  {
+    const SEL = "sel-de-test", TOURS = 1000, LISTE = { sel: SEL, tours: TOURS, codes: [{ h: pbkdf2Sync("KQ7MX3PA", SEL, TOURS, 32, "sha256").toString("hex"), fin: futur }] };
+    const r = await page("pass/index.html", { stockage: { "pass-commande": JSON.stringify({ code: "KQ7MX3PA", formule: "Pass Ma voiture - 9 DT - 12 mois", date: "2026-10-01" }) },
+      avant: w2 => { Object.defineProperty(w2, "crypto", { value: webcrypto, configurable: true }); w2.fetch = async () => ({ ok: true, status: 200, json: async () => JSON.parse(JSON.stringify(LISTE)) }); } });
+    await attendre(() => !r.w.localStorage.getItem("pass-commande"));
+    const garde = JSON.parse(r.w.localStorage.getItem("mv-pass-v1") || "{}");
+    check("parcours commun : code de commande activé = Pass ouvert tout seul au retour (même vérification que « J'ai un code »), mémoire de la commande effacée",
+      garde.code === "KQ7MX3PA" && garde.fin === futur && r.w.eval("passActif()") && !r.w.localStorage.getItem("pass-commande") && !r.d.getElementById("pass-etat").hidden
+      && r.d.getElementById("commande-attente").hidden && !r.d.getElementById("pass-form").hidden && /Paiement reçu/.test(r.d.getElementById("code-status").textContent));
+  }
+  {
+    const r = await page("pass/index.html", { stockage: { "pass-commande": JSON.stringify({ code: "KQ7MX3PA", formule: "x", date: "2026-08-09" }) } });
+    check("parcours commun : commande gardée 60 jours au plus (au-delà : effacée, pas de bandeau)", !r.w.localStorage.getItem("pass-commande") && r.d.getElementById("commande-attente").hidden && !r.d.getElementById("pass-form").hidden);
+    const r2 = await page("pass/index.html", { stockage: { "pass-commande": "{abîmé" } });
+    check("parcours commun : mémoire abîmée = pas de plantage, formulaire normal", r2.js.length === 0 && !r2.d.getElementById("pass-form").hidden);
+  }
+  // textes : motif = le code de commande partout ; plus jamais « motif : nom et téléphone » ; l'étape 1 cite nom, téléphone WhatsApp et e-mail
+  {
+    const vieux = /motif[^.<]{0,80}(nom|téléphone)|(nom|téléphone)[^.<]{0,40}(pour|comme|en) motif|سبب الدفع[^.<]{0,40}(اسم|هاتف)|مع ذكر اسم|ذكر اسمك ورقم هاتفك|Nom et téléphone :/i, mal = [];
+    for (const p of PAGES) if (vieux.test(lire(p))) mal.push(p);
+    for (const fi of ["assets/pass.js", ...readdirSync(join(root, "tools/gabarits")).map(n => "tools/gabarits/" + n)]) if (vieux.test(lire(fi).replace(/\/\*[\s\S]*?\*\/|\/\/[^\n]*/g, ""))) mal.push(fi);
+    check(`parcours commun : plus aucun « motif : nom et téléphone » (pages FR + AR, gabarits, pass.js) ${mal}`, mal.length === 0);
+    const txt = h => h.replace(/<[^>]+>/g, " ").replace(/&nbsp;|&#39;/g, m => m === "&#39;" ? "'" : " ").replace(/[ ⁦-⁩]/g, " ").replace(/\s+/g, " ");
+    const pf = txt(lire("pass/index.html")), pa = txt(lire("ar/pass/index.html")), cf = txt(lire("pass/conditions/index.html")), ca = txt(lire("ar/pass/conditions/index.html"));
+    check("parcours commun : motif = code de commande sur la page du Pass, les conditions et « Comment fonctionne le site ? » (FR + AR) ; étape 1 = nom, téléphone WhatsApp et e-mail",
+      pf.includes("(nom, téléphone WhatsApp et e-mail)") && pa.includes("الاسم وهاتف واتساب والبريد الإلكتروني") && /Motif : votre code de commande/.test(pf) && /سبب الدفع: رمز طلبك/.test(pa)
+      && cf.includes("avec pour motif ce code de commande") && ca.includes("مع كتابة رمز الطلب في خانة سبب الدفع")
+      && txt(lire("a-propos/index.html")).includes("à écrire comme motif du paiement") && txt(lire("ar/a-propos/index.html")).includes("تكتبه في خانة سبب الدفع")
+      && cf.includes("12 mois à partir de l'activation du code"));
+  }
+}
+
 // ---- 9. bouton Partager et pied de page sur TOUTES les pages (règle commune)
 {
   const manque = [];
@@ -434,6 +523,7 @@ check("À propos : la page introuvable et les liens Confidentialité / Condition
     ["vidéo de présentation", existsSync(join(root, "video/index.html")), /Vidéo de présentation : courte vidéo/],
     ["une voiture gratuite et Pass Ma voiture (prix, 5 voitures, code)", existsSync(join(root, "pass/index.html")), /une voiture avec ses rappels[\s\S]*Pass Ma voiture \(payant, 9 DT pour 12 mois\) ajoute jusqu'à 5 voitures[\s\S]*code/],
     ["rappel de fin du Pass", /afficherRappel/.test(js), /avant la fin du Pass, un bandeau vous prévient/],
+    ["code de commande au formulaire = motif du paiement, reconnu tout seul (parcours commun du Pass, 25/11/2026)", /pass-commande/.test(js), /le formulaire vous donne aussitôt votre code de commande, à écrire comme motif du paiement[^.]*la page du Pass le reconnaît toute seule/],
     ["vie privée", true, /Vos voitures, vos dates et vos dépenses sont gardées dans votre téléphone/],
     ["mises à jour automatiques", existsSync(join(root, "tools/surveillance.py")), /Un robot surveille chaque jour les annonces officielles/],
     ["site indépendant", true, /Ce site est indépendant/],

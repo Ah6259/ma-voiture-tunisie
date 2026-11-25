@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""Sabotage volontaire (règle commune) : on abîme une COPIE du site de 8 façons ; chaque fois, tools/test_site.mjs doit échouer.
+"""Sabotage volontaire (règle commune) : on abîme une COPIE du site de 16 façons ; chaque fois, tools/test_site.mjs doit échouer.
   python tools/test_sabotage.py      (lancé aussi par .github/workflows/tests.yml)
 Ancres courtes et stables (règle du 08/10/2026) : si une ancre n'est plus trouvée, le test le dit (à adapter dans le même commit)."""
 import os, shutil, subprocess, sys, tempfile
@@ -15,6 +15,16 @@ SABOTAGES = [
     # une adresse par langue (21/11/2026) : page arabe modifiée à la main (hreflang retiré), renvoi « ?lang=ar » oublié
     ("ar/vignette/index.html", '<link rel="alternate" hreflang="x-default"', '<link rel="alternate" hreflang="x-defaut"', "page arabe modifiée à la main (hreflang)"),
     ("assets/page.js", "if (voulue && voulue !== FIXE && !robot) aller();", "", "ancien lien ?lang=ar plus renvoyé vers ar/"),
+    # parcours commun du Pass (25/11/2026, règle commune § 70) : chaque nouvelle vérification doit attraper son sabotage
+    ("assets/pass.js", "const n = PASS.longueur, t", "const n = PASS.longueur + 1, t", "code de commande au mauvais format (9 caractères)"),
+    ("assets/pass.js", 'donnees.set("code", commande.code);', "", "code de commande pas envoyé à Formspree"),
+    ("assets/pass.js", "ecrireCommande(commande);", "", "commande pas gardée dans le téléphone"),
+    ("assets/pass.js", "JSON.stringify({ code: c.code, formule: c.formule, date: c.date })",
+     'JSON.stringify({ code: c.code, formule: c.formule, date: c.date, tel: (document.getElementById("pass-tel") || {}).value })', "téléphone du client gardé dans localStorage"),
+    ("assets/pass.js", '"Voici ma preuve de paiement — Ma voiture Tunisie — code " + c.code', '"Voici ma preuve de paiement — Ma voiture Tunisie — code "', "code absent du message WhatsApp"),
+    ("assets/pass.js", "const r = await verifierCode(c.code);", 'const r = { etat: "inconnu" };', "code de commande activé pas essayé tout seul au retour"),
+    ("assets/pass.js", "age <= PASS.commandeJours", "age <= 9999", "commande gardée plus de 60 jours"),
+    ("assets/pass.js", 'if (haut && bandeau) haut.hidden = false;', "", "bandeau « commande en attente » absent au retour"),
 ]
 IGNORER = shutil.ignore_patterns("node_modules", ".git", "_icone", "__pycache__")
 

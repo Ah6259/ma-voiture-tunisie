@@ -270,6 +270,15 @@ html[dir="rtl"] .abo input[name=telephone],html[dir="rtl"] .abo input[name=code]
 .apres-abo{background:var(--vert-tres-clair);border:1px solid var(--vert);border-radius:14px;padding:16px}
 .apres-abo h3{margin:0 0 8px;font-size:16.5px}
 .apres-abo p{margin:0 0 8px}
+/* commande du Pass (25/11/2026, parcours commun) : code de commande en gros, bandeau « commande en attente » */
+.commande-code{display:flex;flex-wrap:wrap;align-items:center;gap:10px 14px;margin:0 0 10px}
+.commande-code p{flex:1 1 220px;margin:0}
+.code-gros{display:inline-block;font:800 26px/1.2 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;letter-spacing:.12em;background:var(--carte);color:var(--texte);border:2px dashed var(--vert);border-radius:12px;padding:8px 14px;direction:ltr;unicode-bidi:isolate;user-select:all}
+.commande-attente{border:2px solid var(--vert)}
+.commande-attente p{margin:0 0 8px}
+.commande-attente .code-commande-txt{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;letter-spacing:.08em}
+#commande-statut.err{color:var(--rouge);font-weight:700}
+.commande-filet{font-weight:700}
 .conditions h2{font-size:16.5px;margin:16px 0 6px}
 .conditions h2:first-child{margin-top:0}
 .conditions p{margin:0 0 8px}
