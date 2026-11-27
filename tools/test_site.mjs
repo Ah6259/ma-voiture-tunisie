@@ -742,5 +742,14 @@ check("À propos : la page introuvable et les liens Confidentialité / Condition
     && /DTSTART;VALUE=DATE:20270305/.test(ics) && [...di.querySelectorAll("#liste-echeances a.lien-ech")].every(a => a.href.startsWith(BASE + "ar/")));
 }
 
+// VIS.3 point 4 (27/11/2026) : l'accueil (FR et AR) garde au moins 450 / 350 mots lisibles SANS JavaScript (hors en-tête, menu et pied) :
+// Google le classait « explorée, non indexée » ; section « Les échéances de votre voiture en Tunisie » (faits sourcés du site)
+for (const [f, min] of [["index.html", 450], ["ar/index.html", 350]]) {
+  const s = readFileSync(join(root, f), "utf8").replace(/<script[\s\S]*?<\/script>|<style[\s\S]*?<\/style>|<noscript[\s\S]*?<\/noscript>/g, " ")
+    .replace(/<header[\s\S]*?<\/header>|<nav[\s\S]*?<\/nav>|<footer[\s\S]*?<\/footer>/g, " ").replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim();
+  const mots = s.split(" ").filter(Boolean).length;
+  check(`${f} : ${mots} mots lisibles sans JavaScript (${min} au moins, pour Google et les IA) et section des échéances`, mots >= min && /class="carte essentiel"/.test(readFileSync(join(root, f), "utf8")));
+}
+
 console.log(`\n${erreurs ? erreurs + " PROBLÈME(S)" : "TOUT PASSE"} (${total} vérifications)`);
 process.exit(erreurs ? 1 : 0);
