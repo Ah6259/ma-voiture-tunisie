@@ -188,6 +188,14 @@ tests du site, pas de commit si rien de neuf) ; passage complet le LUNDI ou lanc
   `htmlEncartPass(quoi, clic)` / `htmlBoutonPass(id, clic)` de pass.js prennent le nom du clic.
 - « Comment fonctionne le site ? » (FR + AR) : ligne de l'encadré + clics dans « Vos données » ; FONCTIONS. Tests (bloc « 25/11/2026 » de test_site.mjs)
   + 5 sabotages (25). VERSION 20261125i.
+- **28/11/2026 (audit, règle commune § 71, « fais tout » d'Ahmed)** : encadré du Pass AUSSI sur `carburant/` et `achat-vente/` (FR + ar/, gabarits,
+  sous le résultat, mêmes repères `<!--encadre-pass-->`, même style, statique comme les deux autres : visible même avec un Pass) :
+  carburant « Suivez vos pleins et toutes vos dépenses de voiture dans le carnet des dépenses : Pass Ma voiture, 9 DT par an. » / « تابع تعبئاتك وكل
+  مصاريف سيارتك في دفتر المصاريف: باقة سيارتك، 9 د في السنة. » ; achat-vente « Vous changez de voiture ou en avez plusieurs ? Rappels pour 5 voitures et
+  carnet des dépenses : Pass Ma voiture, 9 DT par an. » / « تغيّر سيارتك أو لديك أكثر من سيارة؟ تذكيرات لـ5 سيارات ودفتر المصاريف: باقة سيارتك، 9 د في السنة. »
+  Clics `clic/pass-carburant` et `clic/pass-achat-vente` (titres dans `TITRES_CLIC` de page.js). Prix inchangés, rien de gratuit, rien sur l'accueil
+  ni dans l'en-tête. « Comment fonctionne le site ? » (FR + AR) : ligne des 4 pages avec encadré ; FONCTIONS ; bloc « 25/11/2026 » de test_site.mjs
+  étendu (4 pages × 2 langues, lien, clic compté avec faux GoatCounter, rien sans lui) ; 5 sabotages de plus (30). VERSION 20261128a.
 
 ## 25/11/2026 — plan Google (B.2, « fais » d'Ahmed après la chute Google d'octobre)
 - **lastmod HONNÊTE** : tools/construire.py passe le plan du site par `tools/lastmod.py` (outil COMMUN, copié tel quel) : date du dernier

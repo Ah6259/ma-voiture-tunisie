@@ -20,7 +20,7 @@ Ne JAMAIS modifier <chemin>/index.html ni ar/ à la main : modifier la source pu
 import html as H, json, os, re, sys
 
 ICI = os.path.dirname(os.path.abspath(__file__)); RACINE = os.path.dirname(ICI)
-VERSION = "20261125i"           # à changer à chaque modification des fichiers assets/ (le test vérifie une seule version)
+VERSION = "20261128a"           # à changer à chaque modification des fichiers assets/ (le test vérifie une seule version)
 BASE = "https://voiture.clicvia.com/"
 sys.path.insert(0, ICI)
 import lastmod  # noqa: E402  (dates honnêtes du plan du site, 25/11/2026)

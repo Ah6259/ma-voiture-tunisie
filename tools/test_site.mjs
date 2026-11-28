@@ -590,17 +590,21 @@ check("À propos : la page introuvable et les liens Confidentialité / Condition
   }
   { const { d } = await page("vignette/index.html");
     check("en-tête : pas de bouton du Pass hors des pages du Pass (accueil, vignette : décision d'Ahmed)", !d.querySelector(".entete-pass") && !(lire("index.html").match(/class="entete-pass/))); }
-  // V.2 : encadré sur vignette/ et visite-technique/, FR + ar/
+  // V.2 : encadré sur vignette/ et visite-technique/, FR + ar/ ; 28/11/2026 : aussi carburant/ et achat-vente/ (texte propre à chaque page)
   const enc = h => (h.match(/<!--encadre-pass-->([\s\S]*?)<!--\/encadre-pass-->/) || [])[1] || "";
   const ko = [];
-  for (const [ch, clic] of [["vignette/", "pass-vignette"], ["visite-technique/", "pass-visite"]]) for (const pref of ["", "ar/"]) {
+  const PLUS = [/Vous avez plusieurs voitures \? Rappels pour 5 voitures et carnet des dépenses : Pass Ma voiture, 9 DT par an\./, /لديك أكثر من سيارة؟ تذكيرات لـ 5 سيارات ودفتر المصاريف: باقة سيارتك، 9 د في السنة\./];
+  const ENCADRES = [["vignette/", "pass-vignette", ...PLUS], ["visite-technique/", "pass-visite", ...PLUS],
+    ["carburant/", "pass-carburant", /Suivez vos pleins et toutes vos dépenses de voiture dans le carnet des dépenses : Pass Ma voiture, 9 DT par an\./, /تابع تعبئاتك وكل مصاريف سيارتك في دفتر المصاريف: باقة سيارتك، 9 د في السنة\./],
+    ["achat-vente/", "pass-achat-vente", /Vous changez de voiture ou en avez plusieurs \? Rappels pour 5 voitures et carnet des dépenses : Pass Ma voiture, 9 DT par an\./, /تغيّر سيارتك أو لديك أكثر من سيارة؟ تذكيرات لـ 5 سيارات ودفتر المصاريف: باقة سيارتك، 9 د في السنة\./]];
+  for (const [ch, clic, reFr, reAr] of ENCADRES) for (const pref of ["", "ar/"]) {
     const h = lire(pref + ch + "index.html"), e = enc(h), t = e.replace(/<[^>]+>/g, " ").replace(/&nbsp;/g, " ").replace(/[ ⁦-⁩]/g, " ").replace(/\s+/g, " ");
-    const bon = pref ? /لديك أكثر من سيارة؟ تذكيرات لـ 5 سيارات ودفتر المصاريف: باقة سيارتك، 9 د في السنة\./.test(t) && !/[A-Za-z]{3,}/.test(t)
-      : /Vous avez plusieurs voitures \? Rappels pour 5 voitures et carnet des dépenses : Pass Ma voiture, 9 DT par an\./.test(t) && !/[؀-ۿ]/.test(t);
+    const bon = pref ? reAr.test(t) && !/[A-Za-z]{3,}/.test(t)
+      : reFr.test(t) && !/[؀-ۿ]/.test(t);
     const a = e.match(/<a class="btn-pass-grand" id="encadre-btn" href="([^"]*)" data-clic="([a-z0-9-]+)">/) || [];
     if (!bon || a[1] !== "../pass/" || a[2] !== clic || (h.match(/id="encadre-pass"/g) || []).length !== 1 || /gratuit|offert|essai|مجان|تجربة/i.test(t)) ko.push(pref + ch);
   }
-  check("encadré « Vous avez plusieurs voitures ? Rappels pour 5 voitures et carnet des dépenses : Pass Ma voiture, 9 DT par an » sur vignette/ et visite-technique/ (FR + ar/), vrai bouton vers pass/, clic compté, aucune gratuité" + (ko.length ? " — " + ko.join(", ") : ""), !ko.length);
+  check("encadré du Pass Ma voiture (texte lié à la page, 5 voitures + carnet, 9 DT par an) sur vignette/, visite-technique/, carburant/ et achat-vente/ (FR + ar/), vrai bouton vers pass/, clic compté, aucune gratuité" + (ko.length ? " — " + ko.join(", ") : ""), !ko.length);
   // C.1 : clics comptés (faux GoatCounter) ; sans GoatCounter (bloqué) : rien, aucune erreur
   const essai = async (chemin, lang, sel, nom, { stockage, avantClic } = {}) => {
     for (const gc of [true, false]) {
@@ -616,6 +620,7 @@ check("À propos : la page introuvable et les liens Confidentialité / Condition
   };
   await essai("vignette/index.html", "fr", "#encadre-btn", "pass-vignette");
   await essai("visite-technique/index.html", "ar", "#encadre-btn", "pass-visite");
+  for (const lang of ["fr", "ar"]) { await essai("carburant/index.html", lang, "#encadre-btn", "pass-carburant"); await essai("achat-vente/index.html", lang, "#encadre-btn", "pass-achat-vente"); }
   await essai("carburant/index.html", "fr", '#pied a[data-clic="pass-pied"]', "pass-pied");
   await essai("entretien/index.html", "ar", "#carnet-encart .btn-pass-grand", "pass-entretien", { stockage: { "mv-voitures-v1": VOITURE } });
   await essai("index.html", "fr", "#encart-voitures .btn-pass-grand", "pass-2e-voiture", { stockage: { "mv-voitures-v1": VOITURE }, avantClic: d => clic(d, "#ajouter-voiture") });
@@ -641,7 +646,7 @@ check("À propos : la page introuvable et les liens Confidentialité / Condition
     ["installation et hors connexion", existsSync(join(root, "sw.js")), /Installer sur le téléphone/],
     ["vidéo de présentation", existsSync(join(root, "video/index.html")), /Vidéo de présentation : courte vidéo/],
     ["une voiture gratuite et Pass Ma voiture (prix, 5 voitures, code)", existsSync(join(root, "pass/index.html")), /une voiture avec ses rappels[\s\S]*Pass Ma voiture \(payant, 9 DT pour 12 mois\) ajoute jusqu'à 5 voitures[\s\S]*code/],
-    ["encadré du Pass Ma voiture sur vignette et visite technique, clics comptés (25/11/2026)", /id="encadre-pass"/.test(lire("vignette/index.html")) && /clic\//.test(js), /Pass Ma voiture sur les pages vignette et visite technique : un encadré « Vous avez plusieurs voitures \? »[\s\S]{0,200}Les clics vers la page du Pass sont comptés, sans savoir qui clique/],
+    ["encadré du Pass Ma voiture sur vignette, visite technique, carburant et achat-vente, clics comptés (25/11 et 28/11/2026)", /id="encadre-pass"/.test(lire("carburant/index.html")) && /id="encadre-pass"/.test(lire("achat-vente/index.html")) && /clic\//.test(js), /Pass Ma voiture sur les pages vignette, visite technique, carburant et achat-vente : un encadré lié à la page \(« Vous avez plusieurs voitures \? »[\s\S]{0,120}« Suivez vos pleins et toutes vos dépenses » sur le carburant, « Vous changez de voiture ou en avez plusieurs \? » sur l'achat-vente\)[\s\S]{0,200}Les clics vers la page du Pass sont comptés, sans savoir qui clique/],
     ["e-mail de confirmation automatique (A.17, 25/11/2026)", /const EMAIL_AUTO = true;/.test(js), /E-mail de confirmation : dans la minute qui suit, vous recevez aussi tout cela par e-mail[\s\S]*Resend/],
     ["rappel de fin du Pass", /afficherRappel/.test(js), /avant la fin du Pass, un bandeau vous prévient/],
     ["code de commande au formulaire = motif du paiement, reconnu tout seul (parcours commun du Pass, 25/11/2026)", /pass-commande/.test(js), /le formulaire vous donne aussitôt votre code de commande, à écrire comme motif du paiement[^.]*la page du Pass le reconnaît toute seule/],

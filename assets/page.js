@@ -199,11 +199,12 @@ document.addEventListener("click", e => {
   try { if (window.goatcounter && window.goatcounter.count) window.goatcounter.count({ path: a.dataset.compteur, title: "Lien vers un autre site : " + a.dataset.compteur, event: true }); } catch (x) { /* rien : le lien marche sans */ }
 });
 
-/* Clics vers le Pass Ma voiture (25/11/2026, décision d'Ahmed ; PAS de gratuité) : tout lien data-clic="<nom>" (encadrés des pages vignette
-   et visite technique, encart de la 2e voiture et du carnet, pied de page, en-tête des pages du Pass, rappel « Renouveler mon Pass ») est compté
+/* Clics vers le Pass Ma voiture (25/11/2026, décision d'Ahmed ; PAS de gratuité) : tout lien data-clic="<nom>" (encadrés des pages vignette,
+   visite technique, carburant et achat-vente, encart de la 2e voiture et du carnet, pied de page, en-tête des pages du Pass, rappel « Renouveler mon Pass ») est compté
    dans GoatCounter comme un ÉVÉNEMENT « /ma-voiture-tunisie/clic/<nom> » (préfixe du site, compteur commun), sans savoir qui clique.
    Rien si GoatCounter est absent ou bloqué ; le lien s'ouvre toujours. */
 const TITRES_CLIC = { "pass-vignette": "Clic vers le Pass (page vignette)", "pass-visite": "Clic vers le Pass (page visite technique)",
+  "pass-carburant": "Clic vers le Pass (page carburant)", "pass-achat-vente": "Clic vers le Pass (page achat-vente)",
   "pass-2e-voiture": "Clic vers le Pass (2e voiture)", "pass-entretien": "Clic vers le Pass (carnet des dépenses)", "pass-pied": "Clic vers le Pass (pied de page)",
   "pass-entete": "Clic vers le Pass (en-tête)", "pass-rappel": "Clic « Renouveler mon Pass » (rappel de fin)", "pass-a-propos": "Clic vers le Pass (Comment fonctionne le site)" };
 document.addEventListener("click", e => {

@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""Sabotage volontaire (règle commune) : on abîme une COPIE du site de 25 façons ; chaque fois, tools/test_site.mjs doit échouer.
+"""Sabotage volontaire (règle commune) : on abîme une COPIE du site de 30 façons ; chaque fois, tools/test_site.mjs doit échouer.
   python tools/test_sabotage.py      (lancé aussi par .github/workflows/tests.yml)
 Ancres courtes et stables (règle du 08/10/2026) : si une ancre n'est plus trouvée, le test le dit (à adapter dans le même commit)."""
 import os, shutil, subprocess, sys, tempfile
@@ -32,8 +32,14 @@ SABOTAGES = [
     ("assets/page.js", '${T("Pass Ma voiture", "باقة سيارتك")}</a>` : ""}', '${T("Pass Rappels", "باقة التذكير")}</a>` : ""}', "ancien nom « Pass Rappels » remis dans le pied de page"),
     ("assets/page.js", 'path: "/ma-voiture-tunisie/clic/" + nom', 'path: "clic/" + nom', "clic vers le Pass compté sans le préfixe du site"),
     ("vignette/index.html", ' data-clic="pass-vignette"', "", "encadré de la page vignette sans clic compté"),
+    # 28/11/2026 : encadrés de carburant/ et achat-vente/ (audit : seul le pied de page menait au Pass)
+    ("carburant/index.html", ' data-clic="pass-carburant"', "", "encadré de la page carburant sans clic compté"),
+    ("ar/achat-vente/index.html", '<!--encadre-pass-->', '<!--encadre-x-->', "encadré du Pass retiré de la page arabe achat-vente"),
+    ("achat-vente/index.html", 'href="../pass/" data-clic="pass-achat-vente"', 'href="../" data-clic="pass-achat-vente"', "bouton de l'encadré achat-vente qui ne mène pas au Pass"),
+    ("ar/carburant/index.html", 'تابع تعبئاتك وكل مصاريف سيارتك', 'تابع تعبئاتك', "texte arabe de l'encadré carburant abîmé"),
+    ("tools/modele-video.html", "« Suivez vos pleins et toutes vos dépenses » sur le carburant", "", "« Comment fonctionne le site ? » sans l'encadré du carburant"),
     ("assets/pass.js", '${clic ? ` data-clic="${clic}"` : ""}', "", "encart de la 2e voiture et du carnet sans clic compté"),
-    ("tools/modele-video.html", "<b>Pass Ma voiture sur les pages vignette et visite technique</b>", "<b>Pass</b>", "« Comment fonctionne le site ? » sans l'encadré du Pass"),
+    ("tools/modele-video.html", "<b>Pass Ma voiture sur les pages vignette, visite technique, carburant et achat-vente</b>", "<b>Pass</b>", "« Comment fonctionne le site ? » sans l'encadré du Pass"),
 ]
 IGNORER = shutil.ignore_patterns("node_modules", ".git", "_icone", "__pycache__")
 
